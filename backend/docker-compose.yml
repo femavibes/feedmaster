@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database service
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: feedmaster_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432" # Expose Postgres port for local access if needed
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistent data volume
+    healthcheck: # Health check to ensure the DB is ready
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI backend API service
+  api: # Renamed from 'app' to 'api' for clarity
+    build: . # Build from the Dockerfile in the current directory
+    # The entrypoint script will ensure the database tables are created before starting FastAPI
+    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/python /app/main.py & uvicorn main:app --host 0.0.0.0 --port 8000 --reload"] # --reload for development
+    volumes:
+      - .:/app # Mount the current directory into the container for live reloading (development)
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/feedmaster_db
+      SECRET_KEY: your-very-strong-and-random-secret-key-replace-this-in-production-seriously # Use the same secret as in .env
+    depends_on:
+      db:
+        condition: service_healthy # Wait until DB is healthy
+    # This API service will be accessible by your frontend
+
+  # Background aggregator worker service
+  aggregator_worker:
+    build: . # Use the same Dockerfile as the API
+    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/python /app/aggregator_worker.py"]
+    volumes:
+      - .:/app # Mount the current directory into the container
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/feedmaster_db
+      SECRET_KEY: your-very-strong-and-random-secret-key-replace-this-in-production-seriously # Use the same secret as in .env
+    depends_on:
+      db:
+        condition: service_healthy # Wait until DB is healthy
+    # This worker does not need to expose any ports unless you want to monitor it
+    # It runs continuously in the background to process data
+
+volumes:
+  postgres_data: # Define the named volume for PostgreSQL data persistence
