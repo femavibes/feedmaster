@@ -1,187 +1,206 @@
-from sqlalchemy.orm import Session, joinedload
-from datetime import datetime, timezone
-from typing import Optional, List
+# backend/crud.py
+#
+# This file contains the Create, Read, Update, and Delete (CRUD) operations
+# for interacting with your database models using SQLAlchemy.
+# These functions abstract the database logic away from your API endpoints.
 
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from typing import List, Optional, Dict, Any
+import uuid
+
+# Import your SQLAlchemy models
 from . import models, schemas
-from passlib.context import CryptContext # For password hashing
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# --- Password Utilities ---
-def get_password_hash(password: str) -> str:
-    """Hashes a plain text password."""
-    return pwd_context.hash(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifies a plain text password against a hashed password."""
-    return pwd_context.verify(plain_password, hashed_password)
 
 # --- User CRUD Operations ---
 
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+def get_user(db: Session, user_did: str) -> Optional[models.User]:
+    """Retrieve a user by their DID."""
+    return db.query(models.User).filter(models.User.did == user_did).first()
 
-def get_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+def get_user_by_handle(db: Session, handle: str) -> Optional[models.User]:
+    """Retrieve a user by their handle."""
+    return db.query(models.User).filter(models.User.handle == handle).first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
-
-def create_user(db: Session, user: schemas.UserCreate):
-    hashed_password = get_password_hash(user.password)
-    db_user = models.User(username=user.username, hashed_password=hashed_password, tier=user.tier)
+def create_user(db: Session, user: schemas.UserCreate) -> models.User:
+    """Create a new user in the database."""
+    db_user = models.User(
+        did=user.did,
+        handle=user.handle,
+        display_name=user.display_name,
+        avatar_url=user.avatar_url
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
-# --- Feed CRUD Operations ---
-
-def get_feed(db: Session, feed_id: int):
-    # Eagerly load the owner to get the tier easily
-    return db.query(models.Feed).options(joinedload(models.Feed.owner)).filter(models.Feed.id == feed_id).first()
-
-def get_feed_by_name(db: Session, name: str):
-    # Eagerly load the owner to get the tier easily
-    return db.query(models.Feed).options(joinedload(models.Feed.owner)).filter(models.Feed.name == name).first()
-
-
-def get_feeds(db: Session, skip: int = 0, limit: int = 100):
-    # Eagerly load the owner for all feeds
-    return db.query(models.Feed).options(joinedload(models.Feed.owner)).offset(skip).limit(limit).all()
-
-def get_user_feeds(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    # Eagerly load the owner for user's feeds
-    return db.query(models.Feed).options(joinedload(models.Feed.owner)).filter(models.Feed.user_id == user_id).offset(skip).limit(limit).all()
-
-def create_user_feed(db: Session, feed: schemas.FeedCreate, user_id: int):
-    db_feed = models.Feed(
-        name=feed.name,
-        title=feed.title,
-        description=feed.description,
-        user_id=user_id,
-        contrails_ws_url=feed.contrails_ws_url,
-        bluesky_feed_uri=feed.bluesky_feed_uri,
-        configuration=feed.configuration.model_dump() if feed.configuration else None
-    )
-    db.add(db_feed)
-    db.commit()
-    db.refresh(db_feed)
-    return db_feed
-
-def update_feed(db: Session, db_feed: models.Feed, feed_update: schemas.FeedUpdate):
-    for key, value in feed_update.model_dump(exclude_unset=True).items():
-        if key == "configuration" and value is not None:
-            # Handle nested Pydantic model for configuration
-            db_feed.configuration = value.model_dump()
-        else:
-            setattr(db_feed, key, value)
-    db.add(db_feed)
-    db.commit()
-    db.refresh(db_feed)
-    return db_feed
-
-def delete_feed(db: Session, feed_id: int):
-    db_feed = db.query(models.Feed).filter(models.Feed.id == feed_id).first()
-    if db_feed:
-        db.delete(db_feed)
+def update_user(db: Session, user_did: str, user_update: schemas.UserCreate) -> Optional[models.User]:
+    """Update an existing user's details."""
+    db_user = db.query(models.User).filter(models.User.did == user_did).first()
+    if db_user:
+        for key, value in user_update.model_dump(exclude_unset=True).items():
+            setattr(db_user, key, value)
+        db_user.last_updated = func.now() # Update timestamp on change
         db.commit()
-        return True
-    return False
+        db.refresh(db_user)
+    return db_user
 
-# --- FeedData CRUD Operations ---
+def delete_user(db: Session, user_did: str) -> Optional[models.User]:
+    """Delete a user from the database."""
+    db_user = db.query(models.User).filter(models.User.did == user_did).first()
+    if db_user:
+        db.delete(db_user)
+        db.commit()
+    return db_user
 
-def create_feed_data(db: Session, feed_data: schemas.FeedDataCreate, feed_id: int):
-    db_feed_data = models.FeedData(
-        feed_id=feed_id,
-        aggregate_type=feed_data.aggregate_type,
-        data=feed_data.data,
-        timestamp=feed_data.timestamp
+
+# --- Post CRUD Operations ---
+
+def get_post(db: Session, post_id: uuid.UUID) -> Optional[models.Post]:
+    """Retrieve a post by its UUID."""
+    return db.query(models.Post).filter(models.Post.id == post_id).first()
+
+def get_post_by_uri(db: Session, post_uri: str) -> Optional[models.Post]:
+    """Retrieve a post by its AT URI."""
+    return db.query(models.Post).filter(models.Post.uri == post_uri).first()
+
+def create_post(db: Session, post: schemas.PostCreate) -> models.Post:
+    """Create a new post in the database."""
+    db_post = models.Post(
+        uri=post.uri,
+        cid=post.cid,
+        text=post.text,
+        created_at=post.created_at,
+        author_did=post.author_did,
+        has_image=post.has_image,
+        has_video=post.has_video,
+        has_link=post.has_link,
+        has_quote=post.has_quote,
+        has_mention=post.has_mention,
+        image_url=post.image_url,
+        link_title=post.link_title,
+        link_description=post.link_description,
+        link_thumbnail_url=post.link_thumbnail_url,
+        hashtags=post.hashtags,
+        links=post.links,
+        mentions=post.mentions,
+        embeds=post.embeds,
+        raw_record=post.raw_record
     )
-    db.add(db_feed_data)
-    db.commit()
-    db.refresh(db_feed_data)
-    return db_feed_data
-
-def get_feed_data(db: Session, feed_id: int, aggregate_type: Optional[str] = None, since_timestamp: Optional[datetime] = None, limit: int = 100) -> List[models.FeedData]:
-    query = db.query(models.FeedData).filter(models.FeedData.feed_id == feed_id)
-    if aggregate_type:
-        query = query.filter(models.FeedData.aggregate_type == aggregate_type)
-    if since_timestamp:
-        query = query.filter(models.FeedData.timestamp >= since_timestamp)
-    # Order by timestamp descending to get most recent data
-    query = query.order_by(models.FeedData.timestamp.desc())
-    return query.limit(limit).all()
-
-# --- UserProfileCache CRUD Operations ---
-
-def get_user_profile_cache(db: Session, did: str):
-    return db.query(models.UserProfileCache).filter(models.UserProfileCache.did == did).first()
-
-def create_or_update_user_profile_cache(db: Session, profile: schemas.UserProfileCacheCreate, high_priority: bool = False):
-    db_profile = db.query(models.UserProfileCache).filter(models.UserProfileCache.did == profile.did).first()
-    current_time = datetime.now(timezone.utc)
-    if db_profile:
-        # Update existing
-        db_profile.handle = profile.handle
-        db_profile.display_name = profile.display_name
-        db_profile.avatar_url = profile.avatar_url
-        db_profile.last_updated = current_time
-        if high_priority:
-            db_profile.last_updated_high_priority = current_time
-    else:
-        # Create new
-        db_profile = models.UserProfileCache(
-            did=profile.did,
-            handle=profile.handle,
-            display_name=profile.display_name,
-            avatar_url=profile.avatar_url,
-            last_updated=current_time,
-            last_updated_high_priority=current_time if high_priority else None
-        )
-        db.add(db_profile)
-    db.commit()
-    db.refresh(db_profile)
-    return db_profile
-
-# --- PostMetadataCache CRUD Operations ---
-
-def get_post_metadata_cache(db: Session, post_uri: str):
-    return db.query(models.PostMetadataCache).filter(models.PostMetadataCache.post_uri == post_uri).first()
-
-def create_or_update_post_metadata_cache(db: Session, post_data: schemas.PostMetadataCacheCreate):
-    db_post = db.query(models.PostMetadataCache).filter(models.PostMetadataCache.post_uri == post_data.post_uri).first()
-    current_time = datetime.now(timezone.utc)
-    if db_post:
-        # Update existing
-        db_post.post_link = post_data.post_link
-        db_post.original_poster_did = post_data.original_poster_did
-        db_post.original_poster_handle = post_data.original_poster_handle
-        db_post.original_poster_display_name = post_data.original_poster_display_name
-        db_post.original_poster_avatar_url = post_data.original_poster_avatar_url
-        db_post.media_type = post_data.media_type
-        db_post.media_url = post_data.media_url
-        db_post.thumbnail_url = post_data.thumbnail_url
-        db_post.post_text = post_data.post_text
-        db_post.last_resolved_at = current_time
-    else:
-        # Create new
-        db_post = models.PostMetadataCache(
-            post_uri=post_data.post_uri,
-            post_link=post_data.post_link,
-            original_poster_did=post_data.original_poster_did,
-            original_poster_handle=post_data.original_poster_handle,
-            original_poster_display_name=post_data.original_poster_display_name,
-            original_poster_avatar_url=post_data.original_poster_avatar_url,
-            media_type=post_data.media_type,
-            media_url=post_data.media_url,
-            thumbnail_url=post_data.thumbnail_url,
-            post_text=post_data.post_text,
-            last_resolved_at=current_time
-        )
-        db.add(db_post)
+    db.add(db_post)
     db.commit()
     db.refresh(db_post)
     return db_post
 
+def get_posts(db: Session, skip: int = 0, limit: int = 100) -> List[models.Post]:
+    """Retrieve a list of posts with pagination."""
+    return db.query(models.Post).offset(skip).limit(limit).all()
+
+def get_posts_by_author(db: Session, author_did: str, skip: int = 0, limit: int = 100) -> List[models.Post]:
+    """Retrieve posts by a specific author DID with pagination."""
+    return db.query(models.Post).filter(models.Post.author_did == author_did).offset(skip).limit(limit).all()
+
+
+# --- FeedPost CRUD Operations ---
+
+def get_feed_post(db: Session, feed_post_id: uuid.UUID) -> Optional[models.FeedPost]:
+    """Retrieve a feed post entry by its UUID."""
+    return db.query(models.FeedPost).filter(models.FeedPost.id == feed_post_id).first()
+
+def create_feed_post(db: Session, feed_post: schemas.FeedPostCreate) -> models.FeedPost:
+    """Create a new entry linking a post to a feed."""
+    db_feed_post = models.FeedPost(
+        post_id=feed_post.post_id,
+        feed_id=feed_post.feed_id
+    )
+    db.add(db_feed_post)
+    # Handle potential UniqueConstraint violation if a post is already in a feed
+    try:
+        db.commit()
+        db.refresh(db_feed_post)
+        return db_feed_post
+    except Exception as e:
+        db.rollback()
+        # You might want to log the error or raise a more specific exception
+        print(f"Error creating feed post: {e}")
+        return None # Or raise HTTPException for FastAPI
+
+
+def get_feed_posts_for_feed(db: Session, feed_id: str, skip: int = 0, limit: int = 100) -> List[models.FeedPost]:
+    """Retrieve all feed posts for a given feed ID."""
+    # This will load FeedPost objects, which contain post_id.
+    # To get the actual posts, you'd need to join or load them separately.
+    return db.query(models.FeedPost)\
+        .filter(models.FeedPost.feed_id == feed_id)\
+        .order_by(models.FeedPost.ingested_at.desc())\
+        .offset(skip)\
+        .limit(limit)\
+        .all()
+
+def get_posts_for_feed(db: Session, feed_id: str, skip: int = 0, limit: int = 100) -> List[models.Post]:
+    """
+    Retrieve actual Post objects for a given feed ID, ordered by ingestion time.
+    Uses a join to efficiently get posts associated with a feed.
+    """
+    return db.query(models.Post)\
+        .join(models.FeedPost, models.Post.id == models.FeedPost.post_id)\
+        .filter(models.FeedPost.feed_id == feed_id)\
+        .order_by(models.FeedPost.ingested_at.desc())\
+        .offset(skip)\
+        .limit(limit)\
+        .all()
+
+
+# --- Aggregate CRUD Operations ---
+
+def get_aggregate(db: Session, feed_id: str, agg_name: str, timeframe: str) -> Optional[models.Aggregate]:
+    """Retrieve a specific aggregate by its identifying attributes."""
+    return db.query(models.Aggregate).filter(
+        models.Aggregate.feed_id == feed_id,
+        models.Aggregate.agg_name == agg_name,
+        models.Aggregate.timeframe == timeframe
+    ).first()
+
+def create_or_update_aggregate(
+    db: Session,
+    aggregate_data: schemas.AggregateCreate
+) -> models.Aggregate:
+    """
+    Creates a new aggregate or updates an existing one based on feed_id, agg_name, and timeframe.
+    """
+    db_aggregate = db.query(models.Aggregate).filter(
+        models.Aggregate.feed_id == aggregate_data.feed_id,
+        models.Aggregate.agg_name == aggregate_data.agg_name,
+        models.Aggregate.timeframe == aggregate_data.timeframe
+    ).first()
+
+    if db_aggregate:
+        # Update existing aggregate
+        db_aggregate.data_json = aggregate_data.data_json
+        db_aggregate.updated_at = func.now() # SQLAlchemy's onupdate will handle this, but explicit here too.
+    else:
+        # Create new aggregate
+        db_aggregate = models.Aggregate(
+            feed_id=aggregate_data.feed_id,
+            agg_name=aggregate_data.agg_name,
+            timeframe=aggregate_data.timeframe,
+            data_json=aggregate_data.data_json
+        )
+        db.add(db_aggregate)
+
+    db.commit()
+    db.refresh(db_aggregate)
+    return db_aggregate
+
+def get_aggregates_for_feed(db: Session, feed_id: str) -> List[models.Aggregate]:
+    """Retrieve all aggregates for a given feed ID."""
+    return db.query(models.Aggregate).filter(models.Aggregate.feed_id == feed_id).all()
+
+def delete_aggregate(db: Session, agg_id: uuid.UUID) -> Optional[models.Aggregate]:
+    """Delete an aggregate by its UUID."""
+    db_aggregate = db.query(models.Aggregate).filter(models.Aggregate.id == agg_id).first()
+    if db_aggregate:
+        db.delete(db_aggregate)
+        db.commit()
+    return db_aggregate
