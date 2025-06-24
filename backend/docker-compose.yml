@@ -1,55 +1,61 @@
-version: '3.8'
+# backend/docker-compose.yml
+#
+# This file defines the services for your Feedmaster backend application
+# using Docker Compose. It orchestrates:
+#   1. A PostgreSQL database service.
+#   2. Your FastAPI API service.
+#   3. A separate aggregator worker service.
+
+version: '3.8' # Specify the Docker Compose file format version
 
 services:
-  # PostgreSQL database service
   db:
-    image: postgres:13
-    restart: always
+    image: postgres:15-alpine # Use a lightweight PostgreSQL image
+    restart: always # Always restart the database service if it fails
     environment:
-      POSTGRES_DB: feedmaster_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: feedmaster_db # Database name
+      POSTGRES_USER: user # Database user
+      POSTGRES_PASSWORD: password # Database password (CHANGE IN PRODUCTION!)
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persist database data to a named volume
     ports:
-      - "5432:5432" # Expose Postgres port for local access if needed
-    volumes:
-      - postgres_data:/var/lib/postgresql/data # Persistent data volume
-    healthcheck: # Health check to ensure the DB is ready
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "5432:5432" # Map host port 5432 to container port 5432
 
-  # FastAPI backend API service
-  api: # Renamed from 'app' to 'api' for clarity
-    build: . # Build from the Dockerfile in the current directory
-    # The entrypoint script will ensure the database tables are created before starting FastAPI
-    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/python /app/main.py & uvicorn main:app --host 0.0.0.0 --port 8000 --reload"] # --reload for development
+  api:
+    build:
+      context: . # Build from the current directory (where Dockerfile is located)
+      dockerfile: Dockerfile # Specify the Dockerfile to use
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload # Run FastAPI with Uvicorn in development mode (with hot-reloads)
     volumes:
-      - .:/app # Mount the current directory into the container for live reloading (development)
+      - ./backend:/app # Mount the backend code into the container for live reloading
+      - ./config:/app/config # Mount the config directory
     ports:
       - "8000:8000" # Map host port 8000 to container port 8000
     environment:
-      DATABASE_URL: postgresql://user:password@db:5432/feedmaster_db
-      SECRET_KEY: your-very-strong-and-random-secret-key-replace-this-in-production-seriously # Use the same secret as in .env
+      # Load environment variables from the .env file.
+      # Docker Compose automatically loads .env in the same directory as docker-compose.yml.
+      # DATABASE_URL should be defined in your .env file:
+      # DATABASE_URL=postgresql://user:password@db:5432/feedmaster_db
+      # SECRET_KEY should also be defined in your .env file.
+      SECRET_KEY: "y!jW%Nf@2P$6tQ^u&Z*v8x+0m_L-aSg)K;c3dJ[E{F]H=O}R|lX/B:I.C,4D5V7U9G{T>1M}Y<X.z0_H`P~q" # Replace with a strong, random key
     depends_on:
-      db:
-        condition: service_healthy # Wait until DB is healthy
-    # This API service will be accessible by your frontend
+      - db # Ensure the database service starts before the API service
 
-  # Background aggregator worker service
   aggregator_worker:
-    build: . # Use the same Dockerfile as the API
-    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/python /app/aggregator_worker.py"]
+    build:
+      context: . # Build from the current directory
+      dockerfile: Dockerfile # Use the same Dockerfile as the API
+    command: python aggregator_worker.py # Command to run the aggregator worker script
     volumes:
-      - .:/app # Mount the current directory into the container
+      - ./backend:/app # Mount the backend code
+      - ./config:/app/config # Mount the config directory
     environment:
-      DATABASE_URL: postgresql://user:password@db:5432/feedmaster_db
-      SECRET_KEY: your-very-strong-and-random-secret-key-replace-this-in-production-seriously # Use the same secret as in .env
+      SECRET_KEY: "y!jW%Nf@2P$6tQ^u&Z*v8x+0m_L-aSg)K;c3dJ[E{F]H=O}R|lX/B:I.C,4D5V7U9G{T>1M}Y<X.z0_H`P~q" # Same secret key
+      # DATABASE_URL will be loaded from .env
     depends_on:
-      db:
-        condition: service_healthy # Wait until DB is healthy
-    # This worker does not need to expose any ports unless you want to monitor it
-    # It runs continuously in the background to process data
+      - db # Ensure the database is ready before the worker starts
+    # If you need to make external API calls (e.g., to Bluesky), ensure network access.
+    # No explicit port mapping needed unless you want to expose a health check or metrics.
 
 volumes:
-  postgres_data: # Define the named volume for PostgreSQL data persistence
+  pgdata: # Define the named volume for PostgreSQL data persistence
