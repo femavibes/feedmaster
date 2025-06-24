@@ -1,6 +1,6 @@
 [
   {
-    "id": "3654", // Your actual Urbanism+ feed ID (make sure this is correct from Graze)
+    "id": "3654", // Your actual Urbanism+ feed ID (replace this if it ever changes!)
     "name": "Urbanism+",
     "description": "Urbanism and city planning feed (from your actual Contrails ID).",
     "contrails_websocket_url": "wss://contrails.graze.social/feeds/3654",
@@ -8,35 +8,35 @@
     "tier": "gold"
   },
   {
-    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
-    "name": "Example Graze Home Feed",
-    "description": "A placeholder for a general home feed from Graze Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0001",
-    "bluesky_at_uri": "at://did:plc:j5p3k2gqj4d7y6t2d3h5q4v3/app.bsky.feed.generator/xxxx",
+    "id": "REPLACE_WITH_GRAZE_ID_001", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID (e.g., "1234")
+    "name": "Example Graze Home Feed (Placeholder)",
+    "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_001", // <<< MUST MATCH THE ID ABOVE
+    "bluesky_at_uri": "at://did:plc:invalid0123456789abcdefgh/app.bsky.feed.generator/invalid-record-key-001", // <<< REPLACE WITH REAL BLUESKY AT URI
     "tier": "silver"
   },
   {
-    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
-    "name": "Example Tech News",
-    "description": "A placeholder for a tech news feed curated by Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0002",
-    "bluesky_at_uri": "at://did:plc:x8m7n9p0q1r2s3t4u5v6w7x8/app.bsky.feed.generator/xxxx",
+    "id": "REPLACE_WITH_GRAZE_ID_002", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID
+    "name": "Example Tech News (Placeholder)",
+    "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_002", // <<< MUST MATCH THE ID ABOVE
+    "bluesky_at_uri": "at://did:plc:invalid0123456789ijklmnopq/app.bsky.feed.generator/invalid-record-key-002",
     "tier": "gold"
   },
   {
-    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
-    "name": "Example Community Feed 1",
-    "description": "A placeholder for a specific community feed from Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0003",
-    "bluesky_at_uri": "at://did:plc:y1z2a3b4c5d6e7f8g9h0i1j2/app.bsky.feed.generator/xxxx",
+    "id": "REPLACE_WITH_GRAZE_ID_003", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID
+    "name": "Example Community Feed 1 (Placeholder)",
+    "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_003", // <<< MUST MATCH THE ID ABOVE
+    "bluesky_at_uri": "at://did:plc:invalid0123456789rstuvwxyzab/app.bsky.feed.generator/invalid-record-key-003",
     "tier": "silver"
   },
   {
-    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
-    "name": "Example Premium Investing Feed",
-    "description": "A placeholder for exclusive investing insights from top analysts.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0004",
-    "bluesky_at_uri": "at://did:plc:a1b2c3d4e5f6g7h8i9j0k1l2/app.bsky.feed.generator/xxxx",
+    "id": "REPLACE_WITH_GRAZE_ID_004", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID
+    "name": "Example Premium Investing (Placeholder)",
+    "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_004", // <<< MUST MATCH THE ID ABOVE
+    "bluesky_at_uri": "at://did:plc:invalid0123456789cdefghijklm/app.bsky.feed.generator/invalid-record-key-004",
     "tier": "platinum"
   }
 ]
