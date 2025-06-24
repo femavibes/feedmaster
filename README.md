@@ -1,4 +1,3 @@
-# feedmaster
 # Feedmaster Application Deployment Guide
 
 This section outlines the necessary steps to deploy and run the Feedmaster application, including setting up the environment, managing the database, and launching the services using Docker Compose.
