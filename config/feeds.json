@@ -1,42 +1,42 @@
 [
   {
-    "id": "feedId", // This ID matches the last part of its Contrails URL
-    "name": "Graze Home Feed",
-    "description": "The default home feed from Graze Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
-    "bluesky_at_uri": "at://did:plc:j5p3k2gqj4d7y6t2d3h5q4v3/app.bsky.feed.generator/home-feed-graze",
-    "tier": "silver"
-  },
-  {
-    "id": "feedId", // This ID matches the last part of its Contrails URL
-    "name": "Graze Tech News",
-    "description": "Tech news feed curated by Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
-    "bluesky_at_uri": "at://did:plc:x8m7n9p0q1r2s3t4u5v6w7x8/app.bsky.feed.generator/tech-news-graze",
-    "tier": "gold"
-  },
-  {
-    "id": "feedId", // This ID matches the last part of its Contrails URL
-    "name": "Graze Community Feed 1",
-    "description": "A specific community feed from Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
-    "bluesky_at_uri": "at://did:plc:y1z2a3b4c5d6e7f8g9h0i1j2/app.bsky.feed.generator/community-feed-1",
-    "tier": "silver"
-  },
-  {
-    "id": "feedId", // This ID matches the last part of its Contrails URL
-    "name": "Premium Investing Feed",
-    "description": "Exclusive investing insights from top analysts.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
-    "bluesky_at_uri": "at://did:plc:a1b2c3d4e5f6g7h8i9j0k1l2/app.bsky.feed.generator/premium-investing",
-    "tier": "platinum"
-  },
-  {
-    "id": "3654", // This ID matches the last part of your Contrails URL
+    "id": "3654", // Your actual Urbanism+ feed ID (make sure this is correct from Graze)
     "name": "Urbanism+",
     "description": "Urbanism and city planning feed (from your actual Contrails ID).",
     "contrails_websocket_url": "wss://contrails.graze.social/feeds/3654",
     "bluesky_at_uri": "at://did:plc:lptjvw6ut224kwrj7ub3sqbe/app.bsky.feed.generator/aaaotfjzjplna",
     "tier": "gold"
+  },
+  {
+    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
+    "name": "Example Graze Home Feed",
+    "description": "A placeholder for a general home feed from Graze Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0001",
+    "bluesky_at_uri": "at://did:plc:j5p3k2gqj4d7y6t2d3h5q4v3/app.bsky.feed.generator/xxxx",
+    "tier": "silver"
+  },
+  {
+    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
+    "name": "Example Tech News",
+    "description": "A placeholder for a tech news feed curated by Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0002",
+    "bluesky_at_uri": "at://did:plc:x8m7n9p0q1r2s3t4u5v6w7x8/app.bsky.feed.generator/xxxx",
+    "tier": "gold"
+  },
+  {
+    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
+    "name": "Example Community Feed 1",
+    "description": "A placeholder for a specific community feed from Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0003",
+    "bluesky_at_uri": "at://did:plc:y1z2a3b4c5d6e7f8g9h0i1j2/app.bsky.feed.generator/xxxx",
+    "tier": "silver"
+  },
+  {
+    "id": "Feed number ID here xxxx", // Placeholder: Very low, unlikely to be a real public feed ID
+    "name": "Example Premium Investing Feed",
+    "description": "A placeholder for exclusive investing insights from top analysts.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/0004",
+    "bluesky_at_uri": "at://did:plc:a1b2c3d4e5f6g7h8i9j0k1l2/app.bsky.feed.generator/xxxx",
+    "tier": "platinum"
   }
 ]
