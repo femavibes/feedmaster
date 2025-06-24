@@ -1,0 +1,53 @@
+[
+  {
+    "id": "home",
+    "name": "Home Feed",
+    "description": "Your main feed for popular posts across various topics.",
+    "criteria": {
+      "include_tiers": ["tier-s", "tier-a", "tier-b"],
+      "min_likes": 10,
+      "min_reposts": 2,
+      "keywords": []
+    }
+  },
+  {
+    "id": "tech-news",
+    "name": "Tech News",
+    "description": "Latest updates and discussions in technology.",
+    "criteria": {
+      "include_tiers": ["tier-a", "tier-b", "tier-c"],
+      "min_likes": 5,
+      "keywords": ["#tech", "#technology", "#ai", "#software", "#dev", "#science"]
+    }
+  },
+  {
+    "id": "crypto-daily",
+    "name": "Crypto Daily",
+    "description": "Daily insights and news on cryptocurrency.",
+    "criteria": {
+      "include_tiers": ["tier-a", "tier-b"],
+      "min_likes": 7,
+      "keywords": ["#crypto", "#bitcoin", "#ethereum", "#blockchain", "#web3"]
+    }
+  },
+  {
+    "id": "gaming-updates",
+    "name": "Gaming Updates",
+    "description": "News and discussions from the gaming world.",
+    "criteria": {
+      "include_tiers": ["tier-b", "tier-c"],
+      "min_likes": 3,
+      "keywords": ["#gaming", "#videogames", "#esports", "#game", "#gamer"]
+    }
+  },
+  {
+    "id": "art-showcase",
+    "name": "Art Showcase",
+    "description": "Curated feed for digital and traditional art.",
+    "criteria": {
+      "include_tiers": ["tier-b", "tier-c"],
+      "min_likes": 5,
+      "keywords": ["#art", "#digitalart", "#illustration", "#painting", "#sculpture"]
+    }
+  }
+]
