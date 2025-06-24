@@ -1,33 +1,33 @@
 [
   {
-    "id": "home-feed-graze", // This ID matches the last part of its Contrails URL
+    "id": "feedId", // This ID matches the last part of its Contrails URL
     "name": "Graze Home Feed",
     "description": "The default home feed from Graze Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/home-feed-graze",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
     "bluesky_at_uri": "at://did:plc:j5p3k2gqj4d7y6t2d3h5q4v3/app.bsky.feed.generator/home-feed-graze",
     "tier": "silver"
   },
   {
-    "id": "tech-news-graze", // This ID matches the last part of its Contrails URL
+    "id": "feedId", // This ID matches the last part of its Contrails URL
     "name": "Graze Tech News",
     "description": "Tech news feed curated by Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/tech-news-graze",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
     "bluesky_at_uri": "at://did:plc:x8m7n9p0q1r2s3t4u5v6w7x8/app.bsky.feed.generator/tech-news-graze",
     "tier": "gold"
   },
   {
-    "id": "community-feed-1", // This ID matches the last part of its Contrails URL
+    "id": "feedId", // This ID matches the last part of its Contrails URL
     "name": "Graze Community Feed 1",
     "description": "A specific community feed from Contrails.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/community-feed-1",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
     "bluesky_at_uri": "at://did:plc:y1z2a3b4c5d6e7f8g9h0i1j2/app.bsky.feed.generator/community-feed-1",
     "tier": "silver"
   },
   {
-    "id": "premium-investing", // This ID matches the last part of its Contrails URL
+    "id": "feedId", // This ID matches the last part of its Contrails URL
     "name": "Premium Investing Feed",
     "description": "Exclusive investing insights from top analysts.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/premium-investing",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/feedId",
     "bluesky_at_uri": "at://did:plc:a1b2c3d4e5f6g7h8i9j0k1l2/app.bsky.feed.generator/premium-investing",
     "tier": "platinum"
   },
