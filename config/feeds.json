@@ -1,0 +1,30 @@
+[
+  {
+    "id": "home-feed-graze",
+    "name": "Graze Home Feed",
+    "description": "The default home feed from Graze Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/home-feed-graze",
+    "tier": "silver"
+  },
+  {
+    "id": "tech-news-graze",
+    "name": "Graze Tech News",
+    "description": "Tech news feed curated by Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/tech-news-graze",
+    "tier": "gold"
+  },
+  {
+    "id": "community-feed-1",
+    "name": "Graze Community Feed 1",
+    "description": "A specific community feed from Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/community-feed-1",
+    "tier": "silver"
+  },
+  {
+    "id": "premium-investing",
+    "name": "Premium Investing Feed",
+    "description": "Exclusive investing insights from top analysts.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/premium-investing",
+    "tier": "platinum"
+  }
+]
