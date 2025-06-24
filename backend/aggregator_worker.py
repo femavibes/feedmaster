@@ -1,493 +1,415 @@
-import os
+# backend/aggregator_worker.py
+#
+# This is the core background worker responsible for:
+# 1. Listening to a data source (e.g., a mock Bluesky "firehose").
+# 2. Resolving DIDs to user profiles (using the profile resolution logic).
+# 3. Ingesting and processing posts, saving them to the database.
+# 4. Running tier-based and feed-based aggregation tasks.
+#
+# This worker is designed to run continuously in the background.
+
 import asyncio
-import websockets
 import json
-import logging
+import os
+import httpx # For making HTTP requests to external APIs (e.g., Bluesky)
+import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from dotenv import load_dotenv
 
-# Import SQLAlchemy components for worker's own DB session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+# Local imports
+from . import models, schemas, crud
+from .database import SessionLocal, engine, Base # Import Base and engine for table creation (for dev/testing, see note below)
 
-# Import models, crud, schemas for database interaction and data validation
-import models
-import crud
-import schemas
+# Load environment variables (e.g., for Bluesky API endpoint, if applicable)
+load_dotenv()
 
 # --- Configuration ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - AGGREGATOR - %(levelname)s - %(message)s')
+# Path to your config files
+CONFIG_DIR = os.getenv("CONFIG_DIR", "config")
+TIERS_CONFIG_PATH = os.path.join(CONFIG_DIR, "tiers.json")
+FEEDS_CONFIG_PATH = os.path.join(CONFIG_DIR, "feeds.json")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db:5432/feedmaster_db")
-BLUESKY_FIREHOSE_URL = "wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos"
+# Mock Bluesky API endpoint for profile resolution (replace with real if available)
+BLUESKY_API_BASE_URL = os.getenv("BLUESKY_API_BASE_URL", "https://api.bsky.app/xrpc")
+PROFILE_RESOLVE_ENDPOINT = f"{BLUESKY_API_BASE_URL}/com.atproto.repo.getRecord" # Example, typically uses resolveHandle or getProfile
 
-# Tier-based polling intervals (in minutes) for aggregate calculation
-TIER_POLLING_RATES = {
-    "silver": 60,   # Every hour
-    "gold": 15,     # Every 15 minutes
-    "platinum": 5   # Every 5 minutes
-}
+# Polling interval for the worker to check for new data / run aggregations
+WORKER_POLLING_INTERVAL_SECONDS = int(os.getenv("WORKER_POLLING_INTERVAL_SECONDS", 10)) # Every 10 seconds for mock firehose
+AGGREGATION_INTERVAL_MINUTES = int(os.getenv("AGGREGATION_INTERVAL_MINUTES", 5)) # Run aggregations every 5 minutes
 
-# Define the tier hierarchy for comparison
-TIER_ORDER = {
-    'silver': 1,
-    'gold': 2,
-    'platinum': 3
-}
+# --- In-memory Configuration Storage ---
+# These will be loaded once at startup
+tiers_config: List[schemas.TierConfig] = []
+feeds_config: List[schemas.FeedsConfig] = []
 
-# Define which aggregate types are available at which tier (minTier)
-# This list is mirrored in the frontend admin for display/selection.
-ALL_AGGREGATE_TYPES_METADATA = [
-    {'id': 'topHashtags', 'name': 'Top Hashtags', 'minTier': 'silver'},
-    {'id': 'topMentions', 'name': 'Top Mentions', 'minTier': 'silver'},
-    {'id': 'topPosters', 'name': 'Top Posters', 'minTier': 'silver'},
-    {'id': 'topUserImages', 'name': 'Top User Images', 'minTier': 'silver'},
-    {'id': 'topUserVideos', 'name': 'Top User Videos', 'minTier': 'silver'},
-    {'id': 'topUserShortVideos', 'name': 'Top User Short Videos', 'minTier': 'silver'},
-    {'id': 'sentimentAnalysis', 'name': 'Sentiment Analysis Score', 'minTier': 'gold'},
-    {'id': 'geoDistribution', 'name': 'Geographical Distribution', 'minTier': 'gold'},
-    {'id': 'predictiveTrends', 'name': 'Predictive Trends', 'minTier': 'platinum'},
-    # Add other aggregate types here
-]
-
-
-# In-memory storage for the last time each feed's aggregates were calculated
-# This helps the scheduler know when to re-run for each feed.
-last_aggregation_run: Dict[int, datetime] = {} # {feed_id: datetime_object}
-
-# --- Database Setup for Worker ---
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def get_db_worker() -> Session:
-    """Provides a database session for the worker operations."""
-    db = SessionLocal()
+def load_configurations():
+    """Loads tier and feed configurations from JSON files."""
+    global tiers_config, feeds_config
     try:
-        return db
-    except Exception as e:
-        logging.error(f"Error getting DB session for worker: {e}")
-        raise
-    # Note: Session needs to be closed manually by the caller in long-running loops or with `finally`
+        with open(TIERS_CONFIG_PATH, 'r') as f:
+            tiers_data = json.load(f)
+            tiers_config = [schemas.TierConfig(**tier) for tier in tiers_data]
+        print(f"Loaded {len(tiers_config)} tier configurations.")
 
-# --- Bluesky Public API Endpoints (copied from initial backend-app-py) ---
-BLUESKY_GET_ACTOR_PROFILE_API_URL = 'https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile'
-BLUESKY_GET_POSTS_API_URL = 'https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts'
+        with open(FEEDS_CONFIG_PATH, 'r') as f:
+            feeds_data = json.load(f)
+            feeds_config = [schemas.FeedsConfig(**feed) for feed in feeds_data]
+        print(f"Loaded {len(feeds_config)} feed configurations.")
+    except FileNotFoundError as e:
+        print(f"Error loading configuration file: {e}. Please ensure '{CONFIG_DIR}' exists and contains 'tiers.json' and 'feeds.json'.")
+        # Exit or raise error if critical configs are missing
+        exit(1) # Or handle gracefully depending on desired behavior
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON in configuration file: {e}")
+        exit(1)
 
-# --- Helper Functions for Bluesky API Interaction (as in previous backend-app-py) ---
-async def fetch_bluesky_actor_profile_details(actor_identifier: str) -> Dict[str, Any]:
-    """Fetches Bluesky actor (user) profile details."""
-    try:
-        # Use asyncio.to_thread for blocking HTTP requests in async context
-        response = await asyncio.to_thread(requests.get, f"{BLUESKY_GET_ACTOR_PROFILE_API_URL}?actor={actor_identifier}")
-        response.raise_for_status()
-        profile_data = response.json()
-        return {
-            "handle": profile_data.get('handle'),
-            "displayName": profile_data.get('displayName'),
-            "avatar": profile_data.get('avatar'),
-            "description": profile_data.get('description')
-        }
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching Bluesky actor profile for {actor_identifier}: {e}")
-        return {}
 
-def generate_bluesky_post_link(post_uri: str) -> Optional[str]:
-    """Generates a human-readable Bluesky app link for a given AT URI."""
-    try:
-        parts = post_uri.split('/')
-        if len(parts) >= 5 and parts[0] == 'at:' and parts[2] == 'app.bsky.feed.post':
-            did = parts[1]
-            rkey = parts[4]
-            return f"https://bsky.app/profile/{did}/post/{rkey}"
-        logging.warning(f"Could not parse Bluesky URI for link generation: {post_uri}")
-        return None
-    except Exception as e:
-        logging.error(f"Error generating Bluesky post link for {post_uri}: {e}")
-        return None
-
-async def fetch_bluesky_post_details(post_uri: str) -> Dict[str, Any]:
-    """Fetches Bluesky post details and extracts media info."""
-    try:
-        response = await asyncio.to_thread(requests.get, f"{BLUESKY_GET_POSTS_API_URL}?uris={post_uri}")
-        response.raise_for_status()
-        posts_data = response.json()
-
-        if not posts_data or not posts_data.get('posts'):
-            logging.warning(f"No posts found for URI: {post_uri}")
-            return {}
-
-        post = posts_data['posts'][0]
-        record = post.get('record', {})
-        author = post.get('author', {})
-        
-        post_text = record.get('text', '')
-        media_type = 'text_only'
-        media_url = None
-        thumbnail_url = None
-        
-        bluesky_post_link = generate_bluesky_post_link(post_uri)
-
-        embed = record.get('embed')
-        if embed:
-            if embed.get('$type') == 'app.bsky.embed.images#view':
-                if embed.get('images'):
-                    media_type = 'image'
-                    media_url = embed['images'][0].get('fullsize') or embed['images'][0].get('thumb')
-                    thumbnail_url = embed['images'][0].get('thumb')
-            elif embed.get('$type') == 'app.bsky.embed.video#view':
-                # Native Bluesky video: Public API does not expose direct playable URL
-                media_url = None 
-                thumbnail_url = None # Not directly exposed for this embed type
-                video_metadata = embed.get('video', {})
-                aspect_ratio = video_metadata.get('aspectRatio')
-                width = aspect_ratio.get('width') if aspect_ratio else None
-                height = aspect_ratio.get('height') if aspect_ratio else None
-
-                if width and height:
-                    ratio = height / width
-                    if ratio >= (16 / 9) * 0.9: # Approximately 9:16 or taller
-                        media_type = 'short_video'
-                    else:
-                        media_type = 'video'
-                else:
-                    media_type = 'video'
-                logging.debug(f"Detected native Bluesky video. Type: {media_type}, AR: {width}x{height}")
-
-            elif embed.get('$type') == 'app.bsky.embed.external#view':
-                external = embed.get('external', {})
-                external_uri = external.get('uri')
-                if external_uri and any(domain in external_uri for domain in ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com']):
-                    media_type = 'video'
-                    media_url = external_uri
-                    thumbnail_url = external.get('thumb')
-                elif external.get('thumb'):
-                    media_type = 'image'
-                    media_url = external.get('thumb')
-                    thumbnail_url = external.get('thumb')
-            elif embed.get('$type') == 'app.bsky.embed.recordWithMedia#view':
-                media_embed_part = embed.get('media')
-                if media_embed_part:
-                    if media_embed_part.get('$type') == 'app.bsky.embed.images#view':
-                        if media_embed_part.get('images'):
-                            media_type = 'image'
-                            media_url = media_embed_part['images'][0].get('fullsize') or media_embed_part['images'][0].get('thumb')
-                            thumbnail_url = media_embed_part['images'][0].get('thumb')
-                    elif media_embed_part.get('$type') == 'app.bsky.embed.external#view':
-                        external = media_embed_part.get('external', {})
-                        external_uri = external.get('uri')
-                        if external_uri and any(domain in external_uri for domain in ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com']):
-                            media_type = 'video'
-                            media_url = external_uri
-                            thumbnail_url = external.get('thumb')
-                        elif external.get('thumb'):
-                            media_type = 'image'
-                            media_url = external.get('thumb')
-                            thumbnail_url = external.get('thumb')
-
-        return {
-            "post_uri": post_uri,
-            "post_link": bluesky_post_link,
-            "post_text": post_text,
-            "original_poster_did": author.get('did'),
-            "original_poster_handle": author.get('handle'),
-            "original_poster_display_name": author.get('displayName'),
-            "original_poster_avatar_url": author.get('avatar'),
-            "media_type": media_type,
-            "media_url": media_url,
-            "thumbnail_url": thumbnail_url,
-        }
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching Bluesky post details for {post_uri}: {e}")
-        return {}
-    except Exception as e:
-        logging.error(f"Error processing post response for {post_uri}: {e}")
-        return {}
-
-# --- Contrails Listener ("Worker 1") ---
-
-# In-memory store for raw incoming data relevant to aggregation
-# This would be more sophisticated in a real app (e.g., Kafka, Redis Streams)
-# For simplicity, we'll collect recent URIs/DIDs.
-raw_data_buffer = {
-    "posts": [], # list of {uri, did, text, media_type, engagement_score}
-    "likes": [], # list of {subject_uri, liker_did}
-    "reposts": [], # list of {subject_uri, reposter_did}
-    "follows": [] # list of {actor_did, target_did}
-}
-BUFFER_RETENTION_SECONDS = max(TIER_POLLING_RATES.values()) * 60 + 300 # Keep data for longest polling + 5 min buffer
-
-async def parse_and_buffer_message(message: bytes, db_session: Session):
+# --- Profile Resolution Logic (Similar to backend-profile-resolver) ---
+async def resolve_profile(db: Session, did: str) -> Optional[models.User]:
     """
-    Parses a raw message from Contrails and buffers relevant data
-    after resolving DIDs and post metadata.
+    Resolves a Bluesky DID to a user profile (handle, display name, avatar_url).
+    Checks cache first, then fetches from Bluesky API if not found or outdated.
     """
-    try:
-        # AT Protocol messages are CBOR encoded, then framed.
-        # This is a *highly simplified placeholder* for parsing.
-        # A real implementation would use a library like `atproto.xrpc_sync_client`
-        # or implement a full AT Protocol lexer/parser.
-        # For now, we assume we can extract basic post info for demonstration.
+    db_user = crud.get_user(db, did)
+    if db_user:
+        # Simple cache hit, return cached profile
+        # TODO: Add logic to refresh if profile is too old (e.g., 24 hours)
+        # For now, always return cached if exists.
+        return db_user
 
-        # Simulate parsing to extract a post_uri and author DID
-        # In reality, this involves iterating `repo_ops` in `commit` messages
-        # and checking for `app.bsky.feed.post` records.
-        
-        # Dummy data for demonstration
-        if b'app.bsky.feed.post' in message:
-            # This is a very crude way to detect a post, will fail often.
-            # Replace with proper AT Protocol parsing!
-            sample_post_uri = f"at://did:plc:sample{datetime.now().timestamp()}/app.bsky.feed.post/dummy"
-            sample_author_did = f"did:plc:sample_user{datetime.now().second}"
-            
-            # Resolve and cache the author's profile
-            profile_data = await fetch_bluesky_actor_profile_details(sample_author_did)
-            if profile_data:
-                profile_schema = schemas.UserProfileCacheCreate(
-                    did=sample_author_did,
-                    handle=profile_data.get('handle'),
-                    display_name=profile_data.get('displayName'),
-                    avatar_url=profile_data.get('avatar')
-                )
-                crud.create_or_update_user_profile_cache(db_session, profile_schema)
-                logging.debug(f"Cached profile for {sample_author_did}.")
+    print(f"Resolving new profile for DID: {did}")
+    # Mock Bluesky API call. In a real scenario, you'd call
+    # `https://api.bsky.app/xrpc/com.atproto.identity.resolveHandle` or
+    # `https://api.bsky.app/xrpc/app.bsky.actor.getProfile`
+    # For now, let's just create a dummy user or make a mock HTTP call.
 
-            # Resolve and cache post metadata
-            post_details = await fetch_bluesky_post_details(sample_post_uri)
-            if post_details:
-                post_schema = schemas.PostMetadataCacheCreate(
-                    post_uri=post_details.get('post_uri'),
-                    post_link=post_details.get('post_link'),
-                    original_poster_did=post_details.get('original_poster_did'),
-                    original_poster_handle=post_details.get('original_poster_handle'),
-                    original_poster_display_name=post_details.get('original_poster_display_name'),
-                    original_poster_avatar_url=post_details.get('original_poster_avatar_url'),
-                    media_type=post_details.get('media_type'),
-                    media_url=post_details.get('media_url'),
-                    thumbnail_url=post_details.get('thumbnail_url'),
-                    post_text=post_details.get('post_text')
-                )
-                crud.create_or_update_post_metadata_cache(db_session, post_schema)
-                logging.debug(f"Cached post metadata for {sample_post_uri}.")
+    # Example: Mocking a successful Bluesky API response
+    # In a real app, you would make an actual HTTP request to Bluesky API
+    # async with httpx.AsyncClient() as client:
+    #     try:
+    #         # Example: Using getProfile
+    #         response = await client.get(f"{BLUESKY_API_BASE_URL}/app.bsky.actor.getProfile?actor={did}")
+    #         response.raise_for_status() # Raise an exception for bad status codes
+    #         profile_data = response.json()
+    #         handle = profile_data.get('handle', f"unknown.bsky.social_{did[:8]}")
+    #         display_name = profile_data.get('displayName')
+    #         avatar_url = profile_data.get('avatar')
+    #     except httpx.HTTPStatusError as e:
+    #         print(f"HTTP error resolving profile {did}: {e.response.status_code} - {e.response.text}")
+    #         handle = f"error.bsky.social_{did[:8]}" # Fallback handle
+    #         display_name = None
+    #         avatar_url = None
+    #     except httpx.RequestError as e:
+    #         print(f"Network error resolving profile {did}: {e}")
+    #         handle = f"network_error.bsky.social_{did[:8]}"
+    #         display_name = None
+    #         avatar_url = None
 
-                # Add to buffer for later aggregation
-                raw_data_buffer["posts"].append({
-                    "uri": post_details["post_uri"],
-                    "did": post_details["original_poster_did"],
-                    "media_type": post_details["media_type"],
-                    "timestamp": datetime.now(timezone.utc),
-                    "text": post_details["post_text"]
-                })
-        
-        # Simulate processing other types of events like likes, reposts, follows
-        # This would require deeper parsing of AT Protocol messages.
-        # For demo, just log if it's a "commit"
-        if b'op":1' in message[:8]: # Crude check for commit header
-            logging.debug(f"Raw Contrails commit received: {message[:100]}...") # Log first 100 bytes
-        
-        # Clean up old data from buffer
-        now = datetime.now(timezone.utc)
-        for key in raw_data_buffer:
-            raw_data_buffer[key] = [
-                item for item in raw_data_buffer[key]
-                if (now - item["timestamp"]).total_seconds() < BUFFER_RETENTION_SECONDS
-            ]
+    # For demonstration, let's create a simple mock user
+    handle = f"user-{did.split(':')[-1][:8]}.bsky.social"
+    display_name = f"User {did.split(':')[-1][:4]}"
+    avatar_url = f"https://example.com/avatars/{did.split(':')[-1][:8]}.jpg"
 
-    except Exception as e:
-        logging.error(f"Error parsing or buffering Contrails message: {e}")
 
-async def listen_to_contrails(db_session: Session):
-    """Worker 1: Connects to the Bluesky Firehose and continuously listens for messages."""
-    logging.info("Worker 1: Connecting to Bluesky Firehose...")
-    while True:
-        try:
-            async with websockets.connect(BLUESKY_FIREHOSE_URL, ping_interval=None) as websocket:
-                logging.info("Worker 1: Connected to Bluesky Firehose. Listening for events...")
-                while True:
-                    try:
-                        message = await websocket.recv()
-                        # Process message in a non-blocking way
-                        await parse_and_buffer_message(message, db_session)
-                    except websockets.exceptions.ConnectionClosed:
-                        logging.warning("Worker 1: Bluesky Firehose connection closed. Reconnecting...")
-                        break
-                    except Exception as e:
-                        logging.error(f"Worker 1: Error receiving from websocket: {e}. Reconnecting in 5s...")
-                        await asyncio.sleep(5)
-                        break
-        except Exception as e:
-            logging.error(f"Worker 1: Failed to connect to Bluesky Firehose: {e}. Retrying in 10s...")
-            await asyncio.sleep(10)
+    user_data = schemas.UserCreate(
+        did=did,
+        handle=handle,
+        display_name=display_name,
+        avatar_url=avatar_url
+    )
+    return crud.create_user(db, user_data)
 
-# --- Aggregate Calculator ("Worker 2") ---
 
-async def calculate_aggregates_for_feed(feed_db_obj: models.Feed, db_session: Session):
+# --- Post Processing & Ingestion ---
+async def process_and_ingest_post(db: Session, raw_post_record: Dict[str, Any]):
     """
-    Worker 2 Helper: Calculates and stores aggregates for a single feed based on its tier
-    and available data in the raw_data_buffer and cache tables.
+    Processes a raw Bluesky AT Protocol post record, extracts relevant data,
+    resolves author profile, and saves the post to the database.
     """
-    feed_id = feed_db_obj.id
-    feed_name = feed_db_obj.name
-    feed_tier = feed_db_obj.owner.tier # Access tier from the relationship
+    uri = raw_post_record.get('uri')
+    cid = raw_post_record.get('cid')
+    author_did = raw_post_record.get('author')
+    record = raw_post_record.get('record', {})
+    text = record.get('text', '')
+    created_at_str = record.get('createdAt')
 
-    logging.info(f"Worker 2: Calculating aggregates for feed '{feed_name}' (ID: {feed_id}, Tier: {feed_tier})...")
+    if not all([uri, cid, author_did, text, created_at_str]):
+        print(f"Skipping malformed post record: {raw_post_record.get('uri', 'N/A')}")
+        return
 
-    # --- Implement Actual Aggregation Logic Here ---
-    # This is the most complex part of the backend. It needs to:
-    # 1. Query the `raw_data_buffer` (or ideally, a more persistent stream/queue)
-    #    and the `UserProfileCache`/`PostMetadataCache` tables for relevant data
-    #    within the last polling interval for this feed's tier.
-    # 2. Perform the actual counts/calculations for each aggregate type.
-    # 3. Apply tier-based filtering for which aggregates to compute.
+    # Check if post already exists
+    existing_post = crud.get_post_by_uri(db, uri)
+    if existing_post:
+        # print(f"Post {uri} already ingested. Skipping.")
+        return # Skip if already exists
 
-    # Example: Top Hashtags
-    # Get recent posts from buffer, count hashtags
-    recent_posts = [p for p in raw_data_buffer["posts"] if (datetime.now(timezone.utc) - p["timestamp"]).total_seconds() <= (TIER_POLLING_RATES.get(feed_tier, TIER_POLLING_RATES["silver"]) * 60)]
-    hashtags_count = {}
-    for post in recent_posts:
-        # Very crude hashtag detection for demo
-        for word in post["text"].split():
-            if word.startswith('#') and len(word) > 1:
-                hashtag = word.lower()
-                hashtags_count[hashtag] = hashtags_count.get(hashtag, 0) + 1
+    print(f"Ingesting new post: {uri} by {author_did}")
+
+    # Resolve author profile (will cache if new)
+    await resolve_profile(db, author_did) # Ensure user exists in DB
+
+    # Parse created_at datetime
+    created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00')) # Handle 'Z' for UTC
+
+    # Extracting embedded content (simplified for demonstration)
+    has_image = False
+    has_video = False
+    has_link = False
+    has_quote = False
+    has_mention = False
+    image_url = None
+    link_title = None
+    link_description = None
+    link_thumbnail_url = None
+    hashtags = []
+    links = []
+    mentions = []
     
-    top_hashtags = sorted(hashtags_count.items(), key=lambda item: item[1], reverse=True)[:5]
-    if top_hashtags:
-        feed_data_entry = schemas.FeedDataCreate(
-            aggregate_type="topHashtags",
-            data={"items": [{"name": h[0], "count": h[1]} for h in top_hashtags]},
-            timestamp=datetime.now(timezone.utc)
-        )
-        crud.create_feed_data(db_session, feed_data_entry, feed_id)
-        logging.info(f"Worker 2: Stored 'topHashtags' for feed {feed_name}.")
+    # A more robust parser would go here
+    # For now, let's do a very basic hashtag extraction
+    for word in text.split():
+        if word.startswith('#') and len(word) > 1:
+            hashtags.append(word.lower())
 
-    # Example: Top Posters
-    posters_count = {}
-    for post in recent_posts:
-        poster_did = post["did"]
-        posters_count[poster_did] = posters_count.get(poster_did, 0) + 1
-    top_posters = sorted(posters_count.items(), key=lambda item: item[1], reverse=True)[:5]
-    if top_posters:
-        # For display, frontend will resolve DID to get handle/avatar
-        feed_data_entry = schemas.FeedDataCreate(
-            aggregate_type="topPosters",
-            data={"items": [{"did": p[0], "count": p[1]} for p in top_posters]},
-            timestamp=datetime.now(timezone.utc)
-        )
-        crud.create_feed_data(db_session, feed_data_entry, feed_id)
-        logging.info(f"Worker 2: Stored 'topPosters' for feed {feed_name}.")
+    # Mock embeds logic (you'd parse `record.embed` in real data)
+    mock_embeds = raw_post_record.get('record', {}).get('embed', {})
+    if mock_embeds and mock_embeds.get('$type') == 'app.bsky.embed.images#view':
+        has_image = True
+        # image_url = mock_embeds['images'][0]['fullsize'] if mock_embeds.get('images') else None # Example
+        image_url = f"https://example.com/images/{uuid.uuid4()}.jpg" # Mock URL
+    elif mock_embeds and mock_embeds.get('$type') == 'app.bsky.embed.external#view':
+        has_link = True
+        link_data = mock_embeds.get('external', {})
+        link_title = link_data.get('title')
+        link_description = link_data.get('description')
+        link_thumbnail_url = link_data.get('thumb')
+        if link_data.get('uri'):
+            links.append({"uri": link_data['uri'], "title": link_title, "description": link_description, "thumb": link_thumbnail_url})
 
-
-    # Example: Top User Images / Videos (using post_uri for engagement count)
-    image_posts = [p for p in recent_posts if p["media_type"] == "image"]
-    video_posts = [p for p in recent_posts if p["media_type"] == "video"]
-    short_video_posts = [p for p in recent_posts if p["media_type"] == "short_video"]
-
-    # This 'engagement_score' for posts would come from parsing likes/reposts/comments in Contrails
-    # For now, let's just count posts themselves.
-    def get_top_media_posts(media_list: List[Dict[str, Any]], agg_type_name: str):
-        # In a real system, you'd get actual engagement for these posts
-        # For demo, assume each post is 1 engagement.
-        media_agg = [{"post_uri": p["uri"], "engagement_score": 1} for p in media_list]
-        # Sort by engagement_score (which is 1 for now)
-        media_agg_sorted = sorted(media_agg, key=lambda x: x["engagement_score"], reverse=True)[:5]
-        if media_agg_sorted:
-            feed_data_entry = schemas.FeedDataCreate(
-                aggregate_type=agg_type_name,
-                data={"items": media_agg_sorted},
-                timestamp=datetime.now(timezone.utc)
-            )
-            crud.create_feed_data(db_session, feed_data_entry, feed_id)
-            logging.info(f"Worker 2: Stored '{agg_type_name}' for feed {feed_name}.")
-
-    get_top_media_posts(image_posts, "topUserImages")
-    get_top_media_posts(video_posts, "topUserVideos")
-    get_top_media_posts(short_video_posts, "topUserShortVideos")
-
-    # Example: Sentiment Analysis (Gold/Platinum tier only)
-    sentiment_aggregate_meta = next((agg for agg in ALL_AGGREGATE_TYPES_METADATA if agg['id'] == 'sentimentAnalysis'), None)
-    if sentiment_aggregate_meta and TIER_ORDER.get(feed_tier, 0) >= TIER_ORDER[sentiment_aggregate_meta['minTier']]:
-        # Simulate sentiment analysis on recent posts
-        # In a real scenario, you'd send text to an NLP service or use a local model.
-        # For demo, just static data.
-        sentiment_data = {"positive_score": 0.75, "negative_score": 0.10, "neutral_score": 0.15}
-        feed_data_entry = schemas.FeedDataCreate(
-            aggregate_type="sentimentAnalysis",
-            data={"score_breakdown": sentiment_data},
-            timestamp=datetime.now(timezone.utc)
-        )
-        crud.create_feed_data(db_session, feed_data_entry, feed_id)
-        logging.info(f"Worker 2: Stored 'sentimentAnalysis' for feed {feed_name}.")
-    else:
-        logging.info(f"Worker 2: Sentiment Analysis skipped for tier {feed_tier} for feed {feed_name}.")
-
-    logging.info(f"Worker 2: Finished calculating aggregates for feed '{feed_name}'.")
+    # Mock mentions logic (you'd parse `record.facets` for mentions in real data)
+    # For simplicity, if text contains "@user", mock a mention.
+    if '@' in text:
+        has_mention = True
+        # In a real app, you'd resolve DID from handle for mentions and get the user's display name
+        mentions.append({"did": "did:plc:mockdid", "handle": "@mockuser", "name": "Mock User"})
 
 
-async def aggregate_worker_loop():
-    """Worker 2: Main loop for the aggregate calculation worker."""
-    logging.info("Worker 2: Starting aggregate calculation worker loop...")
-    
-    while True:
-        db = get_db_worker() # Get a fresh DB session for each loop iteration
-        try:
-            active_feeds = crud.get_feeds(db) # Get active feeds and their owner (for tier)
-            current_time = datetime.now(timezone.utc)
-
-            for feed_db_obj in active_feeds:
-                # Ensure the owner relationship is loaded for tier access
-                if not hasattr(feed_db_obj, 'owner') or not feed_db_obj.owner:
-                    logging.warning(f"Feed {feed_db_obj.name} (ID: {feed_db_obj.id}) has no associated owner. Skipping aggregation.")
-                    continue
-                
-                feed_id = feed_db_obj.id
-                feed_tier = feed_db_obj.owner.tier # Get tier from associated User model
-                
-                last_run_time = last_aggregation_run.get(feed_id, datetime.min.replace(tzinfo=timezone.utc))
-                
-                polling_minutes = TIER_POLLING_RATES.get(feed_tier, TIER_POLLING_RATES["silver"])
-                
-                if (current_time - last_run_time) >= timedelta(minutes=polling_minutes):
-                    logging.info(f"Worker 2: Triggering aggregate calculation for feed ID {feed_id} (Tier: {feed_tier})...")
-                    await calculate_aggregates_for_feed(feed_db_obj, db)
-                    last_aggregation_run[feed_id] = current_time # Update last run time
-                else:
-                    logging.debug(f"Worker 2: Feed ID {feed_id} (Tier: {feed_tier}) not due for aggregation yet. Next run in approx. {int((last_run_time + timedelta(minutes=polling_minutes) - current_time).total_seconds() / 60)} minutes.")
-            
-            # Determine the shortest polling interval to sleep for
-            min_sleep_seconds = min(TIER_POLLING_RATES.values()) * 60
-            logging.debug(f"Worker 2: Sleeping for {min_sleep_seconds} seconds until next check...")
-            await asyncio.sleep(min_sleep_seconds)
-
-        except Exception as e:
-            logging.critical(f"Worker 2: Critical error in aggregate worker loop: {e}")
-            await asyncio.sleep(60) # Sleep longer on critical error before retrying
-        finally:
-            db.close() # Ensure DB session is closed after each iteration
-
-# --- Main Entry Point for the Aggregator Worker ---
-async def main():
-    # Ensure database tables are created before starting workers
-    models.Base.metadata.create_all(bind=engine)
-    logging.info("Database tables ensured to exist for worker.")
-    
-    # The Contrails listener and Aggregate Calculator will run concurrently.
-    # We need to create separate DB sessions for each concurrent task if they are
-    # long-running and operate independently, to avoid issues with shared session state
-    # across async tasks.
-    
-    # Or, if they truly share state/transaction, manage it carefully.
-    # For simplicity of demonstration, let's create two separate DB sessions that
-    # are managed within their respective async functions.
-    
-    # We'll pass a session that each coroutine manages (opens/closes as needed).
-    # For `listen_to_contrails`, it opens/closes connection within its `async with websockets.connect` loop.
-    # For `aggregate_worker_loop`, it opens/closes session for each outer loop iteration.
-
-    # Start both workers
-    await asyncio.gather(
-        listen_to_contrails(get_db_worker()), # Pass a fresh session for the listener
-        aggregate_worker_loop() # The loop itself manages its session
+    post_data = schemas.PostCreate(
+        uri=uri,
+        cid=cid,
+        text=text,
+        created_at=created_at,
+        author_did=author_did,
+        has_image=has_image,
+        has_video=has_video, # This would need more sophisticated embed parsing
+        has_link=has_link,
+        has_quote=has_quote, # This would need more sophisticated embed parsing
+        has_mention=has_mention,
+        image_url=image_url,
+        link_title=link_title,
+        link_description=link_description,
+        link_thumbnail_url=link_thumbnail_url,
+        hashtags=hashtags if hashtags else None, # Store as None if empty list
+        links=links if links else None,
+        mentions=mentions if mentions else None,
+        embeds=mock_embeds if mock_embeds else None,
+        raw_record=raw_post_record # Store full raw record for completeness
     )
 
+    db_post = crud.create_post(db, post_data)
+    if db_post:
+        # Now, link the post to relevant feeds based on config
+        await link_post_to_feeds(db, db_post)
+
+
+async def link_post_to_feeds(db: Session, post: models.Post):
+    """
+    Links an ingested post to relevant feeds based on the feeds configuration and post content.
+    """
+    # In a real application, you'd apply the `criteria` from feeds_config
+    # (e.g., keywords, included_tiers, min_likes) to filter which posts
+    # belong to which feeds.
+
+    # For demonstration, link all posts to the "home" feed and any feed
+    # that matches a hashtag or keyword in the post text.
+    feed_ids_to_link = set()
+    feed_ids_to_link.add("home") # Always include in a default 'home' feed
+
+    # Simple keyword/hashtag matching
+    post_text_lower = post.text.lower()
+    for feed_conf in feeds_config:
+        if feed_conf.criteria and feed_conf.criteria.get('keywords'):
+            feed_keywords = [k.lower() for k in feed_conf.criteria['keywords']]
+            if any(keyword in post_text_lower for keyword in feed_keywords):
+                feed_ids_to_link.add(feed_conf.id)
+        # TODO: Add logic for 'include_tiers', 'min_likes', 'min_reposts' etc.
+        # This would require fetching author's tier, post likes/reposts.
+
+    for feed_id in feed_ids_to_link:
+        # Check if FeedPost already exists for this post and feed to prevent duplicates
+        # The unique constraint in models.py (when enabled) handles this at DB level
+        # but a pre-check can reduce transaction overhead.
+        # This logic is simplified for now. crud.create_feed_post handles rollback on error.
+        feed_post_data = schemas.FeedPostCreate(post_id=post.id, feed_id=feed_id)
+        crud.create_feed_post(db, feed_post_data)
+
+
+# --- Mock Firehose Listener ---
+async def mock_bluesky_firehose_listener():
+    """
+    A mock function that simulates listening to the Bluesky firehose.
+    In a real application, this would be a WebSocket client connecting to the AT Protocol firehose.
+    For demonstration, it yields dummy post data periodically.
+    """
+    counter = 0
+    while True:
+        counter += 1
+        now = datetime.now(timezone.utc)
+        mock_did = f"did:plc:mockauthor{counter}"
+        mock_handle = f"mockuser{counter}.bsky.social"
+        mock_uri = f"at://{mock_did}/app.bsky.feed.post/mockpost{counter}"
+        mock_cid = f"bafyreig{counter}abcdefghijklmnopqrstuvwxyz"
+
+        # Simulate a post with some variability
+        if counter % 5 == 0: # Every 5th post has a hashtag
+            text = f"This is a mock post number {counter} from {mock_handle} about #mockdata and #fastapi. #bluesky"
+        elif counter % 7 == 0: # Every 7th post has a mock image embed
+             text = f"Here's a cool image for post {counter} by {mock_handle}!"
+             embed = {
+                 "$type": "app.bsky.embed.images#view",
+                 "images": [
+                     {"alt": "A cool image", "fullsize": f"https://example.com/images/mock_image_{counter}.jpg"}
+                 ]
+             }
+        elif counter % 11 == 0: # Every 11th post has a mock link embed
+            text = f"Check out this interesting link for post {counter}: https://example.com/article/{counter}"
+            embed = {
+                "$type": "app.bsky.embed.external#view",
+                "external": {
+                    "uri": f"https://example.com/article/{counter}",
+                    "title": f"Mock Article {counter}",
+                    "description": f"A description for mock article {counter} on {mock_handle}'s blog.",
+                    "thumb": f"https://example.com/thumbs/mock_thumb_{counter}.jpg"
+                }
+            }
+        else:
+            text = f"Hello from mock Bluesky firehose! This is post {counter} by {mock_handle}."
+            embed = None
+
+        mock_post_record = {
+            "uri": mock_uri,
+            "cid": mock_cid,
+            "author": mock_did,
+            "record": {
+                "$type": "app.bsky.feed.post",
+                "text": text,
+                "createdAt": now.isoformat().replace('+00:00', 'Z'), # ISO 8601 with Z for UTC
+                "embed": embed # Add mock embed if present
+            },
+            # In a real firehose, there's more metadata like 'seq', 'takedown', etc.
+        }
+        yield mock_post_record
+        await asyncio.sleep(WORKER_POLLING_INTERVAL_SECONDS) # Simulate delay
+
+
+# --- Aggregation Logic ---
+async def run_aggregations(db: Session):
+    """
+    Runs various aggregation tasks based on feed configurations and updates the database.
+    This function will be called periodically by the main worker loop.
+    """
+    print(f"\n--- Running Aggregations at {datetime.now()} ---")
+    for feed_conf in feeds_config:
+        feed_id = feed_conf.id
+        print(f"  Aggregating for Feed: '{feed_id}'")
+
+        # --- Example Aggregation: Top Hashtags ---
+        # Get posts for this feed from the last 24 hours
+        time_24h_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+        recent_posts = db.query(models.Post)\
+            .join(models.FeedPost, models.Post.id == models.FeedPost.post_id)\
+            .filter(models.FeedPost.feed_id == feed_id)\
+            .filter(models.Post.created_at >= time_24h_ago)\
+            .all()
+
+        hashtag_counts: Dict[str, int] = {}
+        for post in recent_posts:
+            if post.hashtags:
+                for hashtag in post.hashtags:
+                    hashtag_counts[hashtag] = hashtag_counts.get(hashtag, 0) + 1
+
+        # Sort hashtags by count (descending) and take top N
+        top_n = 10 # Configurable
+        sorted_hashtags = sorted(hashtag_counts.items(), key=lambda item: item[1], reverse=True)[:top_n]
+        top_hashtags_data = [{"hashtag": h, "count": c} for h, c in sorted_hashtags]
+
+        # Save/Update aggregate in DB
+        agg_data = schemas.AggregateCreate(
+            feed_id=feed_id,
+            agg_name="topHashtags", # Matches what frontend might expect
+            timeframe="24h",
+            data_json={"top": top_hashtags_data}
+        )
+        crud.create_or_update_aggregate(db, agg_data)
+        print(f"    - Updated topHashtags for '{feed_id}' ({len(top_hashtags_data)} unique hashtags in last 24h)")
+
+        # TODO: Implement other aggregations:
+        # - Top Links
+        # - Top Mentions
+        # - Most Active Users
+        # - Daily Post Count
+        # - etc.
+        # Each would involve querying `models.Post` and `models.FeedPost` and then
+        # processing the data before saving to `models.Aggregate`.
+
+
+# --- Main Worker Loop ---
+async def run_worker():
+    """
+    The main asynchronous loop for the aggregator worker.
+    It continuously listens for new posts and periodically triggers aggregations.
+    """
+    print("Starting Aggregator Worker...")
+    load_configurations() # Load configs once at startup
+
+    # Initial database setup (for development/testing convenience)
+    # In production, use Alembic migrations (as discussed)
+    # Base.metadata.create_all(bind=engine)
+    # print("Database tables ensured (via create_all). In production, use Alembic migrations.")
+
+    last_aggregation_run = datetime.now(timezone.utc) - timedelta(minutes=AGGREGATION_INTERVAL_MINUTES * 2) # Force first run
+
+    async for raw_post_record in mock_bluesky_firehose_listener():
+        db = SessionLocal() # Get a new session for each post/batch
+        try:
+            await process_and_ingest_post(db, raw_post_record)
+
+            # Check if it's time to run aggregations
+            now = datetime.now(timezone.utc)
+            if (now - last_aggregation_run).total_seconds() >= AGGREGATION_INTERVAL_MINUTES * 60:
+                await run_aggregations(db)
+                last_aggregation_run = now
+        except Exception as e:
+            print(f"Error in worker loop: {e}")
+            db.rollback() # Rollback transaction on error
+        finally:
+            db.close()
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Ensure the config directory exists for local testing
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    # Create dummy config files if they don't exist for easy local testing
+    # In a real scenario, these would be managed by your deployment process
+    if not os.path.exists(TIERS_CONFIG_PATH):
+        with open(TIERS_CONFIG_PATH, 'w') as f:
+            json.dump([{"id": "test-tier", "name": "Test Tier", "description": "Desc", "min_followers": 0, "min_posts_daily": 0, "min_reputation_score": 0.0}], f, indent=2)
+    if not os.path.exists(FEEDS_CONFIG_PATH):
+        with open(FEEDS_CONFIG_PATH, 'w') as f:
+            json.dump([{"id": "home", "name": "Home", "description": "Home feed", "criteria": {}}], f, indent=2)
+
+
+    # Run the worker
+    asyncio.run(run_worker())
