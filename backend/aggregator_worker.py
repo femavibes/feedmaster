@@ -35,10 +35,6 @@ FEEDS_CONFIG_PATH = os.path.join(CONFIG_DIR, "feeds.json")
 
 # Bluesky API endpoint for profile resolution
 BLUESKY_API_BASE_URL = os.getenv("BLUESKY_API_BASE_URL", "https://api.bsky.app/xrpc")
-# PROFILE_RESOLVE_ENDPOINT = f"{BLUESKY_API_BASE_URL}/com.atproto.repo.getRecord" # Example, typically uses resolveHandle or getProfile
-
-# Graze Contrails WebSocket Base URL
-GRAZE_CONTRAILS_WS_BASE_URL = os.getenv("GRAZE_CONTRAILS_WS_BASE_URL", "wss://contrails.graze.social") # ASSUMPTION!
 
 # Polling interval for the worker to check for new data / run aggregations
 # This will primarily be for checking aggregation schedule, as WebSocket is real-time
@@ -61,6 +57,7 @@ def load_configurations():
 
         with open(FEEDS_CONFIG_PATH, 'r') as f:
             feeds_data = json.load(f)
+            # Ensure HttpUrl is parsed correctly for contrails_websocket_url
             feeds_config = [schemas.FeedsConfig(**feed) for feed in feeds_data]
         print(f"Loaded {len(feeds_config)} feed configurations.")
     except FileNotFoundError as e:
@@ -69,6 +66,9 @@ def load_configurations():
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON in configuration file: {e}")
         raise # Re-raise if config is malformed
+    except Exception as e:
+        print(f"Error loading and parsing configurations: {e}")
+        raise
 
 
 # --- Profile Resolution Logic (Uses Bluesky API) ---
@@ -144,7 +144,7 @@ async def process_and_ingest_post(db: Session, feed_id: str, contrails_data: Dic
     # You'll need to adjust this parsing based on the actual Contrails payload.
     raw_post_record = contrails_data.get('post')
     if not raw_post_record:
-        print(f"Contrails data for feed {feed_id} missing 'post' key: {contrails_data}")
+        print(f"Contrails data for feed {feed_id} missing 'post' key or invalid format: {contrails_data}")
         return
 
     uri = raw_post_record.get('uri')
@@ -155,16 +155,16 @@ async def process_and_ingest_post(db: Session, feed_id: str, contrails_data: Dic
     created_at_str = record.get('createdAt')
 
     if not all([uri, cid, author_did, text, created_at_str]):
-        print(f"Skipping malformed post record from Contrails for feed {feed_id}: {uri}")
+        print(f"Skipping malformed post record from Contrails for feed {feed_id}: Missing required fields in {uri if uri else 'unknown URI'}")
         return
 
     # Check if post already exists in our general 'posts' table
     existing_post = crud.get_post_by_uri(db, uri)
     if existing_post:
         # If post already exists, just link it to this specific feed if not already linked
-        # print(f"Post {uri} already ingested. Ensuring linkage to feed {feed_id}.")
+        # No need for link_post_to_feeds anymore as it directly comes from a specific feed
         feed_post_data = schemas.FeedPostCreate(post_id=existing_post.id, feed_id=feed_id)
-        crud.create_feed_post(db, feed_post_data) # This will handle duplicates
+        crud.create_feed_post(db, feed_post_data) # This will handle duplicates (unique constraint)
         return
 
     print(f"Ingesting new post from Contrails for feed {feed_id}: {uri} by {author_did}")
@@ -248,7 +248,7 @@ async def process_and_ingest_post(db: Session, feed_id: str, contrails_data: Dic
 
     db_post = crud.create_post(db, post_data)
     if db_post:
-        # Link the post to this specific feed
+        # Link the post to this specific feed it came from
         feed_post_data = schemas.FeedPostCreate(post_id=db_post.id, feed_id=feed_id)
         crud.create_feed_post(db, feed_post_data) # This handles duplicate linkages
 
@@ -262,7 +262,8 @@ async def run_aggregations(db: Session):
     print(f"\n--- Running Aggregations at {datetime.now()} ---")
     for feed_conf in feeds_config:
         feed_id = feed_conf.id
-        print(f"  Aggregating for Feed: '{feed_id}'")
+        feed_tier = feed_conf.tier # Tier information is now available
+        print(f"  Aggregating for Feed: '{feed_id}' (Tier: {feed_tier})")
 
         # --- Example Aggregation: Top Hashtags (last 24 hours) ---
         # Get posts for this feed that were *created* in the last 24 hours
@@ -280,7 +281,7 @@ async def run_aggregations(db: Session):
                     hashtag_counts[hashtag] = hashtag_counts.get(hashtag, 0) + 1
 
         # Sort hashtags by count (descending) and take top N
-        top_n = 10 # Configurable, or from feed_conf if specified
+        top_n = 10 # Configurable, or from feed_conf if specified based on tier?
         sorted_hashtags = sorted(hashtag_counts.items(), key=lambda item: item[1], reverse=True)[:top_n]
         top_hashtags_data = [{"hashtag": h, "count": c} for h, c in sorted_hashtags]
 
@@ -305,17 +306,16 @@ async def run_aggregations(db: Session):
 
 
 # --- WebSocket Listener for a Single Contrails Feed ---
-async def listen_to_contrails_feed(feed_id: str):
+async def listen_to_contrails_feed(feed_id: str, websocket_url: str):
     """
     Establishes and maintains a WebSocket connection to a specific Graze Contrails feed.
     Receives messages and passes them for processing.
     """
-    ws_url = f"{GRAZE_CONTRAILS_WS_BASE_URL}/feeds/{feed_id}" # ASSUMPTION for Contrails URL structure
-    print(f"Attempting to connect to Contrails feed: {ws_url}")
+    print(f"Attempting to connect to Contrails feed: {feed_id} at {websocket_url}")
 
     while True:
         try:
-            async with websockets.connect(ws_url) as websocket:
+            async with websockets.connect(websocket_url) as websocket:
                 print(f"Connected to Contrails feed: {feed_id}")
                 while True:
                     try:
@@ -357,26 +357,44 @@ async def run_worker():
     load_configurations() # Load configs once at startup
 
     # Ensure the config directory exists and contains dummy configs for local testing
-    # In a real scenario, these would be managed by your deployment process
     os.makedirs(CONFIG_DIR, exist_ok=True)
-    if not os.path.exists(TIERS_CONFIG_PATH) or not os.path.exists(FEEDS_CONFIG_PATH):
-        print("Creating dummy config files for local testing. Make sure your actual configs are in 'config/' directory.")
-        if not os.path.exists(TIERS_CONFIG_PATH):
-            with open(TIERS_CONFIG_PATH, 'w') as f:
-                json.dump([{"id": "test-tier", "name": "Test Tier", "description": "Desc", "min_followers": 0, "min_posts_daily": 0, "min_reputation_score": 0.0}], f, indent=2)
-        if not os.path.exists(FEEDS_CONFIG_PATH):
-            with open(FEEDS_CONFIG_PATH, 'w') as f:
-                json.dump([{"id": "home", "name": "Home", "description": "Home feed", "criteria": {}}, {"id": "tech-news", "name": "Tech News", "description": "Tech feed", "criteria": {"keywords": ["#tech"]}}], f, indent=2)
+    # Create dummy config files if they don't exist for easy local testing
+    if not os.path.exists(TIERS_CONFIG_PATH):
+        print(f"Creating dummy tiers.json at {TIERS_CONFIG_PATH}")
+        with open(TIERS_CONFIG_PATH, 'w') as f:
+            json.dump([{"id": "silver", "name": "Silver Tier", "description": "Standard access", "min_followers": 0, "min_posts_daily": 0, "min_reputation_score": 0.0}], f, indent=2)
+    if not os.path.exists(FEEDS_CONFIG_PATH):
+        print(f"Creating dummy feeds.json at {FEEDS_CONFIG_PATH}")
+        with open(FEEDS_CONFIG_PATH, 'w') as f:
+            json.dump([
+                {
+                    "id": "home-feed-graze",
+                    "name": "Graze Home Feed",
+                    "description": "The default home feed from Graze Contrails.",
+                    "contrails_websocket_url": "wss://contrails.graze.social/feeds/home-feed-graze",
+                    "tier": "silver"
+                },
+                {
+                    "id": "tech-news-graze",
+                    "name": "Graze Tech News",
+                    "description": "Tech news feed curated by Contrails.",
+                    "contrails_websocket_url": "wss://contrails.graze.social/feeds/tech-news-graze",
+                    "tier": "gold"
+                }
+            ], f, indent=2)
+
+    # Re-load configurations after potentially creating dummy files
+    load_configurations()
 
 
     # --- Start WebSocket listeners for each feed ---
-    # Create a list of tasks, one for each feed listener
     listener_tasks = []
     if not feeds_config:
         print("No feeds configured. Worker will only run aggregations if scheduled.")
     else:
         for feed_conf in feeds_config:
-            listener_tasks.append(asyncio.create_task(listen_to_contrails_feed(feed_conf.id)))
+            # Pass both feed_id and the specific websocket_url from config
+            listener_tasks.append(asyncio.create_task(listen_to_contrails_feed(feed_conf.id, str(feed_conf.contrails_websocket_url))))
 
     # --- Schedule periodic aggregations ---
     async def aggregation_scheduler():
