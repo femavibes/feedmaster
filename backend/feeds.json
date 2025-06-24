@@ -1,53 +1,31 @@
 [
   {
-    "id": "home",
-    "name": "Home Feed",
-    "description": "Your main feed for popular posts across various topics.",
-    "criteria": {
-      "include_tiers": ["tier-s", "tier-a", "tier-b"],
-      "min_likes": 10,
-      "min_reposts": 2,
-      "keywords": []
-    }
+    "id": "home-feed-graze",
+    "name": "Graze Home Feed",
+    "description": "The default home feed from Graze Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/home-feed-graze",
+    "tier": "silver"
   },
   {
-    "id": "tech-news",
-    "name": "Tech News",
-    "description": "Latest updates and discussions in technology.",
-    "criteria": {
-      "include_tiers": ["tier-a", "tier-b", "tier-c"],
-      "min_likes": 5,
-      "keywords": ["#tech", "#technology", "#ai", "#software", "#dev", "#science"]
-    }
+    "id": "tech-news-graze",
+    "name": "Graze Tech News",
+    "description": "Tech news feed curated by Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/tech-news-graze",
+    "tier": "gold"
   },
   {
-    "id": "crypto-daily",
-    "name": "Crypto Daily",
-    "description": "Daily insights and news on cryptocurrency.",
-    "criteria": {
-      "include_tiers": ["tier-a", "tier-b"],
-      "min_likes": 7,
-      "keywords": ["#crypto", "#bitcoin", "#ethereum", "#blockchain", "#web3"]
-    }
+    "id": "community-feed-1",
+    "name": "Graze Community Feed 1",
+    "description": "A specific community feed from Contrails.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/community-feed-1",
+    "tier": "silver"
   },
   {
-    "id": "gaming-updates",
-    "name": "Gaming Updates",
-    "description": "News and discussions from the gaming world.",
-    "criteria": {
-      "include_tiers": ["tier-b", "tier-c"],
-      "min_likes": 3,
-      "keywords": ["#gaming", "#videogames", "#esports", "#game", "#gamer"]
-    }
-  },
-  {
-    "id": "art-showcase",
-    "name": "Art Showcase",
-    "description": "Curated feed for digital and traditional art.",
-    "criteria": {
-      "include_tiers": ["tier-b", "tier-c"],
-      "min_likes": 5,
-      "keywords": ["#art", "#digitalart", "#illustration", "#painting", "#sculpture"]
-    }
+    "id": "premium-investing",
+    "name": "Premium Investing Feed",
+    "description": "Exclusive investing insights from top analysts.",
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/premium-investing",
+    "tier": "platinum"
   }
+  // Add more existing Contrails feed IDs as needed, with their specific URLs and tiers
 ]
