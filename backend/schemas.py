@@ -1,162 +1,161 @@
 # backend/schemas.py
 #
-# This file defines Pydantic models for data validation and serialization.
-# These models are used to ensure the structure and types of data
-# for requests coming into your API and responses going out.
+# This file defines the Pydantic models (schemas) for validating and
+# serializing data. These schemas are used for API request/response bodies
+# and for data validation when interacting with the database.
 
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 from typing import List, Optional, Dict, Any
-from datetime import datetime
-import uuid
-
-# --- Base Schemas (common configurations) ---
-# Pydantic's ConfigDict can be used for configuration for a model class.
-# from_attributes = True is important for SQLAlchemy models to work with Pydantic.
-# It tells Pydantic to read data from ORM attributes, not just dict keys.
-# alias_generator and populate_by_name can be useful for field name mapping (e.g., camelCase to snake_case)
-# but for now, we'll keep it simple with direct attribute access.
-class Config:
-    from_attributes = True
-    populate_by_name = True # Allow population by field name and alias
+from datetime import datetime, date
 
 # --- User Schemas ---
 class UserBase(BaseModel):
-    did: str = Field(..., max_length=255)
-    handle: str = Field(..., max_length=255)
-    display_name: Optional[str] = Field(None, max_length=255)
-    avatar_url: Optional[str] = None # No max length on URL
+    did: str = Field(..., example="did:plc:abcdef1234567890abcdef12", description="Decentralized Identifier (DID) of the user")
+    handle: Optional[str] = Field(None, example="johndoe.bsky.social", description="Bluesky handle of the user")
+    display_name: Optional[str] = Field(None, example="John Doe", description="Display name of the user")
+    avatar_url: Optional[HttpUrl] = Field(None, example="https://example.com/avatars/johndoe.jpg", description="URL to the user's avatar image")
+    bio: Optional[str] = Field(None, example="I am a human.", description="User's biography")
+    followers_count: Optional[int] = Field(0, example=123, description="Number of followers the user has")
+    following_count: Optional[int] = Field(0, example=45, description="Number of users this user is following")
+    posts_count: Optional[int] = Field(0, example=500, description="Total number of posts made by the user")
+    created_at: Optional[datetime] = Field(None, description="Timestamp when the user's profile was created on Bluesky")
+    last_updated: Optional[datetime] = Field(None, description="Timestamp when the user's profile was last updated in our system")
 
 class UserCreate(UserBase):
-    # For user creation, we might include a password if this was a local user system.
-    # For Bluesky DIDs, this is handled externally.
+    # For creation, DID is mandatory, others are optional.
+    # We might not have all details initially, the worker will enrich.
     pass
 
 class UserPublic(UserBase):
-    # Schema for public display of user information
-    last_updated: datetime
-
-    model_config = ConfigDict(from_attributes=True) # Apply Pydantic configuration
-
-class UserInDB(UserPublic):
-    # Schema for internal use, might include sensitive info or just link to ORM object
-    # In this case, it's similar to UserPublic but indicates it's from the DB
-    pass
-
+    # This schema is for responses, includes DB-generated fields like id
+    id: int
+    # Add config for ORM mode
+    model_config = {
+        "from_attributes": True
+    }
 
 # --- Post Schemas ---
 class PostBase(BaseModel):
-    uri: str = Field(..., max_length=512)
-    cid: str = Field(..., max_length=255)
-    text: str
-    created_at: datetime
-    author_did: str = Field(..., max_length=255) # Author's DID
-    has_image: bool = False
-    has_video: bool = False
-    has_link: bool = False
-    has_quote: bool = False
-    has_mention: bool = False
-    image_url: Optional[str] = None
-    link_title: Optional[str] = Field(None, max_length=255)
+    uri: str = Field(..., example="at://did:plc:xyz/app.bsky.feed.post/abc123def456", description="The AT URI of the post")
+    cid: str = Field(..., example="bafyreihm4e7r5f...", description="The CID (Content ID) of the post record")
+    text: str = Field(..., example="This is a post on Bluesky.", description="The main text content of the post")
+    created_at: datetime = Field(..., description="Timestamp when the post was created on Bluesky")
+    author_did: str = Field(..., example="did:plc:abcdef1234567890abcdef12", description="DID of the post author")
+
+    has_image: Optional[bool] = False
+    has_video: Optional[bool] = False
+    has_link: Optional[bool] = False
+    has_quote: Optional[bool] = False
+    has_mention: Optional[bool] = False
+
+    image_url: Optional[HttpUrl] = Field(None, example="https://example.com/post_image.jpg")
+    link_title: Optional[str] = None
     link_description: Optional[str] = None
-    link_thumbnail_url: Optional[str] = None
-    hashtags: Optional[List[str]] = None
-    links: Optional[List[Dict[str, Any]]] = None # List of dicts for link embeds
-    mentions: Optional[List[Dict[str, Any]]] = None # List of dicts for mentions
-    embeds: Optional[Dict[str, Any]] = None # Full raw embeds JSON
-    raw_record: Dict[str, Any] # Full raw AT Protocol record JSON
+    link_thumbnail_url: Optional[HttpUrl] = None
+
+    hashtags: Optional[List[str]] = None # e.g., ["#bluesky", "#python"]
+    links: Optional[List[Dict[str, Any]]] = None # e.g., [{"uri": "...", "title": "..."}]
+    mentions: Optional[List[Dict[str, Any]]] = None # e.g., [{"did": "...", "handle": "...", "name": "..."}]
+    embeds: Optional[Dict[str, Any]] = None # Raw embed JSON structure
+    raw_record: Optional[Dict[str, Any]] = Field(None, description="The full raw AT Protocol record of the post")
 
 class PostCreate(PostBase):
-    # When creating a post, we include all base fields
     pass
 
 class PostInDB(PostBase):
-    # Schema for posts retrieved from the database, including auto-generated fields
-    id: uuid.UUID
-    ingested_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
+    id: int
+    last_processed_at: Optional[datetime] = None # When our worker last processed/updated it
+    # Config for ORM mode
+    model_config = {
+        "from_attributes": True
+    }
 
 class PostPublic(PostInDB):
-    # Schema for public display of post information
-    # Potentially nested UserPublic here if we want author details embedded
-    author: Optional[UserPublic] = None # Will be loaded by SQLAlchemy relationship
+    author: Optional[UserPublic] = Field(None, description="Details of the post author")
+    # This is for output, should include author details.
+    # Pydantic's from_attributes=True usually handles loading relationship if configured correctly in models.
 
-    model_config = ConfigDict(from_attributes=True)
-
-
-# --- FeedPost Schemas (for the join table) ---
+# --- FeedPost Schemas (Link table between Post and Feed) ---
 class FeedPostBase(BaseModel):
-    post_id: uuid.UUID
-    feed_id: str = Field(..., max_length=255)
+    post_id: int
+    feed_id: str = Field(..., example="tech-news")
+    # You could add a 'rank' or 'score' here specific to this feed if needed
+    # score: Optional[float] = 0.0
 
 class FeedPostCreate(FeedPostBase):
     pass
 
 class FeedPostInDB(FeedPostBase):
-    id: uuid.UUID
-    ingested_at: datetime
+    id: int
+    added_at: datetime # When this post was added to this feed in our DB
+    # Config for ORM mode
+    model_config = {
+        "from_attributes": True
+    }
 
-    model_config = ConfigDict(from_attributes=True)
 
+# --- Tier Schemas ---
+class TierConfig(BaseModel):
+    id: str = Field(..., example="tier-a", description="Unique identifier for the tier")
+    name: str = Field(..., example="Tier A Users", description="Human-readable name for the tier")
+    description: Optional[str] = Field(None, example="Users with high follower count and engagement.")
+    min_followers: Optional[int] = Field(0, example=1000)
+    min_posts_daily: Optional[int] = Field(0, example=10)
+    min_reputation_score: Optional[float] = Field(0.0, example=0.75)
+    # Add other criteria for tiering if needed
+
+class TierInDB(TierConfig):
+    # Could add DB-specific fields if tiers were stored in DB directly
+    model_config = {
+        "from_attributes": True
+    }
+
+# --- Feeds Configuration Schemas ---
+class FeedsConfig(BaseModel):
+    id: str = Field(..., example="tech-news", description="Unique identifier for the feed (corresponds to Contrails feed ID)")
+    name: str = Field(..., example="Tech News Feed", description="Human-readable name for the feed")
+    description: Optional[str] = Field(None, example="Curated feed for technology news.")
+    # New fields based on user clarification:
+    contrails_websocket_url: HttpUrl = Field(..., example="wss://contrails.graze.social/feeds/tech-news-feed", description="The direct WebSocket URL for this feed on Graze Contrails.")
+    tier: str = Field(..., example="silver", description="The tier of this feed (e.g., silver, gold, platinum), impacting access or processing priority.")
+
+class FeedsConfigInDB(FeedsConfig):
+    # If you were to store this config in the DB, it would have an ID
+    model_config = {
+        "from_attributes": True
+    }
 
 # --- Aggregate Schemas ---
 class AggregateBase(BaseModel):
-    feed_id: str = Field(..., max_length=255)
-    agg_name: str = Field(..., max_length=255)
-    timeframe: str = Field(..., max_length=50)
-    data_json: Dict[str, Any] # The actual aggregated data (e.g., {"trending_topics": ["#bluesky", ...]})
+    feed_id: str = Field(..., example="tech-news", description="The ID of the feed this aggregate belongs to")
+    agg_name: str = Field(..., example="topHashtags", description="Name of the aggregate (e.g., topHashtags, mostActiveUsers)")
+    timeframe: str = Field(..., example="24h", description="Timeframe of the aggregate (e.g., 24h, 7d, 30d)")
+    data_json: Dict[str, Any] = Field(..., description="The actual aggregated data in JSON format")
 
 class AggregateCreate(AggregateBase):
     pass
 
 class AggregateInDB(AggregateBase):
-    id: uuid.UUID
-    updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
+    id: int
+    last_updated: datetime = Field(..., description="Timestamp when this aggregate was last updated")
+    model_config = {
+        "from_attributes": True
+    }
 
 # --- Authentication Schemas ---
 class Token(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str
 
 class TokenData(BaseModel):
-    did: Optional[str] = None
+    did: Optional[str] = None # The subject of the token, which is the user's DID
 
 class UserLogin(BaseModel):
-    did: str # For Bluesky, DID is the identifier for login
-    # Potentially an app password or token if a separate auth layer is built
-    # For now, assuming DID is the main identifier for internal mapping.
+    did: str = Field(..., example="did:plc:abcdef1234567890abcdef12", description="Bluesky DID for authentication")
+    # Potentially add password/app_password if you implemented that security layer
+    # password: str
 
-# If you were to implement email/password auth
-class UserAuth(BaseModel):
-    email: EmailStr
-    password: str
-
-# --- Tier and Feed Configuration Schemas ---
-# These are for reading your config files, not for database models.
-
-class TierConfig(BaseModel):
-    id: str
-    name: str
-    description: str
-    min_followers: int
-    min_posts_daily: int
-    min_reputation_score: float # Placeholder for a reputation metric
-
-class FeedsConfig(BaseModel):
-    id: str
-    name: str
-    description: str
-    # You might add criteria for feeds here, e.g., list of included DIDs, keywords, etc.
-    criteria: Optional[Dict[str, Any]] = None
-
-class SystemConfig(BaseModel):
-    tiers: List[TierConfig]
-    feeds: List[FeedsConfig]
-
-# You can also define API response structures, e.g., a list of posts
+# --- API Response Schemas ---
 class PostListResponse(BaseModel):
     posts: List[PostPublic]
     total: int
