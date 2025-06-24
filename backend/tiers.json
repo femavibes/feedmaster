@@ -1,0 +1,42 @@
+[
+  {
+    "id": "tier-s",
+    "name": "S Tier (Super Influencers)",
+    "description": "Profiles with exceptional reach and engagement.",
+    "min_followers": 100000,
+    "min_posts_daily": 5,
+    "min_reputation_score": 0.95
+  },
+  {
+    "id": "tier-a",
+    "name": "A Tier (High Impact Profiles)",
+    "description": "Significant influencers with consistent activity.",
+    "min_followers": 50000,
+    "min_posts_daily": 3,
+    "min_reputation_score": 0.85
+  },
+  {
+    "id": "tier-b",
+    "name": "B Tier (Active & Growing)",
+    "description": "Solid profiles with good engagement and growth potential.",
+    "min_followers": 10000,
+    "min_posts_daily": 2,
+    "min_reputation_score": 0.70
+  },
+  {
+    "id": "tier-c",
+    "name": "C Tier (Emerging & Niche)",
+    "description": "Newer or niche profiles with notable activity within their sphere.",
+    "min_followers": 1000,
+    "min_posts_daily": 1,
+    "min_reputation_score": 0.50
+  },
+  {
+    "id": "tier-d",
+    "name": "D Tier (Standard Users)",
+    "description": "General users, potentially less active or with smaller followings.",
+    "min_followers": 0,
+    "min_posts_daily": 0,
+    "min_reputation_score": 0.0
+  }
+]
