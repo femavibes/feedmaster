@@ -25,19 +25,22 @@ services:
     build:
       context: . # Build from the current directory (where Dockerfile is located)
       dockerfile: Dockerfile # Specify the Dockerfile to use
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload # Run FastAPI with Uvicorn in development mode (with hot-reloads)
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload # Run FastAPI with Uvicorn in development mode
     volumes:
-      - ./backend:/app # Mount the backend code into the container for live reloading
+      - ./backend:/app/backend # Mount the backend code into /app/backend to preserve package structure
       - ./config:/app/config # Mount the config directory
     ports:
       - "8000:8000" # Map host port 8000 to container port 8000
     environment:
       # Load environment variables from the .env file.
       # Docker Compose automatically loads .env in the same directory as docker-compose.yml.
-      # DATABASE_URL should be defined in your .env file:
-      # DATABASE_URL=postgresql://user:password@db:5432/feedmaster_db
-      # SECRET_KEY should also be defined in your .env file.
-      SECRET_KEY: "y!jW%Nf@2P$6tQ^u&Z*v8x+0m_L-aSg)K;c3dJ[E{F]H=O}R|lX/B:I.C,4D5V7U9G{T>1M}Y<X.z0_H`P~q" # Replace with a strong, random key
+      # SECRET_KEY and other sensitive vars should be defined in your .env file.
+      SECRET_KEY: ${SECRET_KEY} # Load from .env
+      ALGORITHM: ${ALGORITHM} # Load from .env
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES} # Load from .env
+      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL} # Load from .env
+      BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL} # Load from .env
+      CONFIG_DIR: /app/config # Explicitly define CONFIG_DIR inside container
     depends_on:
       - db # Ensure the database service starts before the API service
 
@@ -45,17 +48,22 @@ services:
     build:
       context: . # Build from the current directory
       dockerfile: Dockerfile # Use the same Dockerfile as the API
-    command: python aggregator_worker.py # Command to run the aggregator worker script
+    command: python backend/aggregator_worker.py # Command to run the aggregator worker script
     volumes:
-      - ./backend:/app # Mount the backend code
+      - ./backend:/app/backend # Mount the backend code into /app/backend
       - ./config:/app/config # Mount the config directory
     environment:
-      SECRET_KEY: "y!jW%Nf@2P$6tQ^u&Z*v8x+0m_L-aSg)K;c3dJ[E{F]H=O}R|lX/B:I.C,4D5V7U9G{T>1M}Y<X.z0_H`P~q" # Same secret key
-      # DATABASE_URL will be loaded from .env
+      SECRET_KEY: ${SECRET_KEY} # Load from .env
+      ALGORITHM: ${ALGORITHM} # Load from .env
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES} # Load from .env
+      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL} # Load from .env
+      BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL} # Load from .env
+      CONFIG_DIR: /app/config # Explicitly define CONFIG_DIR inside container
+      WORKER_POLLING_INTERVAL_SECONDS: ${WORKER_POLLING_INTERVAL_SECONDS} # Load from .env
+      AGGREGATION_INTERVAL_MINUTES: ${AGGREGATION_INTERVAL_MINUTES} # Load from .env
+      PROMINENT_DID_REFRESH_INTERVAL_MINUTES: ${PROMINENT_DID_REFRESH_INTERVAL_MINUTES} # Load from .env
     depends_on:
       - db # Ensure the database is ready before the worker starts
-    # If you need to make external API calls (e.g., to Bluesky), ensure network access.
-    # No explicit port mapping needed unless you want to expose a health check or metrics.
 
 volumes:
   pgdata: # Define the named volume for PostgreSQL data persistence
