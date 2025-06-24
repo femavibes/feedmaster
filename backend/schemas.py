@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr, Field, HttpUrl
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 
-# --- User Schemas ---
+# --- User Schemas (for content authors) ---
 class UserBase(BaseModel):
     did: str = Field(..., example="did:plc:abcdef1234567890abcdef12", description="Decentralized Identifier (DID) of the user")
     handle: Optional[str] = Field(None, example="johndoe.bsky.social", description="Bluesky handle of the user")
@@ -94,30 +94,13 @@ class FeedPostInDB(FeedPostBase):
     }
 
 
-# --- Tier Schemas ---
-class TierConfig(BaseModel):
-    id: str = Field(..., example="tier-a", description="Unique identifier for the tier")
-    name: str = Field(..., example="Tier A Users", description="Human-readable name for the tier")
-    description: Optional[str] = Field(None, example="Users with high follower count and engagement.")
-    min_followers: Optional[int] = Field(0, example=1000)
-    min_posts_daily: Optional[int] = Field(0, example=10)
-    min_reputation_score: Optional[float] = Field(0.0, example=0.75)
-    # Add other criteria for tiering if needed
-
-class TierInDB(TierConfig):
-    # Could add DB-specific fields if tiers were stored in DB directly
-    model_config = {
-        "from_attributes": True
-    }
-
 # --- Feeds Configuration Schemas ---
 class FeedsConfig(BaseModel):
     id: str = Field(..., example="tech-news", description="Unique identifier for the feed (corresponds to Contrails feed ID)")
     name: str = Field(..., example="Tech News Feed", description="Human-readable name for the feed")
     description: Optional[str] = Field(None, example="Curated feed for technology news.")
-    # New fields based on user clarification:
     contrails_websocket_url: HttpUrl = Field(..., example="wss://contrails.graze.social/feeds/tech-news-feed", description="The direct WebSocket URL for this feed on Graze Contrails.")
-    tier: str = Field(..., example="silver", description="The tier of this feed (e.g., silver, gold, platinum), impacting access or processing priority.")
+    tier: str = Field(..., example="silver", description="The tier of this feed (e.g., silver, gold, platinum), impacting access to aggregates or processing priority.")
 
 class FeedsConfigInDB(FeedsConfig):
     # If you were to store this config in the DB, it would have an ID
@@ -151,7 +134,7 @@ class TokenData(BaseModel):
     did: Optional[str] = None # The subject of the token, which is the user's DID
 
 class UserLogin(BaseModel):
-    did: str = Field(..., example="did:plc:abcdef1234567890abcdef12", description="Bluesky DID for authentication")
+    did: str = Field(..., example="did:plc:abcdef1234567890abcdef12", description="Bluesky DID for authentication (for feedmakers)")
     # Potentially add password/app_password if you implemented that security layer
     # password: str
 
