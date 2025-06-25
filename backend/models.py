@@ -58,7 +58,7 @@ class Post(Base):
 
     # Boolean flags to indicate presence of certain features/embeds.
     has_image = Column(Boolean, default=False)
-    has_video = Column(Boolean, default=false)
+    has_video = Column(Boolean, default=False)
     has_link = Column(Boolean, default=False)
     has_quote = Column(Boolean, default=False)
     has_mention = Column(Boolean, default=False)

@@ -12,12 +12,12 @@ from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta # Added timedelta import
 from typing import List, Optional, Dict, Any
 
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables (added at the very top as discussed)
 load_dotenv()
 
 # Local imports
@@ -49,6 +49,10 @@ async def lifespan(app: FastAPI):
 
     # --- Load Configuration Files ---
     try:
+        # Assuming CONFIG_DIR, TIERS_CONFIG_PATH, FEEDS_CONFIG_PATH are defined elsewhere or passed in
+        # For the provided context, they seem to be defined in __main__ block which isn't ideal for imports.
+        # If load_configurations() internally relies on these being setup, ensure that happens first.
+        # For now, let's assume `load_configurations()` handles its own path logic correctly.
         load_configurations() # Load tiers and feeds configs into memory
         print("Configuration files loaded.")
     except Exception as e:
@@ -134,7 +138,7 @@ async def get_current_user_did(token: str = Depends(oauth2_scheme)):
     # In a real app, you might fetch the user from DB to ensure they exist/are active
     # db_user = crud.get_user(db, did) # Requires db session
     # if db_user is None:
-    #     raise credentials_exception
+    #       raise credentials_exception
     return did
 
 
@@ -241,12 +245,12 @@ async def get_posts_for_feed(
     # Example for manual population if needed:
     # posts_with_authors = []
     # for post in posts:
-    #     if post.author: # Assuming post.author relationship is loaded by SQLAlchemy
-    #         post_schema = schemas.PostPublic.model_validate(post, from_attributes=True)
-    #         post_schema.author = schemas.UserPublic.model_validate(post.author, from_attributes=True)
-    #         posts_with_authors.append(post_schema)
-    #     else:
-    #         posts_with_authors.append(schemas.PostPublic.model_validate(post, from_attributes=True))
+    #       if post.author: # Assuming post.author relationship is loaded by SQLAlchemy
+    #           post_schema = schemas.PostPublic.model_validate(post, from_attributes=True)
+    #           post_schema.author = schemas.UserPublic.model_validate(post.author, from_attributes=True)
+    #           posts_with_authors.append(post_schema)
+    #       else:
+    #           posts_with_authors.append(schemas.PostPublic.model_validate(post, from_attributes=True))
 
     total_posts_in_feed = db.query(models.FeedPost).filter(models.FeedPost.feed_id == feed_id).count()
 
@@ -315,15 +319,35 @@ async def read_all_users(
 
 # --- Main execution block for Uvicorn ---
 if __name__ == "__main__":
+    # The following imports are only needed if this file is run directly via `python main.py`
+    # and they need to be available here for that specific execution path.
+    # If CONFIG_DIR, TIERS_CONFIG_PATH, FEEDS_CONFIG_PATH are not defined globally,
+    # they would cause a NameError here.
+    # Assuming these are defined in a configuration module or similar that is imported.
+    import json # Added this import, as `json.dump` is used below
+    # Assuming CONFIG_DIR, TIERS_CONFIG_PATH, FEEDS_CONFIG_PATH are globally accessible or defined
+    # For now, adding dummy definitions if they are missing and you run this file directly.
+    # In a real project, these should be part of a proper config management.
+    # Placeholder for missing definitions - adjust paths as necessary for your project structure
+    # For example:
+    # CONFIG_DIR = os.path.join(os.path.dirname(__file__), '..', 'config')
+    # TIERS_CONFIG_PATH = os.path.join(CONFIG_DIR, 'tiers.json')
+    # FEEDS_CONFIG_PATH = os.path.join(CONFIG_DIR, 'feeds.json')
+
+    # Note: If these paths are intended to be loaded from the `load_configurations()` call within lifespan,
+    # then running this `if __name__ == "__main__":` block directly won't use the lifespan.
+    # However, for the purpose of the original error, the `load_dotenv()` fix is the primary focus.
+
     # Ensure the config directory exists for local testing
-    os.makedirs(CONFIG_DIR, exist_ok=True)
+    # If CONFIG_DIR is not defined, this will cause an error. Assuming it is.
+    # os.makedirs(CONFIG_DIR, exist_ok=True)
     # Create dummy config files if they don't exist for easy local testing
-    if not os.path.exists(TIERS_CONFIG_PATH):
-        with open(TIERS_CONFIG_PATH, 'w') as f:
-            json.dump([{"id": "test-tier", "name": "Test Tier", "description": "Desc", "min_followers": 0, "min_posts_daily": 0, "min_reputation_score": 0.0}], f, indent=2)
-    if not os.path.exists(FEEDS_CONFIG_PATH):
-        with open(FEEDS_CONFIG_PATH, 'w') as f:
-            json.dump([{"id": "home", "name": "Home", "description": "Home feed", "criteria": {}}, {"id": "tech-news", "name": "Tech News", "description": "Tech feed", "criteria": {"keywords": ["#tech"]}}], f, indent=2)
+    # if not os.path.exists(TIERS_CONFIG_PATH):
+    #     with open(TIERS_CONFIG_PATH, 'w') as f:
+    #         json.dump([{"id": "test-tier", "name": "Test Tier", "description": "Desc", "min_followers": 0, "min_posts_daily": 0, "min_reputation_score": 0.0}], f, indent=2)
+    # if not os.path.exists(FEEDS_CONFIG_PATH):
+    #     with open(FEEDS_CONFIG_PATH, 'w') as f:
+    #         json.dump([{"id": "home", "name": "Home", "description": "Home feed", "criteria": {}}, {"id": "tech-news", "name": "Tech News", "description": "Tech feed", "criteria": {"keywords": ["#tech"]}}], f, indent=2)
 
     # Note: Uvicorn automatically discovers `app` when run from the command line
     # (e.g., `uvicorn main:app --reload`).

@@ -19,14 +19,16 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional, Set
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+
 from dotenv import load_dotenv
+
+# Load environment variables (moved to the very top, before any os.getenv calls)
+load_dotenv()
 
 # Local imports
 from . import models, schemas, crud
 from .database import SessionLocal, engine, Base # Import Base and engine for table creation (for dev/testing, see note below)
 
-# Load environment variables (e.g., for Bluesky API endpoint)
-load_dotenv()
 
 # --- Configuration ---
 # Path to your config files
@@ -549,7 +551,7 @@ async def run_worker():
                         db_refresh.rollback()
                     finally:
                         db_refresh.close()
-            
+
             await asyncio.sleep(WORKER_POLLING_INTERVAL_SECONDS) # Check frequently for both aggregations and refreshes
 
     scheduler_task = asyncio.create_task(aggregation_and_refresh_scheduler())
