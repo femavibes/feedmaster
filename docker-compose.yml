@@ -1,5 +1,17 @@
+# No 'version: X.Y' at the top - it's obsolete and can be removed.
+
 services:
-  # ... db service ...
+  db:
+    image: postgres:15-alpine # Use a lightweight PostgreSQL image
+    restart: always # Always restart the database service if it fails
+    environment:
+      POSTGRES_DB: feedmaster_db # Database name
+      POSTGRES_USER: user # Database user
+      POSTGRES_PASSWORD: password # Database password (MAKE SURE THESE MATCH YOUR .env)
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persist database data to a named volume
+    ports:
+      - "5432:5432" # Map host port 5432 to container port 5432
 
   api:
     image: ghcr.io/femavibes/feedmaster/api:latest
@@ -12,8 +24,7 @@ services:
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
-      # NEW: Add DATABASE_URL here!
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL} # Crucial for database.py
       BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
       CONFIG_DIR: /app/config
     depends_on:
@@ -22,7 +33,7 @@ services:
   aggregator_worker:
     image: ghcr.io/femavibes/feedmaster/api:latest # Assuming this image also contains the worker code
     restart: unless-stopped
-    command: python backend/aggregator_worker.py
+    command: python backend/aggregator_worker.py # This command might need adjustment if relative imports still fail after this.
     volumes:
       - ./config:/app/config
     environment:
@@ -30,8 +41,7 @@ services:
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
-      # NEW: Add DATABASE_URL here!
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL} # Crucial for database.py
       BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
       CONFIG_DIR: /app/config
       WORKER_POLLING_INTERVAL_SECONDS: ${WORKER_POLLING_INTERVAL_SECONDS}
@@ -41,4 +51,4 @@ services:
       - db
 
 volumes:
-  pgdata:
+  pgdata: # Define the named volume for PostgreSQL data persistence
