@@ -8,6 +8,12 @@ services:
       POSTGRES_DB: feedmaster_db # Database name
       POSTGRES_USER: datamaster # Database user
       POSTGRES_PASSWORD: 0437663470b59957dbd7ed2164500bd3dc41dc847b27a0cd7363280ecda78481 # Database password (MAKE SURE THESE MATCH YOUR .env)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s # Give it a bit of time to start before checking
     volumes:
       - pgdata:/var/lib/postgresql/data # Persist database data to a named volume
     ports:
@@ -33,7 +39,7 @@ services:
   aggregator_worker:
     image: ghcr.io/femavibes/feedmaster/api:latest # Assuming this image also contains the worker code
     restart: unless-stopped
-    command: python backend/aggregator_worker.py # This command might need adjustment if relative imports still fail after this.
+    command: python -m backend.aggregator_worker # This command might need adjustment if relative imports still fail after this.
     volumes:
       - ./config:/app/config
     environment:

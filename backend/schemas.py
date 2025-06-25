@@ -4,7 +4,7 @@
 # serializing data. These schemas are used for API request/response bodies
 # and for data validation when interacting with the database.
 
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, EmailStr, Field, HttpUrl, AnyUrl # Added AnyUrl
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 
@@ -95,11 +95,16 @@ class FeedPostInDB(FeedPostBase):
 
 
 # --- Feeds Configuration Schemas ---
+
+# Define a custom Pydantic type for WebSocket URLs
+class WebSocketUrl(AnyUrl):
+    allowed_schemes = {'ws', 'wss'} # Allow both secure (wss) and insecure (ws) WebSocket schemes
+
 class FeedsConfig(BaseModel):
     id: str = Field(..., example="tech-news", description="Unique identifier for the feed (corresponds to Contrails feed ID)")
     name: str = Field(..., example="Tech News Feed", description="Human-readable name for the feed")
     description: Optional[str] = Field(None, example="Curated feed for technology news.")
-    contrails_websocket_url: HttpUrl = Field(..., example="wss://contrails.graze.social/feeds/tech-news-feed", description="The direct WebSocket URL for this feed on Graze Contrails.")
+    contrails_websocket_url: WebSocketUrl = Field(..., example="wss://contrails.graze.social/feeds/tech-news-feed", description="The direct WebSocket URL for this feed on Graze Contrails.")
     tier: str = Field(..., example="silver", description="The tier of this feed (e.g., silver, gold, platinum), impacting access to aggregates or processing priority.")
 
 class FeedsConfigInDB(FeedsConfig):
