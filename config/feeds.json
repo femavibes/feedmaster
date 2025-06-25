@@ -1,6 +1,6 @@
 [
   {
-    "id": "3654", // Your actual Urbanism+ feed ID (replace this if it ever changes!)
+    "id": "3654",
     "name": "Urbanism+",
     "description": "Urbanism and city planning feed (from your actual Contrails ID).",
     "contrails_websocket_url": "wss://contrails.graze.social/feeds/3654",
@@ -8,34 +8,34 @@
     "tier": "gold"
   },
   {
-    "id": "REPLACE_WITH_GRAZE_ID_001", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID (e.g., "1234")
+    "id": "REPLACE_WITH_GRAZE_ID_001",
     "name": "Example Graze Home Feed (Placeholder)",
     "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_001", // <<< MUST MATCH THE ID ABOVE
-    "bluesky_at_uri": "at://did:plc:invalid0123456789abcdefgh/app.bsky.feed.generator/invalid-record-key-001", // <<< REPLACE WITH REAL BLUESKY AT URI
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_001",
+    "bluesky_at_uri": "at://did:plc:invalid0123456789abcdefgh/app.bsky.feed.generator/invalid-record-key-001",
     "tier": "silver"
   },
   {
-    "id": "REPLACE_WITH_GRAZE_ID_002", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID
+    "id": "REPLACE_WITH_GRAZE_ID_002",
     "name": "Example Tech News (Placeholder)",
     "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_002", // <<< MUST MATCH THE ID ABOVE
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_002",
     "bluesky_at_uri": "at://did:plc:invalid0123456789ijklmnopq/app.bsky.feed.generator/invalid-record-key-002",
     "tier": "gold"
   },
   {
-    "id": "REPLACE_WITH_GRAZE_ID_003", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID
+    "id": "REPLACE_WITH_GRAZE_ID_003",
     "name": "Example Community Feed 1 (Placeholder)",
     "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_003", // <<< MUST MATCH THE ID ABOVE
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_003",
     "bluesky_at_uri": "at://did:plc:invalid0123456789rstuvwxyzab/app.bsky.feed.generator/invalid-record-key-003",
     "tier": "silver"
   },
   {
-    "id": "REPLACE_WITH_GRAZE_ID_004", // <<< YOU MUST REPLACE THIS WITH A REAL GRAZE NUMERICAL ID
+    "id": "REPLACE_WITH_GRAZE_ID_004",
     "name": "Example Premium Investing (Placeholder)",
     "description": "A placeholder entry. Replace ID, URL, and AT URI with actual values.",
-    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_004", // <<< MUST MATCH THE ID ABOVE
+    "contrails_websocket_url": "wss://contrails.graze.social/feeds/REPLACE_WITH_GRAZE_ID_004",
     "bluesky_at_uri": "at://did:plc:invalid0123456789cdefghijklm/app.bsky.feed.generator/invalid-record-key-004",
     "tier": "platinum"
   }
