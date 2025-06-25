@@ -6,62 +6,83 @@
 #   2. Your FastAPI API service.
 #   3. A separate aggregator worker service.
 
-version: '3.8' # Specify the Docker Compose file format version
+version: '3.8' # Specify the Docker Compose file format version (can be removed, but harmless)
 
 services:
   db:
     image: postgres:15-alpine # Use a lightweight PostgreSQL image
     restart: always # Always restart the database service if it fails
     environment:
-      POSTGRES_DB: feedmaster_db # Database name
-      POSTGRES_USER: user # Database user
-      POSTGRES_PASSWORD: password # Database password (CHANGE IN PRODUCTION!)
+      POSTGRES_DB: feedmaster_db # Database name (should be loaded from .env)
+      POSTGRES_USER: user # Database user (should be loaded from .env)
+      POSTGRES_PASSWORD: password # Database password (CHANGE IN PRODUCTION! - should be loaded from .env)
     volumes:
       - pgdata:/var/lib/postgresql/data # Persist database data to a named volume
     ports:
       - "5432:5432" # Map host port 5432 to container port 5432
 
   api:
-    build:
-      context: . # Build from the current directory (where Dockerfile is located)
-      dockerfile: Dockerfile # Specify the Dockerfile to use
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload # Run FastAPI with Uvicorn in development mode
+    # --- Docker Compose will now PULL the image from GitHub Container Registry (GHCR) ---
+    # The 'build' section is commented out/removed because we are using pre-built images.
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ghcr.io/femavibes/feedmaster/api:latest # <<< NEW: Specifies the image to pull from your GHCR
+    restart: unless-stopped # Restart the API service unless explicitly stopped
+
+    # Command to run the FastAPI application using Uvicorn.
+    # 'backend.main:app' ensures Uvicorn finds your application correctly
+    # within the /app/backend directory of the container.
+    # '--reload' is removed for production as code changes are handled by new image deployments.
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+
+    # Volumes - if your code is baked into the image, './backend:/app/backend' is often removed.
+    # './config:/app/config' is kept if config files (like feeds.json) are managed externally.
     volumes:
-      - ./backend:/app/backend # Mount the backend code into /app/backend to preserve package structure
-      - ./config:/app/config # Mount the config directory
+      # - ./backend:/app/backend # Commented out for production deployment via GHCR
+      - ./config:/app/config # Keep this if you want feeds.json to be external/updatable on the VPS
+
     ports:
       - "8000:8000" # Map host port 8000 to container port 8000
     environment:
-      # Load environment variables from the .env file.
-      # Docker Compose automatically loads .env in the same directory as docker-compose.yml.
-      # SECRET_KEY and other sensitive vars should be defined in your .env file.
-      SECRET_KEY: ${SECRET_KEY} # Load from .env
-      ALGORITHM: ${ALGORITHM} # Load from .env
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES} # Load from .env
-      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL} # Load from .env
-      BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL} # Load from .env
+      # These environment variables will be loaded from your .env file on the host (VPS).
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
+      BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
       CONFIG_DIR: /app/config # Explicitly define CONFIG_DIR inside container
     depends_on:
       - db # Ensure the database service starts before the API service
 
   aggregator_worker:
-    build:
-      context: . # Build from the current directory
-      dockerfile: Dockerfile # Use the same Dockerfile as the API
+    # --- Docker Compose will now PULL the image from GitHub Container Registry (GHCR) ---
+    # The 'build' section is commented out/removed because we are using pre-built images.
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ghcr.io/femavibes/feedmaster/api:latest # <<< NEW: Specifies the image to pull from your GHCR
+    restart: unless-stopped # Restart the worker service unless explicitly stopped
+
     command: python backend/aggregator_worker.py # Command to run the aggregator worker script
+
+    # Volumes - if your code is baked into the image, './backend:/app/backend' is often removed.
+    # './config:/app/config' is kept if config files (like feeds.json) are managed externally.
     volumes:
-      - ./backend:/app/backend # Mount the backend code into /app/backend
-      - ./config:/app/config # Mount the config directory
+      # - ./backend:/app/backend # Commented out for production deployment via GHCR
+      - ./config:/app/config # Keep this if you want feeds.json to be external/updatable on the VPS
+
     environment:
-      SECRET_KEY: ${SECRET_KEY} # Load from .env
-      ALGORITHM: ${ALGORITHM} # Load from .env
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES} # Load from .env
-      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL} # Load from .env
-      BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL} # Load from .env
+      # These environment variables will be loaded from your .env file on the host (VPS).
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
+      BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
       CONFIG_DIR: /app/config # Explicitly define CONFIG_DIR inside container
-      WORKER_POLLING_INTERVAL_SECONDS: ${WORKER_POLLING_INTERVAL_SECONDS} # Load from .env
-      AGGREGATION_INTERVAL_MINUTES: ${AGGREGATION_INTERVAL_MINUTES} # Load from .env
-      PROMINENT_DID_REFRESH_INTERVAL_MINUTES: ${PROMINENT_DID_REFRESH_INTERVAL_MINUTES} # Load from .env
+      WORKER_POLLING_INTERVAL_SECONDS: ${WORKER_POLLING_INTERVAL_SECONDS}
+      AGGREGATION_INTERVAL_MINUTES: ${AGGREGATION_INTERVAL_MINUTES}
+      PROMINENT_DID_REFRESH_INTERVAL_MINUTES: ${PROMINENT_DID_REFRESH_INTERVAL_MINUTES}
     depends_on:
       - db # Ensure the database is ready before the worker starts
 
