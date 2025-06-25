@@ -1,90 +1,44 @@
-# backend/docker-compose.yml
-#
-# This file defines the services for your Feedmaster backend application
-# using Docker Compose. It orchestrates:
-#   1. A PostgreSQL database service.
-#   2. Your FastAPI API service.
-#   3. A separate aggregator worker service.
-
-version: '3.8' # Specify the Docker Compose file format version (can be removed, but harmless)
-
 services:
-  db:
-    image: postgres:15-alpine # Use a lightweight PostgreSQL image
-    restart: always # Always restart the database service if it fails
-    environment:
-      POSTGRES_DB: feedmaster_db # Database name (should be loaded from .env)
-      POSTGRES_USER: user # Database user (should be loaded from .env)
-      POSTGRES_PASSWORD: password # Database password (CHANGE IN PRODUCTION! - should be loaded from .env)
-    volumes:
-      - pgdata:/var/lib/postgresql/data # Persist database data to a named volume
-    ports:
-      - "5432:5432" # Map host port 5432 to container port 5432
+  # ... db service ...
 
   api:
-    # --- Docker Compose will now PULL the image from GitHub Container Registry (GHCR) ---
-    # The 'build' section is commented out/removed because we are using pre-built images.
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: ghcr.io/femavibes/feedmaster/api:latest # <<< NEW: Specifies the image to pull from your GHCR
-    restart: unless-stopped # Restart the API service unless explicitly stopped
-
-    # Command to run the FastAPI application using Uvicorn.
-    # 'backend.main:app' ensures Uvicorn finds your application correctly
-    # within the /app/backend directory of the container.
-    # '--reload' is removed for production as code changes are handled by new image deployments.
+    image: ghcr.io/femavibes/feedmaster/api:latest
+    restart: unless-stopped
     command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
-
-    # Volumes - if your code is baked into the image, './backend:/app/backend' is often removed.
-    # './config:/app/config' is kept if config files (like feeds.json) are managed externally.
     volumes:
-      # - ./backend:/app/backend # Commented out for production deployment via GHCR
-      - ./config:/app/config # Keep this if you want feeds.json to be external/updatable on the VPS
-
-    ports:
-      - "8000:8000" # Map host port 8000 to container port 8000
+      - ./config:/app/config
     environment:
-      # These environment variables will be loaded from your .env file on the host (VPS).
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
+      # NEW: Add DATABASE_URL here!
+      DATABASE_URL: ${DATABASE_URL}
       BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
-      CONFIG_DIR: /app/config # Explicitly define CONFIG_DIR inside container
+      CONFIG_DIR: /app/config
     depends_on:
-      - db # Ensure the database service starts before the API service
+      - db
 
   aggregator_worker:
-    # --- Docker Compose will now PULL the image from GitHub Container Registry (GHCR) ---
-    # The 'build' section is commented out/removed because we are using pre-built images.
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: ghcr.io/femavibes/feedmaster/api:latest # <<< NEW: Specifies the image to pull from your GHCR
-    restart: unless-stopped # Restart the worker service unless explicitly stopped
-
-    command: python backend/aggregator_worker.py # Command to run the aggregator worker script
-
-    # Volumes - if your code is baked into the image, './backend:/app/backend' is often removed.
-    # './config:/app/config' is kept if config files (like feeds.json) are managed externally.
+    image: ghcr.io/femavibes/feedmaster/api:latest # Assuming this image also contains the worker code
+    restart: unless-stopped
+    command: python backend/aggregator_worker.py
     volumes:
-      # - ./backend:/app/backend # Commented out for production deployment via GHCR
-      - ./config:/app/config # Keep this if you want feeds.json to be external/updatable on the VPS
-
+      - ./config:/app/config
     environment:
-      # These environment variables will be loaded from your .env file on the host (VPS).
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
+      # NEW: Add DATABASE_URL here!
+      DATABASE_URL: ${DATABASE_URL}
       BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
-      CONFIG_DIR: /app/config # Explicitly define CONFIG_DIR inside container
+      CONFIG_DIR: /app/config
       WORKER_POLLING_INTERVAL_SECONDS: ${WORKER_POLLING_INTERVAL_SECONDS}
       AGGREGATION_INTERVAL_MINUTES: ${AGGREGATION_INTERVAL_MINUTES}
       PROMINENT_DID_REFRESH_INTERVAL_MINUTES: ${PROMINENT_DID_REFRESH_INTERVAL_MINUTES}
     depends_on:
-      - db # Ensure the database is ready before the worker starts
+      - db
 
 volumes:
-  pgdata: # Define the named volume for PostgreSQL data persistence
+  pgdata:
