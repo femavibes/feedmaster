@@ -6,8 +6,8 @@ services:
     restart: always # Always restart the database service if it fails
     environment:
       POSTGRES_DB: feedmaster_db # Database name
-      POSTGRES_USER: user # Database user
-      POSTGRES_PASSWORD: password # Database password (MAKE SURE THESE MATCH YOUR .env)
+      POSTGRES_USER: datamaster # Database user
+      POSTGRES_PASSWORD: 0437663470b59957dbd7ed2164500bd3dc41dc847b27a0cd7363280ecda78481 # Database password (MAKE SURE THESE MATCH YOUR .env)
     volumes:
       - pgdata:/var/lib/postgresql/data # Persist database data to a named volume
     ports:
