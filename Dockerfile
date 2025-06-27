@@ -44,4 +44,4 @@ EXPOSE 8000
 # The --host 0.0.0.0 makes the server accessible from outside the container
 # Use the exec form (list of strings) for better signal handling (e.g., graceful shutdown)
 # Ensure 'backend.main:app' is the correct module and app object.
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
