@@ -1,5 +1,3 @@
-# docker-compose.yml (corrected section for api and aggregator_worker)
-
 services:
   db:
     image: postgres:15-alpine
@@ -10,7 +8,7 @@ services:
       POSTGRES_PASSWORD: 0437663470b59957dbd7ed2164500bd3dc41dc847b27a0cd7363280ecda78481
     healthcheck:
       # IMPORTANT: Use $$ to escape the $ for shell variable expansion
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] # <-- FIX HERE
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,10 +19,9 @@ services:
       - "5432:5432"
 
   api:
-    # Change 'image:' to 'build:' to build locally
-    build: . # <-- FIX HERE: This tells Docker Compose to build the image from the Dockerfile in the current directory
+    build: .
     restart: unless-stopped
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    command: python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 # <--- THIS IS THE CORRECTED LINE
     volumes:
       - ./config:/app/config
     environment:
@@ -35,13 +32,12 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       BLUESKY_API_BASE_URL: ${BLUESKY_API_BASE_URL}
       CONFIG_DIR: /app/config
-    depends_on: # <-- FIX HERE: Add condition: service_healthy
+    depends_on:
       db:
         condition: service_healthy
 
   aggregator_worker:
-    # Change 'image:' to 'build:' to build locally
-    build: . # <-- FIX HERE
+    build: .
     restart: unless-stopped
     command: python -m backend.aggregator_worker
     volumes:
@@ -57,7 +53,7 @@ services:
       WORKER_POLLING_INTERVAL_SECONDS: ${WORKER_POLLING_INTERVAL_SECONDS}
       AGGREGATION_INTERVAL_MINUTES: ${AGGREGATION_INTERVAL_MINUTES}
       PROMINENT_DID_REFRESH_INTERVAL_MINUTES: ${PROMINENT_DID_REFRESH_INTERVAL_MINUTES}
-    depends_on: # <-- FIX HERE: Add condition: service_healthy
+    depends_on:
       db:
         condition: service_healthy
 
