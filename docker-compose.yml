@@ -23,7 +23,8 @@ services:
     restart: unless-stopped
     command: python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 # <--- THIS IS THE CORRECTED LINE
     volumes:
-      - ./config:/app/config
+      - .:/app # <--- ADDED THIS CRITICAL LINE! This maps host project root to /app in container
+      - ./config:/app/config # This is still good for specific config mounts
     environment:
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
@@ -41,6 +42,7 @@ services:
     restart: unless-stopped
     command: python -m backend.aggregator_worker
     volumes:
+      - .:/app # <--- ADDED THIS CRITICAL LINE HERE TOO!
       - ./config:/app/config
     environment:
       SECRET_KEY: ${SECRET_KEY}

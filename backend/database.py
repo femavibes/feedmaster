@@ -9,6 +9,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
+# --- IMPORTANT: Import your models here to ensure they are registered with Base.metadata ---
+# This line assumes your SQLAlchemy models are defined in 'backend/models.py'.
+# If your models are in a different file (e.g., backend/schema.py or split across multiple files),
+# adjust this import accordingly to ensure all your model classes are loaded.
+# If you had multiple model files, you might do:
+# from backend import user_models
+# from backend import post_models
+# etc.
+# --- END IMPORTANT ---
+
 # Load environment variables from .env file
 load_dotenv()
 
