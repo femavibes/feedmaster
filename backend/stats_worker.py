@@ -316,7 +316,14 @@ async def update_all_user_stats(db: AsyncSession, since: datetime | None) -> tup
         for row in stats_mappings
     ]
 
+    # Prevent future timestamps from breaking incremental updates
+    current_time = datetime.now(timezone.utc)
     new_latest_timestamp = max(row['latest_post_at'] for row in stats_to_upsert)
+    
+    # If the latest timestamp is in the future, cap it at current time
+    if new_latest_timestamp > current_time:
+        logger.warning(f"Found future timestamp {new_latest_timestamp}, capping at current time {current_time}")
+        new_latest_timestamp = current_time
 
     logger.info(f"Found {len(stats_to_upsert)} user/feed stat records to process in batches.")
 
