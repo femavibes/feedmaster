@@ -51,7 +51,43 @@ async def get_achievement_share_page(
         achievement = target_achievement.achievement
         feed_context = f" in {target_achievement.feed.name}" if target_achievement.feed else ""
         
-        rarity_tier = achievement.rarity_tier or "Bronze"
+        # Get rarity from per-feed table or fallback to global
+        if target_achievement.feed_id:
+            # Per-feed achievement - check feed-specific rarity
+            # Import here to avoid circular imports
+            from backend.models import AchievementFeedRarity
+            feed_rarity_stmt = select(AchievementFeedRarity).where(
+                AchievementFeedRarity.achievement_id == achievement.id,
+                AchievementFeedRarity.feed_id == target_achievement.feed_id
+            )
+            feed_rarity_result = await db.execute(feed_rarity_stmt)
+            feed_rarity = feed_rarity_result.scalar_one_or_none()
+            
+            if feed_rarity:
+                rarity_tier = feed_rarity.rarity_tier
+                rarity_percentage = feed_rarity.rarity_percentage
+            else:
+                # Fallback: calculate on-demand for this feed
+                from ..achievements.definitions import get_rarity_tier_from_percentage
+                total_posters_stmt = select(func.count(models.UserStats.user_did.distinct())).where(
+                    models.UserStats.feed_id == target_achievement.feed_id
+                )
+                total_posters = (await db.execute(total_posters_stmt)).scalar_one()
+                
+                earners_stmt = select(func.count(models.UserAchievement.user_did.distinct())).where(
+                    models.UserAchievement.achievement_id == achievement.id,
+                    models.UserAchievement.feed_id == target_achievement.feed_id
+                )
+                earners = (await db.execute(earners_stmt)).scalar_one()
+                
+                rarity_percentage = (earners / total_posters) * 100 if total_posters > 0 else 100.0
+                rarity_tier_obj = get_rarity_tier_from_percentage(rarity_percentage)
+                rarity_tier = rarity_tier_obj["name"]
+        else:
+            # Global achievement
+            rarity_tier = achievement.rarity_tier or "Bronze"
+            rarity_percentage = achievement.rarity_percentage or 100.0
+        
         rarity_icon = {
             'Mythic': '✨',
             'Legendary': '👑', 
@@ -63,7 +99,7 @@ async def get_achievement_share_page(
         }.get(rarity_tier, '🏅')
         
         title = f"{rarity_icon} {user.display_name or user.handle} earned {achievement.name}!"
-        description = f"{achievement.description} • {rarity_tier} rarity ({achievement.rarity_percentage:.2f}% of users){feed_context}"
+        description = f"{achievement.description} • {rarity_tier} rarity ({rarity_percentage:.2f}% of users){feed_context}"
         
         # Generate achievement card image
         card_path = await card_generator.generate_card(
