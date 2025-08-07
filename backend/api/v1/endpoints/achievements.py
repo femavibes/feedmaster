@@ -76,7 +76,9 @@ async def get_achievement_share_page(
         # Use generated card as og:image with aggressive cache busting
         import time
         cache_bust = int(time.time())  # Changes every second
-        card_url = f"{request.base_url}achievement/{user_did}/{achievement_identifier}/card.png?t={cache_bust}&massive=true"
+        # Use HTTPS for public URLs
+        base_url = str(request.base_url).replace('http://', 'https://')
+        card_url = f"{base_url}achievement/{user_did}/{achievement_identifier}/card.png?t={cache_bust}&massive=true"
         
         html_content = f"""
 <!DOCTYPE html>
@@ -319,8 +321,8 @@ async def get_recent_achievements(
             u.display_name as user_display_name,
             a.name as achievement_name,
             a.description as achievement_description,
-            a.rarity_tier,
-            a.rarity_percentage,
+            COALESCE(afr.rarity_tier, a.rarity_tier) as rarity_tier,
+            COALESCE(afr.rarity_percentage, a.rarity_percentage) as rarity_percentage,
             ua.feed_id,
             f.name as feed_name,
             ua.earned_at
@@ -328,6 +330,7 @@ async def get_recent_achievements(
         JOIN achievements a ON ua.achievement_id = a.id
         JOIN users u ON ua.user_did = u.did
         LEFT JOIN feeds f ON ua.feed_id = f.id
+        LEFT JOIN achievement_feed_rarity afr ON (a.id = afr.achievement_id AND ua.feed_id = afr.feed_id)
         WHERE ua.feed_id = ANY(:feed_ids)
         {since_clause}
         ORDER BY ua.earned_at DESC
