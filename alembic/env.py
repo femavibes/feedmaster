@@ -1,13 +1,11 @@
-import os
-import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
-# This is the Alembic Config object, which provides
+
+# this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
@@ -16,46 +14,16 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# --- START: Critical Alembic Configuration Changes ---
+# add your model's MetaData object here
+# for 'autogenerate' support
+from backend.models import Base
+from backend.database import DATABASE_URL
 
-# Add your project's root to the Python path
-# This is crucial so Alembic can import your 'backend' module
-# This assumes env.py is in 'your_project_root/alembic/env.py'
-# and your application code (e.g., database.py, models.py) is in 'your_project_root/backend/'
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, project_root)
+target_metadata = Base.metadata # type: ignore
 
-# Import your SQLAlchemy Base (or SQLModel.metadata) here
-# for 'autogenerate' support.
-# Adjust the import path 'backend.database' if your Base/metadata is located elsewhere.
-try:
-    from backend.database import Base # This imports the Base object from your database setup
-
-    # IMPORTANT: Import your models here to ensure they are registered with Base.metadata
-    # This line assumes your SQLAlchemy models are defined in 'backend/models.py'.
-    # If your models are in a different file (e.g., backend/schema.py or split across multiple files),
-    # adjust this import accordingly to ensure all your model classes are loaded.
-    from backend import models # <--- THIS IS THE CRITICAL ADDITION/UNCOMMENT!
-
-    # Set target_metadata to your imported Base.metadata
-    target_metadata = Base.metadata
-
-    # Example for SQLModel (if you were using SQLModel directly instead of SQLAlchemy Base):
-    # from backend.models import SQLModel
-    # target_metadata = SQLModel.metadata # If using SQLModel directly
-
-except ImportError as e:
-    print(f"Error importing SQLAlchemy Base/metadata or models: {e}")
-    print(f"Current sys.path: {sys.path}")
-    print("Please ensure your 'backend' module is correctly structured and 'Base' (or 'SQLModel') is importable from 'alembic/env.py'.")
-    sys.exit(1)
-
-# --- END: Critical Alembic Configuration Changes ---
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Get the async URL and convert it to a sync one for Alembic
+sync_db_url = DATABASE_URL.replace("+asyncpg", "")
+config.set_main_option("sqlalchemy.url", sync_db_url)
 
 
 def run_migrations_offline() -> None:
@@ -63,18 +31,14 @@ def run_migrations_offline() -> None:
 
     This configures the context with just a URL
     and not an Engine, though an Engine is acceptable
-    here as well. By skipping the Engine creation
+    here as well.  By skipping the Engine creation
     we don't even need a DBAPI to be available.
 
     Calls to context.execute() here emit the given string to the
     script output.
 
     """
-    # Get the database URL from the DATABASE_URL environment variable
-    url = os.environ.get("DATABASE_URL")
-    if not url:
-        raise Exception("DATABASE_URL environment variable is not set. Alembic cannot connect to the database.")
-
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -93,22 +57,14 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Get the database URL from the DATABASE_URL environment variable
-    url = os.environ.get("DATABASE_URL")
-    if not url:
-        raise Exception("DATABASE_URL environment variable is not set. Alembic cannot connect to the database.")
-
-    # Create a connectable using the database URL
     connectable = engine_from_config(
-        {"sqlalchemy.url": url}, # Pass the URL directly
+        config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

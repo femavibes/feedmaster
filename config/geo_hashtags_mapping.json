@@ -1,0 +1,5207 @@
+{
+    "nyc": {
+        "city": "New York City",
+        "region": "New York",
+        "country": "USA"
+    },
+    "newyorkcity": {
+        "city": "New York City",
+        "region": "New York",
+        "country": "USA"
+    },
+    "bigapple": {
+        "city": "New York City",
+        "region": "New York",
+        "country": "USA"
+    },
+    "la": {
+        "city": "Los Angeles",
+        "region": "California",
+        "country": "USA"
+    },
+    "losangeles": {
+        "city": "Los Angeles",
+        "region": "California",
+        "country": "USA"
+    },
+    "hollywood": {
+        "city": "Los Angeles",
+        "region": "California",
+        "country": "USA"
+    },
+    "london": {
+        "city": "London",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "londonuk": {
+        "city": "London",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "londonontario": {
+        "city": "London, Ontario",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "paris": {
+        "city": "Paris",
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "parismonamour": {
+        "city": "Paris",
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "tokyo": {
+        "city": "Tokyo",
+        "region": "Tokyo Prefecture",
+        "country": "Japan"
+    },
+    "tokyojapan": {
+        "city": "Tokyo",
+        "region": "Tokyo Prefecture",
+        "country": "Japan"
+    },
+    "berlin": {
+        "city": "Berlin",
+        "region": "Berlin",
+        "country": "Germany"
+    },
+    "berlingermany": {
+        "city": "Berlin",
+        "region": "Berlin",
+        "country": "Germany"
+    },
+    "sydney": {
+        "city": "Sydney",
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "sydneyaustralia": {
+        "city": "Sydney",
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "toronto": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "torontocanada": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "dubai": {
+        "city": "Dubai",
+        "region": "Dubai Emirate",
+        "country": "United Arab Emirates"
+    },
+    "dubaiuae": {
+        "city": "Dubai",
+        "region": "Dubai",
+        "country": "UAE"
+    },
+    "mumbai": {
+        "city": "Mumbai",
+        "region": "Maharashtra",
+        "country": "India"
+    },
+    "mumbaiindia": {
+        "city": "Mumbai",
+        "region": "Maharashtra",
+        "country": "India"
+    },
+    "saopaulo": {
+        "city": "São Paulo",
+        "region": "São Paulo",
+        "country": "Brazil"
+    },
+    "lagos": {
+        "city": "Lagos",
+        "region": "Lagos State",
+        "country": "Nigeria"
+    },
+    "lagosnigeria": {
+        "city": "Lagos",
+        "region": "Lagos State",
+        "country": "Nigeria"
+    },
+    "mexicocity": {
+        "city": "Mexico City",
+        "region": "Mexico City",
+        "country": "Mexico"
+    },
+    "ciudaddemexico": {
+        "city": "Mexico City",
+        "region": "Mexico City",
+        "country": "Mexico"
+    },
+    "newyork": {
+        "city": null,
+        "region": "New York",
+        "country": "USA"
+    },
+    "california": {
+        "city": null,
+        "region": "California",
+        "country": "USA"
+    },
+    "socal": {
+        "city": "Los Angeles",
+        "region": "California",
+        "country": "USA"
+    },
+    "norcal": {
+        "city": "San Francisco",
+        "region": "California",
+        "country": "USA"
+    },
+    "texas": {
+        "city": null,
+        "region": "Texas",
+        "country": "USA"
+    },
+    "florida": {
+        "city": null,
+        "region": "Florida",
+        "country": "USA"
+    },
+    "ontario": {
+        "city": null,
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "quebec": {
+        "city": null,
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "england": {
+        "city": null,
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "scotland": {
+        "city": null,
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "bavaria": {
+        "city": null,
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "hokkaido": {
+        "city": "Sapporo",
+        "region": "Hokkaido Prefecture",
+        "country": "Japan"
+    },
+    "usa": {
+        "city": null,
+        "region": null,
+        "country": "USA"
+    },
+    "america": {
+        "city": null,
+        "region": null,
+        "country": "USA"
+    },
+    "us": {
+        "city": null,
+        "region": null,
+        "country": "USA"
+    },
+    "canada": {
+        "city": null,
+        "region": null,
+        "country": "Canada"
+    },
+    "uk": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "unitedkingdom": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "france": {
+        "city": null,
+        "region": null,
+        "country": "France"
+    },
+    "germany": {
+        "city": null,
+        "region": null,
+        "country": "Germany"
+    },
+    "japan": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "australia": {
+        "city": null,
+        "region": null,
+        "country": "Australia"
+    },
+    "india": {
+        "city": null,
+        "region": null,
+        "country": "India"
+    },
+    "brazil": {
+        "city": null,
+        "region": null,
+        "country": "Brazil"
+    },
+    "nigeria": {
+        "city": null,
+        "region": null,
+        "country": "Nigeria"
+    },
+    "mexico": {
+        "city": null,
+        "region": null,
+        "country": "Mexico"
+    },
+    "uae": {
+        "city": null,
+        "region": null,
+        "country": "UAE"
+    },
+    "unitedarabemirates": {
+        "city": null,
+        "region": null,
+        "country": "UAE"
+    },
+    "unitedstates": {
+        "city": null,
+        "region": null,
+        "country": "USA"
+    },
+    "alabama": {
+        "city": null,
+        "region": "Alabama",
+        "country": "USA"
+    },
+    "alaska": {
+        "city": null,
+        "region": "Alaska",
+        "country": "USA"
+    },
+    "arizona": {
+        "city": null,
+        "region": "Arizona",
+        "country": "USA"
+    },
+    "arkansas": {
+        "city": null,
+        "region": "Arkansas",
+        "country": "USA"
+    },
+    "colorado": {
+        "city": null,
+        "region": "Colorado",
+        "country": "USA"
+    },
+    "connecticut": {
+        "city": null,
+        "region": "Connecticut",
+        "country": "USA"
+    },
+    "delaware": {
+        "city": null,
+        "region": "Delaware",
+        "country": "USA"
+    },
+    "georgia": {
+        "city": null,
+        "region": "Georgia",
+        "country": "USA"
+    },
+    "hawaii": {
+        "city": null,
+        "region": "Hawaii",
+        "country": "USA"
+    },
+    "idaho": {
+        "city": null,
+        "region": "Idaho",
+        "country": "USA"
+    },
+    "illinois": {
+        "city": null,
+        "region": "Illinois",
+        "country": "USA"
+    },
+    "indiana": {
+        "city": null,
+        "region": "Indiana",
+        "country": "USA"
+    },
+    "iowa": {
+        "city": null,
+        "region": "Iowa",
+        "country": "USA"
+    },
+    "kansas": {
+        "city": null,
+        "region": "Kansas",
+        "country": "USA"
+    },
+    "kentucky": {
+        "city": null,
+        "region": "Kentucky",
+        "country": "USA"
+    },
+    "louisiana": {
+        "city": null,
+        "region": "Louisiana",
+        "country": "USA"
+    },
+    "maine": {
+        "city": null,
+        "region": "Maine",
+        "country": "USA"
+    },
+    "maryland": {
+        "city": null,
+        "region": "Maryland",
+        "country": "USA"
+    },
+    "massachusetts": {
+        "city": null,
+        "region": "Massachusetts",
+        "country": "USA"
+    },
+    "michigan": {
+        "city": null,
+        "region": "Michigan",
+        "country": "USA"
+    },
+    "minnesota": {
+        "city": null,
+        "region": "Minnesota",
+        "country": "USA"
+    },
+    "mississippi": {
+        "city": null,
+        "region": "Mississippi",
+        "country": "USA"
+    },
+    "missouri": {
+        "city": null,
+        "region": "Missouri",
+        "country": "USA"
+    },
+    "montana": {
+        "city": null,
+        "region": "Montana",
+        "country": "USA"
+    },
+    "nebraska": {
+        "city": null,
+        "region": "Nebraska",
+        "country": "USA"
+    },
+    "nevada": {
+        "city": null,
+        "region": "Nevada",
+        "country": "USA"
+    },
+    "newhampshire": {
+        "city": null,
+        "region": "New Hampshire",
+        "country": "USA"
+    },
+    "newjersey": {
+        "city": null,
+        "region": "New Jersey",
+        "country": "USA"
+    },
+    "newmexico": {
+        "city": null,
+        "region": "New Mexico",
+        "country": "USA"
+    },
+    "northcarolina": {
+        "city": null,
+        "region": "North Carolina",
+        "country": "USA"
+    },
+    "northdakota": {
+        "city": null,
+        "region": "North Dakota",
+        "country": "USA"
+    },
+    "ohio": {
+        "city": null,
+        "region": "Ohio",
+        "country": "USA"
+    },
+    "oklahoma": {
+        "city": null,
+        "region": "Oklahoma",
+        "country": "USA"
+    },
+    "oregon": {
+        "city": null,
+        "region": "Oregon",
+        "country": "USA"
+    },
+    "pennsylvania": {
+        "city": null,
+        "region": "Pennsylvania",
+        "country": "USA"
+    },
+    "rhodeisland": {
+        "city": null,
+        "region": "Rhode Island",
+        "country": "USA"
+    },
+    "southcarolina": {
+        "city": null,
+        "region": "South Carolina",
+        "country": "USA"
+    },
+    "southdakota": {
+        "city": null,
+        "region": "South Dakota",
+        "country": "USA"
+    },
+    "tennessee": {
+        "city": null,
+        "region": "Tennessee",
+        "country": "USA"
+    },
+    "utah": {
+        "city": null,
+        "region": "Utah",
+        "country": "USA"
+    },
+    "vermont": {
+        "city": null,
+        "region": "Vermont",
+        "country": "USA"
+    },
+    "virginia": {
+        "city": null,
+        "region": "Virginia",
+        "country": "USA"
+    },
+    "washington": {
+        "city": null,
+        "region": "Washington",
+        "country": "USA"
+    },
+    "westvirginia": {
+        "city": null,
+        "region": "West Virginia",
+        "country": "USA"
+    },
+    "wisconsin": {
+        "city": null,
+        "region": "Wisconsin",
+        "country": "USA"
+    },
+    "wyoming": {
+        "city": null,
+        "region": "Wyoming",
+        "country": "USA"
+    },
+    "brooklyn": {
+        "city": "New York City",
+        "region": "New York",
+        "country": "USA"
+    },
+    "manhattan": {
+        "city": "New York City",
+        "region": "New York",
+        "country": "USA"
+    },
+    "sf": {
+        "city": "San Francisco",
+        "region": "California",
+        "country": "USA"
+    },
+    "sanfrancisco": {
+        "city": "San Francisco",
+        "region": "California",
+        "country": "USA"
+    },
+    "bayarea": {
+        "city": "San Francisco",
+        "region": "California",
+        "country": "USA"
+    },
+    "chicago": {
+        "city": "Chicago",
+        "region": "Illinois",
+        "country": "USA"
+    },
+    "windycity": {
+        "city": "Chicago",
+        "region": "Illinois",
+        "country": "USA"
+    },
+    "houston": {
+        "city": "Houston",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "htown": {
+        "city": "Houston",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "phoenix": {
+        "city": "Phoenix",
+        "region": "Arizona",
+        "country": "USA"
+    },
+    "phx": {
+        "city": "Phoenix",
+        "region": "Arizona",
+        "country": "USA"
+    },
+    "philadelphia": {
+        "city": "Philadelphia",
+        "region": "Pennsylvania",
+        "country": "USA"
+    },
+    "philly": {
+        "city": "Philadelphia",
+        "region": "Pennsylvania",
+        "country": "USA"
+    },
+    "sanantonio": {
+        "city": "San Antonio",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "sandiego": {
+        "city": "San Diego",
+        "region": "California",
+        "country": "USA"
+    },
+    "sd": {
+        "city": "San Diego",
+        "region": "California",
+        "country": "USA"
+    },
+    "dallas": {
+        "city": "Dallas",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "dtx": {
+        "city": "Dallas",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "sanjose": {
+        "city": "San Jose",
+        "region": "California",
+        "country": "USA"
+    },
+    "austin": {
+        "city": "Austin",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "atx": {
+        "city": "Austin",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "jacksonville": {
+        "city": "Jacksonville",
+        "region": "Florida",
+        "country": "USA"
+    },
+    "jville": {
+        "city": "Jacksonville",
+        "region": "Florida",
+        "country": "USA"
+    },
+    "fortworth": {
+        "city": "Fort Worth",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "columbusoh": {
+        "city": "Columbus",
+        "region": "Ohio",
+        "country": "USA"
+    },
+    "columbus": {
+        "city": "Columbus",
+        "region": "Ohio",
+        "country": "USA"
+    },
+    "charlotte": {
+        "city": "Charlotte",
+        "region": "North Carolina",
+        "country": "USA"
+    },
+    "clt": {
+        "city": "Charlotte",
+        "region": "North Carolina",
+        "country": "USA"
+    },
+    "indianapolis": {
+        "city": "Indianapolis",
+        "region": "Indiana",
+        "country": "USA"
+    },
+    "indy": {
+        "city": "Indianapolis",
+        "region": "Indiana",
+        "country": "USA"
+    },
+    "seattle": {
+        "city": "Seattle",
+        "region": "Washington",
+        "country": "USA"
+    },
+    "sea": {
+        "city": "Seattle",
+        "region": "Washington",
+        "country": "USA"
+    },
+    "denver": {
+        "city": "Denver",
+        "region": "Colorado",
+        "country": "USA"
+    },
+    "milehighcity": {
+        "city": "Denver",
+        "region": "Colorado",
+        "country": "USA"
+    },
+    "washingtondc": {
+        "city": "Washington, D.C.",
+        "region": "District of Columbia",
+        "country": "USA"
+    },
+    "dc": {
+        "city": "Washington, D.C.",
+        "region": "District of Columbia",
+        "country": "USA"
+    },
+    "boston": {
+        "city": "Boston",
+        "region": "Massachusetts",
+        "country": "USA"
+    },
+    "beantown": {
+        "city": "Boston",
+        "region": "Massachusetts",
+        "country": "USA"
+    },
+    "nashville": {
+        "city": "Nashville",
+        "region": "Tennessee",
+        "country": "USA"
+    },
+    "musiccity": {
+        "city": "Nashville",
+        "region": "Tennessee",
+        "country": "USA"
+    },
+    "elpaso": {
+        "city": "El Paso",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "detroit": {
+        "city": "Detroit",
+        "region": "Michigan",
+        "country": "USA"
+    },
+    "motown": {
+        "city": "Detroit",
+        "region": "Michigan",
+        "country": "USA"
+    },
+    "memphis": {
+        "city": "Memphis",
+        "region": "Tennessee",
+        "country": "USA"
+    },
+    "portlandor": {
+        "city": "Portland",
+        "region": "Oregon",
+        "country": "USA"
+    },
+    "pdx": {
+        "city": "Portland",
+        "region": "Oregon",
+        "country": "USA"
+    },
+    "okc": {
+        "city": "Oklahoma City",
+        "region": "Oklahoma",
+        "country": "USA"
+    },
+    "oklahomacity": {
+        "city": "Oklahoma City",
+        "region": "Oklahoma",
+        "country": "USA"
+    },
+    "lasvegas": {
+        "city": "Las Vegas",
+        "region": "Nevada",
+        "country": "USA"
+    },
+    "vegas": {
+        "city": "Las Vegas",
+        "region": "Nevada",
+        "country": "USA"
+    },
+    "louisville": {
+        "city": "Louisville",
+        "region": "Kentucky",
+        "country": "USA"
+    },
+    "baltimore": {
+        "city": "Baltimore",
+        "region": "Maryland",
+        "country": "USA"
+    },
+    "milwaukee": {
+        "city": "Milwaukee",
+        "region": "Wisconsin",
+        "country": "USA"
+    },
+    "albuquerque": {
+        "city": "Albuquerque",
+        "region": "New Mexico",
+        "country": "USA"
+    },
+    "abq": {
+        "city": "Albuquerque",
+        "region": "New Mexico",
+        "country": "USA"
+    },
+    "tucson": {
+        "city": "Tucson",
+        "region": "Arizona",
+        "country": "USA"
+    },
+    "fresno": {
+        "city": "Fresno",
+        "region": "California",
+        "country": "USA"
+    },
+    "sacramento": {
+        "city": "Sacramento",
+        "region": "California",
+        "country": "USA"
+    },
+    "mesa": {
+        "city": "Mesa",
+        "region": "Arizona",
+        "country": "USA"
+    },
+    "kansascitymo": {
+        "city": "Kansas City",
+        "region": "Missouri",
+        "country": "USA"
+    },
+    "kansascity": {
+        "city": "Kansas City",
+        "region": "Missouri",
+        "country": "USA"
+    },
+    "atlanta": {
+        "city": "Atlanta",
+        "region": "Georgia",
+        "country": "USA"
+    },
+    "atl": {
+        "city": "Atlanta",
+        "region": "Georgia",
+        "country": "USA"
+    },
+    "omaha": {
+        "city": "Omaha",
+        "region": "Nebraska",
+        "country": "USA"
+    },
+    "miami": {
+        "city": "Miami",
+        "region": "Florida",
+        "country": "USA"
+    },
+    "mia": {
+        "city": "Miami",
+        "region": "Florida",
+        "country": "USA"
+    },
+    "raleigh": {
+        "city": "Raleigh",
+        "region": "North Carolina",
+        "country": "USA"
+    },
+    "virginiabeach": {
+        "city": "Virginia Beach",
+        "region": "Virginia",
+        "country": "USA"
+    },
+    "minneapolis": {
+        "city": "Minneapolis",
+        "region": "Minnesota",
+        "country": "USA"
+    },
+    "mpls": {
+        "city": "Minneapolis",
+        "region": "Minnesota",
+        "country": "USA"
+    },
+    "oakland": {
+        "city": "Oakland",
+        "region": "California",
+        "country": "USA"
+    },
+    "tulsa": {
+        "city": "Tulsa",
+        "region": "Oklahoma",
+        "country": "USA"
+    },
+    "wichita": {
+        "city": "Wichita",
+        "region": "Kansas",
+        "country": "USA"
+    },
+    "neworleans": {
+        "city": "New Orleans",
+        "region": "Louisiana",
+        "country": "USA"
+    },
+    "nola": {
+        "city": "New Orleans",
+        "region": "Louisiana",
+        "country": "USA"
+    },
+    "cleveland": {
+        "city": "Cleveland",
+        "region": "Ohio",
+        "country": "USA"
+    },
+    "bakersfield": {
+        "city": "Bakersfield",
+        "region": "California",
+        "country": "USA"
+    },
+    "arlingtontx": {
+        "city": "Arlington",
+        "region": "Texas",
+        "country": "USA"
+    },
+    "honolulu": {
+        "city": "Honolulu",
+        "region": "Hawaii",
+        "country": "USA"
+    },
+    "anchorage": {
+        "city": "Anchorage",
+        "region": "Alaska",
+        "country": "USA"
+    },
+    "littlerock": {
+        "city": "Little Rock",
+        "region": "Arkansas",
+        "country": "USA"
+    },
+    "boise": {
+        "city": "Boise",
+        "region": "Idaho",
+        "country": "USA"
+    },
+    "desmoines": {
+        "city": "Des Moines",
+        "region": "Iowa",
+        "country": "USA"
+    },
+    "portlandme": {
+        "city": "Portland",
+        "region": "Maine",
+        "country": "USA"
+    },
+    "jacksonms": {
+        "city": "Jackson",
+        "region": "Mississippi",
+        "country": "USA"
+    },
+    "billings": {
+        "city": "Billings",
+        "region": "Montana",
+        "country": "USA"
+    },
+    "manchester": {
+        "city": "Manchester",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "newark": {
+        "city": "Newark",
+        "region": "New Jersey",
+        "country": "USA"
+    },
+    "fargo": {
+        "city": "Fargo",
+        "region": "North Dakota",
+        "country": "USA"
+    },
+    "providence": {
+        "city": "Providence",
+        "region": "Rhode Island",
+        "country": "USA"
+    },
+    "columbiasc": {
+        "city": "Columbia",
+        "region": "South Carolina",
+        "country": "USA"
+    },
+    "siouxfalls": {
+        "city": "Sioux Falls",
+        "region": "South Dakota",
+        "country": "USA"
+    },
+    "burlingtonvt": {
+        "city": "Burlington",
+        "region": "Vermont",
+        "country": "USA"
+    },
+    "charlestonwv": {
+        "city": "Charleston",
+        "region": "West Virginia",
+        "country": "USA"
+    },
+    "cheyenne": {
+        "city": "Cheyenne",
+        "region": "Wyoming",
+        "country": "USA"
+    },
+    "portland": {
+        "city": "Portland",
+        "region": "Oregon",
+        "country": "USA"
+    },
+    "thea": {
+        "city": "Atlanta",
+        "region": "Georgia",
+        "country": "USA"
+    },
+    "peachstate": {
+        "city": null,
+        "region": "Georgia",
+        "country": "USA"
+    },
+    "districtofcolumbia": {
+        "city": "Washington, D.C.",
+        "region": "District of Columbia",
+        "country": "USA"
+    },
+    "nippon": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "nihon": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "japantravel": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "tokyoprefecture": {
+        "city": null,
+        "region": "Tokyo Prefecture",
+        "country": "Japan"
+    },
+    "osaka": {
+        "city": "Osaka",
+        "region": "Osaka Prefecture",
+        "country": "Japan"
+    },
+    "osakajapan": {
+        "city": "Osaka",
+        "region": "Osaka Prefecture",
+        "country": "Japan"
+    },
+    "osakaprefecture": {
+        "city": null,
+        "region": "Osaka Prefecture",
+        "country": "Japan"
+    },
+    "kyoto": {
+        "city": "Kyoto",
+        "region": "Kyoto Prefecture",
+        "country": "Japan"
+    },
+    "kyotojapan": {
+        "city": "Kyoto",
+        "region": "Kyoto Prefecture",
+        "country": "Japan"
+    },
+    "kyotoprefecture": {
+        "city": null,
+        "region": "Kyoto Prefecture",
+        "country": "Japan"
+    },
+    "hokkaidoprefecture": {
+        "city": null,
+        "region": "Hokkaido Prefecture",
+        "country": "Japan"
+    },
+    "sapporo": {
+        "city": "Sapporo",
+        "region": "Hokkaido Prefecture",
+        "country": "Japan"
+    },
+    "aomoriprefecture": {
+        "city": null,
+        "region": "Aomori Prefecture",
+        "country": "Japan"
+    },
+    "aomori": {
+        "city": "Aomori",
+        "region": "Aomori Prefecture",
+        "country": "Japan"
+    },
+    "iwateprefecture": {
+        "city": null,
+        "region": "Iwate Prefecture",
+        "country": "Japan"
+    },
+    "morioka": {
+        "city": "Morioka",
+        "region": "Iwate Prefecture",
+        "country": "Japan"
+    },
+    "miyagiprefecture": {
+        "city": null,
+        "region": "Miyagi Prefecture",
+        "country": "Japan"
+    },
+    "sendai": {
+        "city": "Sendai",
+        "region": "Miyagi Prefecture",
+        "country": "Japan"
+    },
+    "akitaprefecture": {
+        "city": null,
+        "region": "Akita Prefecture",
+        "country": "Japan"
+    },
+    "akita": {
+        "city": "Akita",
+        "region": "Akita Prefecture",
+        "country": "Japan"
+    },
+    "yamagataprefecture": {
+        "city": null,
+        "region": "Yamagata Prefecture",
+        "country": "Japan"
+    },
+    "yamagata": {
+        "city": "Yamagata",
+        "region": "Yamagata Prefecture",
+        "country": "Japan"
+    },
+    "fukushimaprefecture": {
+        "city": null,
+        "region": "Fukushima Prefecture",
+        "country": "Japan"
+    },
+    "fukushima": {
+        "city": "Fukushima",
+        "region": "Fukushima Prefecture",
+        "country": "Japan"
+    },
+    "ibaraki": {
+        "city": "Mito",
+        "region": "Ibaraki Prefecture",
+        "country": "Japan"
+    },
+    "ibarakiprefecture": {
+        "city": null,
+        "region": "Ibaraki Prefecture",
+        "country": "Japan"
+    },
+    "mito": {
+        "city": "Mito",
+        "region": "Ibaraki Prefecture",
+        "country": "Japan"
+    },
+    "tochigi": {
+        "city": "Utsunomiya",
+        "region": "Tochigi Prefecture",
+        "country": "Japan"
+    },
+    "tochigiprefecture": {
+        "city": null,
+        "region": "Tochigi Prefecture",
+        "country": "Japan"
+    },
+    "utsunomiya": {
+        "city": "Utsunomiya",
+        "region": "Tochigi Prefecture",
+        "country": "Japan"
+    },
+    "gunma": {
+        "city": "Maebashi",
+        "region": "Gunma Prefecture",
+        "country": "Japan"
+    },
+    "gunmaprefecture": {
+        "city": null,
+        "region": "Gunma Prefecture",
+        "country": "Japan"
+    },
+    "maebashi": {
+        "city": "Maebashi",
+        "region": "Gunma Prefecture",
+        "country": "Japan"
+    },
+    "saitama": {
+        "city": "Saitama",
+        "region": "Saitama Prefecture",
+        "country": "Japan"
+    },
+    "saitamaprefecture": {
+        "city": null,
+        "region": "Saitama Prefecture",
+        "country": "Japan"
+    },
+    "chiba": {
+        "city": "Chiba",
+        "region": "Chiba Prefecture",
+        "country": "Japan"
+    },
+    "chibaprefecture": {
+        "city": null,
+        "region": "Chiba Prefecture",
+        "country": "Japan"
+    },
+    "kanagawa": {
+        "city": "Yokohama",
+        "region": "Kanagawa Prefecture",
+        "country": "Japan"
+    },
+    "kanagawaprefecture": {
+        "city": null,
+        "region": "Kanagawa Prefecture",
+        "country": "Japan"
+    },
+    "yokohama": {
+        "city": "Yokohama",
+        "region": "Kanagawa Prefecture",
+        "country": "Japan"
+    },
+    "kawasaki": {
+        "city": "Kawasaki",
+        "region": "Kanagawa Prefecture",
+        "country": "Japan"
+    },
+    "niigataprefecture": {
+        "city": null,
+        "region": "Niigata Prefecture",
+        "country": "Japan"
+    },
+    "niigata": {
+        "city": "Niigata",
+        "region": "Niigata Prefecture",
+        "country": "Japan"
+    },
+    "toyama": {
+        "city": "Toyama",
+        "region": "Toyama Prefecture",
+        "country": "Japan"
+    },
+    "toyamaprefecture": {
+        "city": null,
+        "region": "Toyama Prefecture",
+        "country": "Japan"
+    },
+    "ishikawa": {
+        "city": "Kanazawa",
+        "region": "Ishikawa Prefecture",
+        "country": "Japan"
+    },
+    "ishikawaprefecture": {
+        "city": null,
+        "region": "Ishikawa Prefecture",
+        "country": "Japan"
+    },
+    "kanazawa": {
+        "city": "Kanazawa",
+        "region": "Ishikawa Prefecture",
+        "country": "Japan"
+    },
+    "fukui": {
+        "city": "Fukui",
+        "region": "Fukui Prefecture",
+        "country": "Japan"
+    },
+    "fukuiprefecture": {
+        "city": null,
+        "region": "Fukui Prefecture",
+        "country": "Japan"
+    },
+    "yamanashiprefecture": {
+        "city": null,
+        "region": "Yamanashi Prefecture",
+        "country": "Japan"
+    },
+    "kofu": {
+        "city": "Kofu",
+        "region": "Yamanashi Prefecture",
+        "country": "Japan"
+    },
+    "naganoprefecture": {
+        "city": null,
+        "region": "Nagano Prefecture",
+        "country": "Japan"
+    },
+    "nagano": {
+        "city": "Nagano",
+        "region": "Nagano Prefecture",
+        "country": "Japan"
+    },
+    "gifuprefecture": {
+        "city": null,
+        "region": "Gifu Prefecture",
+        "country": "Japan"
+    },
+    "gifu": {
+        "city": "Gifu",
+        "region": "Gifu Prefecture",
+        "country": "Japan"
+    },
+    "shizuokaprefecture": {
+        "city": null,
+        "region": "Shizuoka Prefecture",
+        "country": "Japan"
+    },
+    "shizuoka": {
+        "city": "Shizuoka",
+        "region": "Shizuoka Prefecture",
+        "country": "Japan"
+    },
+    "hamamatsu": {
+        "city": "Hamamatsu",
+        "region": "Shizuoka Prefecture",
+        "country": "Japan"
+    },
+    "aichiprefecture": {
+        "city": null,
+        "region": "Aichi Prefecture",
+        "country": "Japan"
+    },
+    "nagoya": {
+        "city": "Nagoya",
+        "region": "Aichi Prefecture",
+        "country": "Japan"
+    },
+    "mieprefecture": {
+        "city": null,
+        "region": "Mie Prefecture",
+        "country": "Japan"
+    },
+    "tsu": {
+        "city": "Tsu",
+        "region": "Mie Prefecture",
+        "country": "Japan"
+    },
+    "shigaprefecture": {
+        "city": null,
+        "region": "Shiga Prefecture",
+        "country": "Japan"
+    },
+    "otsu": {
+        "city": "Otsu",
+        "region": "Shiga Prefecture",
+        "country": "Japan"
+    },
+    "hyogoprefecture": {
+        "city": null,
+        "region": "Hyogo Prefecture",
+        "country": "Japan"
+    },
+    "kobe": {
+        "city": "Kobe",
+        "region": "Hyogo Prefecture",
+        "country": "Japan"
+    },
+    "naraprefecture": {
+        "city": null,
+        "region": "Nara Prefecture",
+        "country": "Japan"
+    },
+    "nara": {
+        "city": "Nara",
+        "region": "Nara Prefecture",
+        "country": "Japan"
+    },
+    "wakayamaprefecture": {
+        "city": null,
+        "region": "Wakayama Prefecture",
+        "country": "Japan"
+    },
+    "wakayama": {
+        "city": "Wakayama",
+        "region": "Wakayama Prefecture",
+        "country": "Japan"
+    },
+    "tottoriprefecture": {
+        "city": null,
+        "region": "Tottori Prefecture",
+        "country": "Japan"
+    },
+    "tottori": {
+        "city": "Tottori",
+        "region": "Tottori Prefecture",
+        "country": "Japan"
+    },
+    "shimaneprefecture": {
+        "city": null,
+        "region": "Shimane Prefecture",
+        "country": "Japan"
+    },
+    "matsue": {
+        "city": "Matsue",
+        "region": "Shimane Prefecture",
+        "country": "Japan"
+    },
+    "okayama": {
+        "city": "Okayama",
+        "region": "Okayama Prefecture",
+        "country": "Japan"
+    },
+    "okayamaprefecture": {
+        "city": null,
+        "region": "Okayama Prefecture",
+        "country": "Japan"
+    },
+    "hiroshima": {
+        "city": "Hiroshima",
+        "region": "Hiroshima Prefecture",
+        "country": "Japan"
+    },
+    "hiroshimaprefecture": {
+        "city": null,
+        "region": "Hiroshima Prefecture",
+        "country": "Japan"
+    },
+    "yamaguchiprefecture": {
+        "city": null,
+        "region": "Yamaguchi Prefecture",
+        "country": "Japan"
+    },
+    "yamaguchi": {
+        "city": "Yamaguchi",
+        "region": "Yamaguchi Prefecture",
+        "country": "Japan"
+    },
+    "tokushimaprefecture": {
+        "city": null,
+        "region": "Tokushima Prefecture",
+        "country": "Japan"
+    },
+    "tokushima": {
+        "city": "Tokushima",
+        "region": "Tokushima Prefecture",
+        "country": "Japan"
+    },
+    "kagawaprefecture": {
+        "city": null,
+        "region": "Kagawa Prefecture",
+        "country": "Japan"
+    },
+    "takamatsu": {
+        "city": "Takamatsu",
+        "region": "Kagawa Prefecture",
+        "country": "Japan"
+    },
+    "ehimeprefecture": {
+        "city": null,
+        "region": "Ehime Prefecture",
+        "country": "Japan"
+    },
+    "matsuyama": {
+        "city": "Matsuyama",
+        "region": "Ehime Prefecture",
+        "country": "Japan"
+    },
+    "kochuprefecture": {
+        "city": null,
+        "region": "Kochi Prefecture",
+        "country": "Japan"
+    },
+    "kochi": {
+        "city": "Kochi",
+        "region": "Kochi Prefecture",
+        "country": "Japan"
+    },
+    "fukuokaprefecture": {
+        "city": null,
+        "region": "Fukuoka Prefecture",
+        "country": "Japan"
+    },
+    "fukuoka": {
+        "city": "Fukuoka",
+        "region": "Fukuoka Prefecture",
+        "country": "Japan"
+    },
+    "kitakyushu": {
+        "city": "Kitakyushu",
+        "region": "Fukuoka Prefecture",
+        "country": "Japan"
+    },
+    "sagaprefecture": {
+        "city": null,
+        "region": "Saga Prefecture",
+        "country": "Japan"
+    },
+    "saga": {
+        "city": "Saga",
+        "region": "Saga Prefecture",
+        "country": "Japan"
+    },
+    "nagasaki": {
+        "city": "Nagasaki",
+        "region": "Nagasaki Prefecture",
+        "country": "Japan"
+    },
+    "nagasakiprefecture": {
+        "city": null,
+        "region": "Nagasaki Prefecture",
+        "country": "Japan"
+    },
+    "kumamotoprefecture": {
+        "city": null,
+        "region": "Kumamoto Prefecture",
+        "country": "Japan"
+    },
+    "kumamoto": {
+        "city": "Kumamoto",
+        "region": "Kumamoto Prefecture",
+        "country": "Japan"
+    },
+    "oitaprefecture": {
+        "city": null,
+        "region": "Oita Prefecture",
+        "country": "Japan"
+    },
+    "oita": {
+        "city": "Oita",
+        "region": "Oita Prefecture",
+        "country": "Japan"
+    },
+    "miyazakiprefecture": {
+        "city": null,
+        "region": "Miyazaki Prefecture",
+        "country": "Japan"
+    },
+    "miyazaki": {
+        "city": "Miyazaki",
+        "region": "Miyazaki Prefecture",
+        "country": "Japan"
+    },
+    "kagoshima": {
+        "city": "Kagoshima",
+        "region": "Kagoshima Prefecture",
+        "country": "Japan"
+    },
+    "kagoshimaprefecture": {
+        "city": null,
+        "region": "Kagoshima Prefecture",
+        "country": "Japan"
+    },
+    "okinawa": {
+        "city": "Naha",
+        "region": "Okinawa Prefecture",
+        "country": "Japan"
+    },
+    "okinawaprefecture": {
+        "city": null,
+        "region": "Okinawa Prefecture",
+        "country": "Japan"
+    },
+    "naha": {
+        "city": "Naha",
+        "region": "Okinawa Prefecture",
+        "country": "Japan"
+    },
+    "kanto": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "kansai": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "chubu": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "chugoku": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "shikoku": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "kyushu": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "tohoku": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "hokkaidoregion": {
+        "city": null,
+        "region": null,
+        "country": "Japan"
+    },
+    "netherlands": {
+        "city": null,
+        "region": null,
+        "country": "Netherlands"
+    },
+    "holland": {
+        "city": null,
+        "region": null,
+        "country": "Netherlands"
+    },
+    "dutch": {
+        "city": null,
+        "region": null,
+        "country": "Netherlands"
+    },
+    "thenetherlands": {
+        "city": null,
+        "region": null,
+        "country": "Netherlands"
+    },
+    "amsterdam": {
+        "city": "Amsterdam",
+        "region": "North Holland",
+        "country": "Netherlands"
+    },
+    "amsterdamcity": {
+        "city": "Amsterdam",
+        "region": "North Holland",
+        "country": "Netherlands"
+    },
+    "rotterdam": {
+        "city": "Rotterdam",
+        "region": "South Holland",
+        "country": "Netherlands"
+    },
+    "thehague": {
+        "city": "The Hague",
+        "region": "South Holland",
+        "country": "Netherlands"
+    },
+    "denhaag": {
+        "city": "The Hague",
+        "region": "South Holland",
+        "country": "Netherlands"
+    },
+    "utrechtcity": {
+        "city": "Utrecht",
+        "region": "Utrecht",
+        "country": "Netherlands"
+    },
+    "utrecht": {
+        "city": "Utrecht",
+        "region": "Utrecht",
+        "country": "Netherlands"
+    },
+    "eindhoven": {
+        "city": "Eindhoven",
+        "region": "North Brabant",
+        "country": "Netherlands"
+    },
+    "groningen": {
+        "city": "Groningen",
+        "region": "Groningen",
+        "country": "Netherlands"
+    },
+    "tilburg": {
+        "city": "Tilburg",
+        "region": "North Brabant",
+        "country": "Netherlands"
+    },
+    "breda": {
+        "city": "Breda",
+        "region": "North Brabant",
+        "country": "Netherlands"
+    },
+    "nijmegen": {
+        "city": "Nijmegen",
+        "region": "Gelderland",
+        "country": "Netherlands"
+    },
+    "apeldoorn": {
+        "city": "Apeldoorn",
+        "region": "Gelderland",
+        "country": "Netherlands"
+    },
+    "arnhem": {
+        "city": "Arnhem",
+        "region": "Gelderland",
+        "country": "Netherlands"
+    },
+    "leiden": {
+        "city": "Leiden",
+        "region": "South Holland",
+        "country": "Netherlands"
+    },
+    "haarlem": {
+        "city": "Haarlem",
+        "region": "North Holland",
+        "country": "Netherlands"
+    },
+    "enschede": {
+        "city": "Enschede",
+        "region": "Overijssel",
+        "country": "Netherlands"
+    },
+    "almere": {
+        "city": "Almere",
+        "region": "Flevoland",
+        "country": "Netherlands"
+    },
+    "apeldoorne": {
+        "city": "Apeldoorn",
+        "region": "Gelderland",
+        "country": "Netherlands"
+    },
+    "zwolle": {
+        "city": "Zwolle",
+        "region": "Overijssel",
+        "country": "Netherlands"
+    },
+    "maastricht": {
+        "city": "Maastricht",
+        "region": "Limburg",
+        "country": "Netherlands"
+    },
+    "lelystad": {
+        "city": "Lelystad",
+        "region": "Flevoland",
+        "country": "Netherlands"
+    },
+    "middelburg": {
+        "city": "Middelburg",
+        "region": "Zeeland",
+        "country": "Netherlands"
+    },
+    "leeuwarden": {
+        "city": "Leeuwarden",
+        "region": "Friesland",
+        "country": "Netherlands"
+    },
+    "assen": {
+        "city": "Assen",
+        "region": "Drenthe",
+        "country": "Netherlands"
+    },
+    "northholland": {
+        "city": null,
+        "region": "North Holland",
+        "country": "Netherlands"
+    },
+    "southholland": {
+        "city": null,
+        "region": "South Holland",
+        "country": "Netherlands"
+    },
+    "utrechtprovince": {
+        "city": null,
+        "region": "Utrecht",
+        "country": "Netherlands"
+    },
+    "gelderland": {
+        "city": null,
+        "region": "Gelderland",
+        "country": "Netherlands"
+    },
+    "northbrabant": {
+        "city": null,
+        "region": "North Brabant",
+        "country": "Netherlands"
+    },
+    "limburgprovince": {
+        "city": null,
+        "region": "Limburg",
+        "country": "Netherlands"
+    },
+    "overijssel": {
+        "city": null,
+        "region": "Overijssel",
+        "country": "Netherlands"
+    },
+    "groningenprovince": {
+        "city": null,
+        "region": "Groningen",
+        "country": "Netherlands"
+    },
+    "drenthe": {
+        "city": null,
+        "region": "Drenthe",
+        "country": "Netherlands"
+    },
+    "friesland": {
+        "city": null,
+        "region": "Friesland",
+        "country": "Netherlands"
+    },
+    "flevoland": {
+        "city": null,
+        "region": "Flevoland",
+        "country": "Netherlands"
+    },
+    "zeeland": {
+        "city": null,
+        "region": "Zeeland",
+        "country": "Netherlands"
+    },
+    "deutschland": {
+        "city": null,
+        "region": null,
+        "country": "Germany"
+    },
+    "germanytravel": {
+        "city": null,
+        "region": null,
+        "country": "Germany"
+    },
+    "hamburg": {
+        "city": "Hamburg",
+        "region": "Hamburg",
+        "country": "Germany"
+    },
+    "munich": {
+        "city": "Munich",
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "muenchen": {
+        "city": "Munich",
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "cologne": {
+        "city": "Cologne",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "koeln": {
+        "city": "Cologne",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "frankfurt": {
+        "city": "Frankfurt",
+        "region": "Hesse",
+        "country": "Germany"
+    },
+    "frankfurtmain": {
+        "city": "Frankfurt am Main",
+        "region": "Hesse",
+        "country": "Germany"
+    },
+    "stuttgart": {
+        "city": "Stuttgart",
+        "region": "Baden-Württemberg",
+        "country": "Germany"
+    },
+    "dusseldorf": {
+        "city": "Düsseldorf",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "duesseldorf": {
+        "city": "Düsseldorf",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "leipzig": {
+        "city": "Leipzig",
+        "region": "Saxony",
+        "country": "Germany"
+    },
+    "dortmund": {
+        "city": "Dortmund",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "essen": {
+        "city": "Essen",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "bremen": {
+        "city": "Bremen",
+        "region": "Bremen",
+        "country": "Germany"
+    },
+    "dresden": {
+        "city": "Dresden",
+        "region": "Saxony",
+        "country": "Germany"
+    },
+    "hanover": {
+        "city": "Hanover",
+        "region": "Lower Saxony",
+        "country": "Germany"
+    },
+    "hannover": {
+        "city": "Hannover",
+        "region": "Lower Saxony",
+        "country": "Germany"
+    },
+    "nuremberg": {
+        "city": "Nuremberg",
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "nuernberg": {
+        "city": "Nuremberg",
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "duisburg": {
+        "city": "Duisburg",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "bochum": {
+        "city": "Bochum",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "wuppertal": {
+        "city": "Wuppertal",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "bielefeld": {
+        "city": "Bielefeld",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "bonn": {
+        "city": "Bonn",
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "badenwurttemberg": {
+        "city": null,
+        "region": "Baden-Württemberg",
+        "country": "Germany"
+    },
+    "brandenburg": {
+        "city": null,
+        "region": "Brandenburg",
+        "country": "Germany"
+    },
+    "potsdam": {
+        "city": "Potsdam",
+        "region": "Brandenburg",
+        "country": "Germany"
+    },
+    "bremenstate": {
+        "city": null,
+        "region": "Bremen",
+        "country": "Germany"
+    },
+    "hamburgstate": {
+        "city": null,
+        "region": "Hamburg",
+        "country": "Germany"
+    },
+    "hesse": {
+        "city": null,
+        "region": "Hesse",
+        "country": "Germany"
+    },
+    "marburg": {
+        "city": "Marburg",
+        "region": "Hesse",
+        "country": "Germany"
+    },
+    "mecklenburgvorpommern": {
+        "city": null,
+        "region": "Mecklenburg-Vorpommern",
+        "country": "Germany"
+    },
+    "rostock": {
+        "city": "Rostock",
+        "region": "Mecklenburg-Vorpommern",
+        "country": "Germany"
+    },
+    "lowersaxony": {
+        "city": null,
+        "region": "Lower Saxony",
+        "country": "Germany"
+    },
+    "northrhinewestphalia": {
+        "city": null,
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "rhinelandpalatinate": {
+        "city": null,
+        "region": "Rhineland-Palatinate",
+        "country": "Germany"
+    },
+    "mainz": {
+        "city": "Mainz",
+        "region": "Rhineland-Palatinate",
+        "country": "Germany"
+    },
+    "saarland": {
+        "city": null,
+        "region": "Saarland",
+        "country": "Germany"
+    },
+    "saarbrucken": {
+        "city": "Saarbrücken",
+        "region": "Saarland",
+        "country": "Germany"
+    },
+    "saxony": {
+        "city": null,
+        "region": "Saxony",
+        "country": "Germany"
+    },
+    "sachsenanhalt": {
+        "city": null,
+        "region": "Saxony-Anhalt",
+        "country": "Germany"
+    },
+    "magdeburg": {
+        "city": "Magdeburg",
+        "region": "Saxony-Anhalt",
+        "country": "Germany"
+    },
+    "schleswigholstein": {
+        "city": null,
+        "region": "Schleswig-Holstein",
+        "country": "Germany"
+    },
+    "kiel": {
+        "city": "Kiel",
+        "region": "Schleswig-Holstein",
+        "country": "Germany"
+    },
+    "thuringia": {
+        "city": null,
+        "region": "Thuringia",
+        "country": "Germany"
+    },
+    "erfurt": {
+        "city": "Erfurt",
+        "region": "Thuringia",
+        "country": "Germany"
+    },
+    "britain": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "greatbritain": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "londontown": {
+        "city": "London",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "birmingham": {
+        "city": "Birmingham",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "birminghamuk": {
+        "city": "Birmingham",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "manchesteruk": {
+        "city": "Manchester",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "liverpool": {
+        "city": "Liverpool",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "glasgow": {
+        "city": "Glasgow",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "glasgowscotland": {
+        "city": "Glasgow",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "edinburgh": {
+        "city": "Edinburgh",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "edinburghscotland": {
+        "city": "Edinburgh",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "cardiff": {
+        "city": "Cardiff",
+        "region": "Wales",
+        "country": "United Kingdom"
+    },
+    "cardiffwales": {
+        "city": "Cardiff",
+        "region": "Wales",
+        "country": "United Kingdom"
+    },
+    "belfast": {
+        "city": "Belfast",
+        "region": "Northern Ireland",
+        "country": "United Kingdom"
+    },
+    "belfastni": {
+        "city": "Belfast",
+        "region": "Northern Ireland",
+        "country": "United Kingdom"
+    },
+    "bristol": {
+        "city": "Bristol",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "sheffield": {
+        "city": "Sheffield",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "leeds": {
+        "city": "Leeds",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "newcastle": {
+        "city": "Newcastle upon Tyne",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "newcastleupontyne": {
+        "city": "Newcastle upon Tyne",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "nottingham": {
+        "city": "Nottingham",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "sunderland": {
+        "city": "Sunderland",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "brighton": {
+        "city": "Brighton",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "plymouth": {
+        "city": "Plymouth",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "southampton": {
+        "city": "Southampton",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "aberdeen": {
+        "city": "Aberdeen",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "dundee": {
+        "city": "Dundee",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "swansea": {
+        "city": "Swansea",
+        "region": "Wales",
+        "country": "United Kingdom"
+    },
+    "newport": {
+        "city": "Newport",
+        "region": "Wales",
+        "country": "United Kingdom"
+    },
+    "derry": {
+        "city": "Derry",
+        "region": "Northern Ireland",
+        "country": "United Kingdom"
+    },
+    "londonderry": {
+        "city": "Derry",
+        "region": "Northern Ireland",
+        "country": "United Kingdom"
+    },
+    "wales": {
+        "city": null,
+        "region": "Wales",
+        "country": "United Kingdom"
+    },
+    "northernireland": {
+        "city": null,
+        "region": "Northern Ireland",
+        "country": "United Kingdom"
+    },
+    "ni": {
+        "city": null,
+        "region": "Northern Ireland",
+        "country": "United Kingdom"
+    },
+    "eastofengland": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "eastmidlands": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "northeastengland": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "northwestengland": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "southeastengland": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "southwestengland": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "westmidlands": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "yorkshireandthehumber": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "greaterlondonregion": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "gb": {
+        "city": null,
+        "region": null,
+        "country": "United Kingdom"
+    },
+    "thebigsmoke": {
+        "city": "London",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "brum": {
+        "city": "Birmingham",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "manc": {
+        "city": "Manchester",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "scouseland": {
+        "city": "Liverpool",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "geordie": {
+        "city": "Newcastle upon Tyne",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "leicester": {
+        "city": "Leicester",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "coventry": {
+        "city": "Coventry",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "hull": {
+        "city": "Kingston upon Hull",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "kingstonuponhull": {
+        "city": "Kingston upon Hull",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "stoke": {
+        "city": "Stoke-on-Trent",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "stokeontrent": {
+        "city": "Stoke-on-Trent",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "wolverhampton": {
+        "city": "Wolverhampton",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "derby": {
+        "city": "Derby",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "portsmouth": {
+        "city": "Portsmouth",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "norwich": {
+        "city": "Norwich",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "reading": {
+        "city": "Reading",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "oxford": {
+        "city": "Oxford",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "cambridge": {
+        "city": "Cambridge",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "york": {
+        "city": "York",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "inverness": {
+        "city": "Inverness",
+        "region": "Scotland",
+        "country": "United Kingdom"
+    },
+    "bangorwales": {
+        "city": "Bangor",
+        "region": "Wales",
+        "country": "United Kingdom"
+    },
+    "canadian": {
+        "city": null,
+        "region": null,
+        "country": "Canada"
+    },
+    "mapleleaf": {
+        "city": null,
+        "region": null,
+        "country": "Canada"
+    },
+    "the6ix": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "ottawa": {
+        "city": "Ottawa",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "hamiltonon": {
+        "city": "Hamilton",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "mississauga": {
+        "city": "Mississauga",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "brampton": {
+        "city": "Brampton",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "markham": {
+        "city": "Markham",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "vaughan": {
+        "city": "Vaughan",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "windsor": {
+        "city": "Windsor",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "kingstonon": {
+        "city": "Kingston",
+        "region": "Ontario",
+        "country": "Canada"
+    },
+    "montreal": {
+        "city": "Montreal",
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "montrealcanada": {
+        "city": "Montreal",
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "mtl": {
+        "city": "Montreal",
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "quebeccity": {
+        "city": "Quebec City",
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "laval": {
+        "city": "Laval",
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "britishcolumbia": {
+        "city": null,
+        "region": "British Columbia",
+        "country": "Canada"
+    },
+    "bc": {
+        "city": null,
+        "region": "British Columbia",
+        "country": "Canada"
+    },
+    "vancouver": {
+        "city": "Vancouver",
+        "region": "British Columbia",
+        "country": "Canada"
+    },
+    "vancouverbc": {
+        "city": "Vancouver",
+        "region": "British Columbia",
+        "country": "Canada"
+    },
+    "victoria": {
+        "city": null,
+        "region": "Victoria",
+        "country": "Australia"
+    },
+    "surreybc": {
+        "city": "Surrey",
+        "region": "British Columbia",
+        "country": "Canada"
+    },
+    "alberta": {
+        "city": null,
+        "region": "Alberta",
+        "country": "Canada"
+    },
+    "calgary": {
+        "city": "Calgary",
+        "region": "Alberta",
+        "country": "Canada"
+    },
+    "edmonton": {
+        "city": "Edmonton",
+        "region": "Alberta",
+        "country": "Canada"
+    },
+    "manitoba": {
+        "city": null,
+        "region": "Manitoba",
+        "country": "Canada"
+    },
+    "winnipeg": {
+        "city": "Winnipeg",
+        "region": "Manitoba",
+        "country": "Canada"
+    },
+    "saskatchewan": {
+        "city": null,
+        "region": "Saskatchewan",
+        "country": "Canada"
+    },
+    "regina": {
+        "city": "Regina",
+        "region": "Saskatchewan",
+        "country": "Canada"
+    },
+    "saskatoon": {
+        "city": "Saskatoon",
+        "region": "Saskatchewan",
+        "country": "Canada"
+    },
+    "novascotia": {
+        "city": null,
+        "region": "Nova Scotia",
+        "country": "Canada"
+    },
+    "halifax": {
+        "city": "Halifax",
+        "region": "Nova Scotia",
+        "country": "Canada"
+    },
+    "newbrunswick": {
+        "city": null,
+        "region": "New Brunswick",
+        "country": "Canada"
+    },
+    "fredericton": {
+        "city": "Fredericton",
+        "region": "New Brunswick",
+        "country": "Canada"
+    },
+    "moncton": {
+        "city": "Moncton",
+        "region": "New Brunswick",
+        "country": "Canada"
+    },
+    "newfoundlandandlabrador": {
+        "city": null,
+        "region": "Newfoundland and Labrador",
+        "country": "Canada"
+    },
+    "stjohns": {
+        "city": "St. John's",
+        "region": "Newfoundland and Labrador",
+        "country": "Canada"
+    },
+    "princeedwardisland": {
+        "city": null,
+        "region": "Prince Edward Island",
+        "country": "Canada"
+    },
+    "pei": {
+        "city": null,
+        "region": "Prince Edward Island",
+        "country": "Canada"
+    },
+    "charlottetown": {
+        "city": "Charlottetown",
+        "region": "Prince Edward Island",
+        "country": "Canada"
+    },
+    "northwestterritories": {
+        "city": null,
+        "region": "Northwest Territories",
+        "country": "Canada"
+    },
+    "nwt": {
+        "city": null,
+        "region": "Northwest Territories",
+        "country": "Canada"
+    },
+    "yellowknife": {
+        "city": "Yellowknife",
+        "region": "Northwest Territories",
+        "country": "Canada"
+    },
+    "yukon": {
+        "city": null,
+        "region": "Yukon",
+        "country": "Canada"
+    },
+    "whitehorse": {
+        "city": "Whitehorse",
+        "region": "Yukon",
+        "country": "Canada"
+    },
+    "nunavut": {
+        "city": null,
+        "region": "Nunavut",
+        "country": "Canada"
+    },
+    "iqaluit": {
+        "city": "Iqaluit",
+        "region": "Nunavut",
+        "country": "Canada"
+    },
+    "aussie": {
+        "city": null,
+        "region": null,
+        "country": "Australia"
+    },
+    "downunder": {
+        "city": null,
+        "region": null,
+        "country": "Australia"
+    },
+    "oz": {
+        "city": null,
+        "region": null,
+        "country": "Australia"
+    },
+    "newsouthwales": {
+        "city": null,
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "nsw": {
+        "city": null,
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "newcastleaustralia": {
+        "city": "Newcastle",
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "wollongong": {
+        "city": "Wollongong",
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "vic": {
+        "city": null,
+        "region": "Victoria",
+        "country": "Australia"
+    },
+    "melbourne": {
+        "city": "Melbourne",
+        "region": "Victoria",
+        "country": "Australia"
+    },
+    "melbourneaustralia": {
+        "city": "Melbourne",
+        "region": "Victoria",
+        "country": "Australia"
+    },
+    "geelong": {
+        "city": "Geelong",
+        "region": "Victoria",
+        "country": "Australia"
+    },
+    "queensland": {
+        "city": null,
+        "region": "Queensland",
+        "country": "Australia"
+    },
+    "qld": {
+        "city": null,
+        "region": "Queensland",
+        "country": "Australia"
+    },
+    "brisbane": {
+        "city": "Brisbane",
+        "region": "Queensland",
+        "country": "Australia"
+    },
+    "brisbaneaustralia": {
+        "city": "Brisbane",
+        "region": "Queensland",
+        "country": "Australia"
+    },
+    "goldcoast": {
+        "city": "Gold Coast",
+        "region": "Queensland",
+        "country": "Australia"
+    },
+    "cairns": {
+        "city": "Cairns",
+        "region": "Queensland",
+        "country": "Australia"
+    },
+    "westernaustralia": {
+        "city": null,
+        "region": "Western Australia",
+        "country": "Australia"
+    },
+    "wa": {
+        "city": null,
+        "region": "Western Australia",
+        "country": "Australia"
+    },
+    "perth": {
+        "city": "Perth",
+        "region": "Western Australia",
+        "country": "Australia"
+    },
+    "perthaustralia": {
+        "city": "Perth",
+        "region": "Western Australia",
+        "country": "Australia"
+    },
+    "southaustralia": {
+        "city": null,
+        "region": "South Australia",
+        "country": "Australia"
+    },
+    "sa": {
+        "city": null,
+        "region": "South Australia",
+        "country": "Australia"
+    },
+    "adelaide": {
+        "city": "Adelaide",
+        "region": "South Australia",
+        "country": "Australia"
+    },
+    "adelaideaustralia": {
+        "city": "Adelaide",
+        "region": "South Australia",
+        "country": "Australia"
+    },
+    "tasmania": {
+        "city": null,
+        "region": "Tasmania",
+        "country": "Australia"
+    },
+    "tas": {
+        "city": null,
+        "region": "Tasmania",
+        "country": "Australia"
+    },
+    "hobart": {
+        "city": "Hobart",
+        "region": "Tasmania",
+        "country": "Australia"
+    },
+    "launceston": {
+        "city": "Launceston",
+        "region": "Tasmania",
+        "country": "Australia"
+    },
+    "australiancapitalterritory": {
+        "city": null,
+        "region": "Australian Capital Territory",
+        "country": "Australia"
+    },
+    "canberra": {
+        "city": "Canberra",
+        "region": "Australian Capital Territory",
+        "country": "Australia"
+    },
+    "northernterritory": {
+        "city": null,
+        "region": "Northern Territory",
+        "country": "Australia"
+    },
+    "nt": {
+        "city": null,
+        "region": "Northern Territory",
+        "country": "Australia"
+    },
+    "darwin": {
+        "city": "Darwin",
+        "region": "Northern Territory",
+        "country": "Australia"
+    },
+    "alicesprings": {
+        "city": "Alice Springs",
+        "region": "Northern Territory",
+        "country": "Australia"
+    },
+    "fr": {
+        "city": null,
+        "region": null,
+        "country": "France"
+    },
+    "lamarseillaise": {
+        "city": null,
+        "region": null,
+        "country": "France"
+    },
+    "iledefrance": {
+        "city": null,
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "parisfrance": {
+        "city": "Paris",
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "parisian": {
+        "city": "Paris",
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "versailles": {
+        "city": "Versailles",
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "nouvelleaquitaine": {
+        "city": null,
+        "region": "Nouvelle-Aquitaine",
+        "country": "France"
+    },
+    "bordeaux": {
+        "city": "Bordeaux",
+        "region": "Nouvelle-Aquitaine",
+        "country": "France"
+    },
+    "limoges": {
+        "city": "Limoges",
+        "region": "Nouvelle-Aquitaine",
+        "country": "France"
+    },
+    "poitiers": {
+        "city": "Poitiers",
+        "region": "Nouvelle-Aquitaine",
+        "country": "France"
+    },
+    "auvergnerhonealpes": {
+        "city": null,
+        "region": "Auvergne-Rhône-Alpes",
+        "country": "France"
+    },
+    "lyon": {
+        "city": "Lyon",
+        "region": "Auvergne-Rhône-Alpes",
+        "country": "France"
+    },
+    "grenoble": {
+        "city": "Grenoble",
+        "region": "Auvergne-Rhône-Alpes",
+        "country": "France"
+    },
+    "saintetienne": {
+        "city": "Saint-Étienne",
+        "region": "Auvergne-Rhône-Alpes",
+        "country": "France"
+    },
+    "bretagne": {
+        "city": null,
+        "region": "Brittany",
+        "country": "France"
+    },
+    "rennes": {
+        "city": "Rennes",
+        "region": "Brittany",
+        "country": "France"
+    },
+    "brest": {
+        "city": "Brest",
+        "region": "Brittany",
+        "country": "France"
+    },
+    "bourgognefranchecomte": {
+        "city": null,
+        "region": "Bourgogne-Franche-Comté",
+        "country": "France"
+    },
+    "dijon": {
+        "city": "Dijon",
+        "region": "Bourgogne-Franche-Comté",
+        "country": "France"
+    },
+    "besancon": {
+        "city": "Besançon",
+        "region": "Bourgogne-Franche-Comté",
+        "country": "France"
+    },
+    "centrevaldeloire": {
+        "city": null,
+        "region": "Centre-Val de Loire",
+        "country": "France"
+    },
+    "tours": {
+        "city": "Tours",
+        "region": "Centre-Val de Loire",
+        "country": "France"
+    },
+    "orleans": {
+        "city": "Orléans",
+        "region": "Centre-Val de Loire",
+        "country": "France"
+    },
+    "grandest": {
+        "city": null,
+        "region": "Grand Est",
+        "country": "France"
+    },
+    "strasbourg": {
+        "city": "Strasbourg",
+        "region": "Grand Est",
+        "country": "France"
+    },
+    "reims": {
+        "city": "Reims",
+        "region": "Grand Est",
+        "country": "France"
+    },
+    "metz": {
+        "city": "Metz",
+        "region": "Grand Est",
+        "country": "France"
+    },
+    "hautsdefrance": {
+        "city": null,
+        "region": "Hauts-de-France",
+        "country": "France"
+    },
+    "lille": {
+        "city": "Lille",
+        "region": "Hauts-de-France",
+        "country": "France"
+    },
+    "amiens": {
+        "city": "Amiens",
+        "region": "Hauts-de-France",
+        "country": "France"
+    },
+    "normandy": {
+        "city": null,
+        "region": "Normandy",
+        "country": "France"
+    },
+    "rouen": {
+        "city": "Rouen",
+        "region": "Normandy",
+        "country": "France"
+    },
+    "lehavre": {
+        "city": "Le Havre",
+        "region": "Normandy",
+        "country": "France"
+    },
+    "occitanie": {
+        "city": null,
+        "region": "Occitanie",
+        "country": "France"
+    },
+    "toulouse": {
+        "city": "Toulouse",
+        "region": "Occitanie",
+        "country": "France"
+    },
+    "montpellier": {
+        "city": "Montpellier",
+        "region": "Occitanie",
+        "country": "France"
+    },
+    "perpignan": {
+        "city": "Perpignan",
+        "region": "Occitanie",
+        "country": "France"
+    },
+    "paysdelaloire": {
+        "city": null,
+        "region": "Pays de la Loire",
+        "country": "France"
+    },
+    "nantes": {
+        "city": "Nantes",
+        "region": "Pays de la Loire",
+        "country": "France"
+    },
+    "angers": {
+        "city": "Angers",
+        "region": "Pays de la Loire",
+        "country": "France"
+    },
+    "provencealpescotedazur": {
+        "city": null,
+        "region": "Provence-Alpes-Côte d'Azur",
+        "country": "France"
+    },
+    "paca": {
+        "city": null,
+        "region": "Provence-Alpes-Côte d'Azur",
+        "country": "France"
+    },
+    "marseille": {
+        "city": "Marseille",
+        "region": "Provence-Alpes-Côte d'Azur",
+        "country": "France"
+    },
+    "nice": {
+        "city": "Nice",
+        "region": "Provence-Alpes-Côte d'Azur",
+        "country": "France"
+    },
+    "cannes": {
+        "city": "Cannes",
+        "region": "Provence-Alpes-Côte d'Azur",
+        "country": "France"
+    },
+    "corsica": {
+        "city": null,
+        "region": "Corsica",
+        "country": "France"
+    },
+    "ajaccio": {
+        "city": "Ajaccio",
+        "region": "Corsica",
+        "country": "France"
+    },
+    "frenchguiana": {
+        "city": null,
+        "region": "French Guiana",
+        "country": "France"
+    },
+    "cayenne": {
+        "city": "Cayenne",
+        "region": "French Guiana",
+        "country": "France"
+    },
+    "guadeloupe": {
+        "city": null,
+        "region": "Guadeloupe",
+        "country": "France"
+    },
+    "basseterre": {
+        "city": "Basse-Terre",
+        "region": "Guadeloupe",
+        "country": "France"
+    },
+    "martinique": {
+        "city": null,
+        "region": "Martinique",
+        "country": "France"
+    },
+    "fortdefrance": {
+        "city": "Fort-de-France",
+        "region": "Martinique",
+        "country": "France"
+    },
+    "mayotte": {
+        "city": null,
+        "region": "Mayotte",
+        "country": "France"
+    },
+    "mamoudzou": {
+        "city": "Mamoudzou",
+        "region": "Mayotte",
+        "country": "France"
+    },
+    "lareunion": {
+        "city": null,
+        "region": "La Réunion",
+        "country": "France"
+    },
+    "saintdenisreunion": {
+        "city": "Saint-Denis",
+        "region": "La Réunion",
+        "country": "France"
+    },
+    "spain": {
+        "city": null,
+        "region": null,
+        "country": "Spain"
+    },
+    "spanish": {
+        "city": null,
+        "region": null,
+        "country": "Spain"
+    },
+    "espana": {
+        "city": null,
+        "region": null,
+        "country": "Spain"
+    },
+    "espanol": {
+        "city": null,
+        "region": null,
+        "country": "Spain"
+    },
+    "madrid": {
+        "city": "Madrid",
+        "region": "Community of Madrid",
+        "country": "Spain"
+    },
+    "madridspain": {
+        "city": "Madrid",
+        "region": "Community of Madrid",
+        "country": "Spain"
+    },
+    "communityofmadrid": {
+        "city": null,
+        "region": "Community of Madrid",
+        "country": "Spain"
+    },
+    "barcelona": {
+        "city": "Barcelona",
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "barcelonaspain": {
+        "city": "Barcelona",
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "catalonia": {
+        "city": null,
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "catalunya": {
+        "city": null,
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "girona": {
+        "city": "Girona",
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "tarragona": {
+        "city": "Tarragona",
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "valenciacommunity": {
+        "city": null,
+        "region": "Valencian Community",
+        "country": "Spain"
+    },
+    "valencia": {
+        "city": "Valencia",
+        "region": "Valencian Community",
+        "country": "Spain"
+    },
+    "alicante": {
+        "city": "Alicante",
+        "region": "Valencian Community",
+        "country": "Spain"
+    },
+    "andalusia": {
+        "city": null,
+        "region": "Andalusia",
+        "country": "Spain"
+    },
+    "sevilla": {
+        "city": "Seville",
+        "region": "Andalusia",
+        "country": "Spain"
+    },
+    "seville": {
+        "city": "Seville",
+        "region": "Andalusia",
+        "country": "Spain"
+    },
+    "malaga": {
+        "city": "Málaga",
+        "region": "Andalusia",
+        "country": "Spain"
+    },
+    "granada": {
+        "city": "Granada",
+        "region": "Andalusia",
+        "country": "Spain"
+    },
+    "cordoba": {
+        "city": "Córdoba",
+        "region": "Andalusia",
+        "country": "Spain"
+    },
+    "basquecountry": {
+        "city": null,
+        "region": "Basque Country",
+        "country": "Spain"
+    },
+    "euskadi": {
+        "city": null,
+        "region": "Basque Country",
+        "country": "Spain"
+    },
+    "bilbao": {
+        "city": "Bilbao",
+        "region": "Basque Country",
+        "country": "Spain"
+    },
+    "sansebastian": {
+        "city": "San Sebastián",
+        "region": "Basque Country",
+        "country": "Spain"
+    },
+    "galicia": {
+        "city": null,
+        "region": "Galicia",
+        "country": "Spain"
+    },
+    "vigogalicia": {
+        "city": "Vigo",
+        "region": "Galicia",
+        "country": "Spain"
+    },
+    "santiagodecompostela": {
+        "city": "Santiago de Compostela",
+        "region": "Galicia",
+        "country": "Spain"
+    },
+    "castileandleon": {
+        "city": null,
+        "region": "Castile and León",
+        "country": "Spain"
+    },
+    "valladolid": {
+        "city": "Valladolid",
+        "region": "Castile and León",
+        "country": "Spain"
+    },
+    "salamanca": {
+        "city": "Salamanca",
+        "region": "Castile and León",
+        "country": "Spain"
+    },
+    "castilelamancha": {
+        "city": null,
+        "region": "Castile-La Mancha",
+        "country": "Spain"
+    },
+    "toledo": {
+        "city": "Toledo",
+        "region": "Castile-La Mancha",
+        "country": "Spain"
+    },
+    "canaryislands": {
+        "city": null,
+        "region": "Canary Islands",
+        "country": "Spain"
+    },
+    "tenerife": {
+        "city": "Santa Cruz de Tenerife",
+        "region": "Canary Islands",
+        "country": "Spain"
+    },
+    "grancanaria": {
+        "city": "Las Palmas de Gran Canaria",
+        "region": "Canary Islands",
+        "country": "Spain"
+    },
+    "aragon": {
+        "city": null,
+        "region": "Aragon",
+        "country": "Spain"
+    },
+    "zaragoza": {
+        "city": "Zaragoza",
+        "region": "Aragon",
+        "country": "Spain"
+    },
+    "extremadura": {
+        "city": null,
+        "region": "Extremadura",
+        "country": "Spain"
+    },
+    "badajoz": {
+        "city": "Badajoz",
+        "region": "Extremadura",
+        "country": "Spain"
+    },
+    "asturias": {
+        "city": null,
+        "region": "Principality of Asturias",
+        "country": "Spain"
+    },
+    "oviedo": {
+        "city": "Oviedo",
+        "region": "Principality of Asturias",
+        "country": "Spain"
+    },
+    "balearicislands": {
+        "city": null,
+        "region": "Balearic Islands",
+        "country": "Spain"
+    },
+    "palmademallorca": {
+        "city": "Palma de Mallorca",
+        "region": "Balearic Islands",
+        "country": "Spain"
+    },
+    "ibiza": {
+        "city": "Ibiza",
+        "region": "Balearic Islands",
+        "country": "Spain"
+    },
+    "navarre": {
+        "city": null,
+        "region": "Navarre",
+        "country": "Spain"
+    },
+    "pamplona": {
+        "city": "Pamplona",
+        "region": "Navarre",
+        "country": "Spain"
+    },
+    "cantabria": {
+        "city": null,
+        "region": "Cantabria",
+        "country": "Spain"
+    },
+    "santander": {
+        "city": "Santander",
+        "region": "Cantabria",
+        "country": "Spain"
+    },
+    "larioja": {
+        "city": null,
+        "region": "La Rioja",
+        "country": "Spain"
+    },
+    "logrono": {
+        "city": "Logroño",
+        "region": "La Rioja",
+        "country": "Spain"
+    },
+    "murcia": {
+        "city": null,
+        "region": "Region of Murcia",
+        "country": "Spain"
+    },
+    "regionofmurcia": {
+        "city": null,
+        "region": "Region of Murcia",
+        "country": "Spain"
+    },
+    "murciacity": {
+        "city": "Murcia",
+        "region": "Region of Murcia",
+        "country": "Spain"
+    },
+    "ceuta": {
+        "city": "Ceuta",
+        "region": "Ceuta",
+        "country": "Spain"
+    },
+    "melilla": {
+        "city": "Melilla",
+        "region": "Melilla",
+        "country": "Spain"
+    },
+    "italy": {
+        "city": null,
+        "region": null,
+        "country": "Italy"
+    },
+    "italia": {
+        "city": null,
+        "region": null,
+        "country": "Italy"
+    },
+    "italytravel": {
+        "city": null,
+        "region": null,
+        "country": "Italy"
+    },
+    "lazio": {
+        "city": null,
+        "region": "Lazio",
+        "country": "Italy"
+    },
+    "rome": {
+        "city": "Rome",
+        "region": "Lazio",
+        "country": "Italy"
+    },
+    "romecity": {
+        "city": "Rome",
+        "region": "Lazio",
+        "country": "Italy"
+    },
+    "roma": {
+        "city": "Rome",
+        "region": "Lazio",
+        "country": "Italy"
+    },
+    "lombardy": {
+        "city": null,
+        "region": "Lombardy",
+        "country": "Italy"
+    },
+    "milan": {
+        "city": "Milan",
+        "region": "Lombardy",
+        "country": "Italy"
+    },
+    "milano": {
+        "city": "Milan",
+        "region": "Lombardy",
+        "country": "Italy"
+    },
+    "brescia": {
+        "city": "Brescia",
+        "region": "Lombardy",
+        "country": "Italy"
+    },
+    "campania": {
+        "city": null,
+        "region": "Campania",
+        "country": "Italy"
+    },
+    "naples": {
+        "city": "Naples",
+        "region": "Campania",
+        "country": "Italy"
+    },
+    "napoli": {
+        "city": "Naples",
+        "region": "Campania",
+        "country": "Italy"
+    },
+    "sicily": {
+        "city": null,
+        "region": "Sicily",
+        "country": "Italy"
+    },
+    "palermo": {
+        "city": "Palermo",
+        "region": "Sicily",
+        "country": "Italy"
+    },
+    "catania": {
+        "city": "Catania",
+        "region": "Sicily",
+        "country": "Italy"
+    },
+    "veneto": {
+        "city": null,
+        "region": "Veneto",
+        "country": "Italy"
+    },
+    "venice": {
+        "city": "Venice",
+        "region": "Veneto",
+        "country": "Italy"
+    },
+    "venezia": {
+        "city": "Venice",
+        "region": "Veneto",
+        "country": "Italy"
+    },
+    "verona": {
+        "city": "Verona",
+        "region": "Veneto",
+        "country": "Italy"
+    },
+    "piedmont": {
+        "city": null,
+        "region": "Piedmont",
+        "country": "Italy"
+    },
+    "turin": {
+        "city": "Turin",
+        "region": "Piedmont",
+        "country": "Italy"
+    },
+    "torino": {
+        "city": "Turin",
+        "region": "Piedmont",
+        "country": "Italy"
+    },
+    "emiliaromagna": {
+        "city": null,
+        "region": "Emilia-Romagna",
+        "country": "Italy"
+    },
+    "bologna": {
+        "city": "Bologna",
+        "region": "Emilia-Romagna",
+        "country": "Italy"
+    },
+    "parma": {
+        "city": "Parma",
+        "region": "Emilia-Romagna",
+        "country": "Italy"
+    },
+    "tuscany": {
+        "city": null,
+        "region": "Tuscany",
+        "country": "Italy"
+    },
+    "florence": {
+        "city": "Florence",
+        "region": "Tuscany",
+        "country": "Italy"
+    },
+    "firenze": {
+        "city": "Florence",
+        "region": "Tuscany",
+        "country": "Italy"
+    },
+    "siena": {
+        "city": "Siena",
+        "region": "Tuscany",
+        "country": "Italy"
+    },
+    "puglia": {
+        "city": null,
+        "region": "Puglia",
+        "country": "Italy"
+    },
+    "bari": {
+        "city": "Bari",
+        "region": "Puglia",
+        "country": "Italy"
+    },
+    "calabria": {
+        "city": null,
+        "region": "Calabria",
+        "country": "Italy"
+    },
+    "catanzaro": {
+        "city": "Catanzaro",
+        "region": "Calabria",
+        "country": "Italy"
+    },
+    "sardinia": {
+        "city": null,
+        "region": "Sardinia",
+        "country": "Italy"
+    },
+    "cagliari": {
+        "city": "Cagliari",
+        "region": "Sardinia",
+        "country": "Italy"
+    },
+    "liguria": {
+        "city": null,
+        "region": "Liguria",
+        "country": "Italy"
+    },
+    "genoa": {
+        "city": "Genoa",
+        "region": "Liguria",
+        "country": "Italy"
+    },
+    "genova": {
+        "city": "Genoa",
+        "region": "Liguria",
+        "country": "Italy"
+    },
+    "marche": {
+        "city": null,
+        "region": "Marche",
+        "country": "Italy"
+    },
+    "ancona": {
+        "city": "Ancona",
+        "region": "Marche",
+        "country": "Italy"
+    },
+    "abruzzo": {
+        "city": null,
+        "region": "Abruzzo",
+        "country": "Italy"
+    },
+    "laquila": {
+        "city": "L'Aquila",
+        "region": "Abruzzo",
+        "country": "Italy"
+    },
+    "friuliveneziagiulia": {
+        "city": null,
+        "region": "Friuli-Venezia Giulia",
+        "country": "Italy"
+    },
+    "trieste": {
+        "city": "Trieste",
+        "region": "Friuli-Venezia Giulia",
+        "country": "Italy"
+    },
+    "umbria": {
+        "city": null,
+        "region": "Umbria",
+        "country": "Italy"
+    },
+    "perugia": {
+        "city": "Perugia",
+        "region": "Umbria",
+        "country": "Italy"
+    },
+    "basilicata": {
+        "city": null,
+        "region": "Basilicata",
+        "country": "Italy"
+    },
+    "potenza": {
+        "city": "Potenza",
+        "region": "Basilicata",
+        "country": "Italy"
+    },
+    "molise": {
+        "city": null,
+        "region": "Molise",
+        "country": "Italy"
+    },
+    "campobasso": {
+        "city": "Campobasso",
+        "region": "Molise",
+        "country": "Italy"
+    },
+    "aostavalley": {
+        "city": null,
+        "region": "Aosta Valley",
+        "country": "Italy"
+    },
+    "aosta": {
+        "city": "Aosta",
+        "region": "Aosta Valley",
+        "country": "Italy"
+    },
+    "trentinoaltoadige": {
+        "city": null,
+        "region": "Trentino-Alto Adige",
+        "country": "Italy"
+    },
+    "trento": {
+        "city": "Trento",
+        "region": "Trentino-Alto Adige",
+        "country": "Italy"
+    },
+    "bolzano": {
+        "city": "Bolzano",
+        "region": "Trentino-Alto Adige",
+        "country": "Italy"
+    },
+    "bayern": {
+        "city": null,
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "berlincity": {
+        "city": "Berlin",
+        "region": "Berlin",
+        "country": "Germany"
+    },
+    "hamburgcity": {
+        "city": "Hamburg",
+        "region": "Hamburg",
+        "country": "Germany"
+    },
+    "nrw": {
+        "city": null,
+        "region": "North Rhine-Westphalia",
+        "country": "Germany"
+    },
+    "heidelberg": {
+        "city": "Heidelberg",
+        "region": "Baden-Württemberg",
+        "country": "Germany"
+    },
+    "wiesbaden": {
+        "city": "Wiesbaden",
+        "region": "Hesse",
+        "country": "Germany"
+    },
+    "lowersachsen": {
+        "city": null,
+        "region": "Lower Saxony",
+        "country": "Germany"
+    },
+    "braunschweig": {
+        "city": "Braunschweig",
+        "region": "Lower Saxony",
+        "country": "Germany"
+    },
+    "bremencity": {
+        "city": "Bremen",
+        "region": "Bremen",
+        "country": "Germany"
+    },
+    "francetravel": {
+        "city": null,
+        "region": null,
+        "country": "France"
+    },
+    "paristravel": {
+        "city": null,
+        "region": null,
+        "country": "France"
+    },
+    "pariscity": {
+        "city": "Paris",
+        "region": "Île-de-France",
+        "country": "France"
+    },
+    "normandie": {
+        "city": null,
+        "region": "Normandy",
+        "country": "France"
+    },
+    "mexican": {
+        "city": null,
+        "region": null,
+        "country": "Mexico"
+    },
+    "mx": {
+        "city": null,
+        "region": null,
+        "country": "Mexico"
+    },
+    "mexicotravel": {
+        "city": null,
+        "region": null,
+        "country": "Mexico"
+    },
+    "cdmx": {
+        "city": "Mexico City",
+        "region": "Mexico City",
+        "country": "Mexico"
+    },
+    "df": {
+        "city": "Mexico City",
+        "region": "Mexico City",
+        "country": "Mexico"
+    },
+    "jalisco": {
+        "city": null,
+        "region": "Jalisco",
+        "country": "Mexico"
+    },
+    "guadalajara": {
+        "city": "Guadalajara",
+        "region": "Jalisco",
+        "country": "Mexico"
+    },
+    "nuevoleon": {
+        "city": null,
+        "region": "Nuevo León",
+        "country": "Mexico"
+    },
+    "monterrey": {
+        "city": "Monterrey",
+        "region": "Nuevo León",
+        "country": "Mexico"
+    },
+    "estadodemexico": {
+        "city": null,
+        "region": "State of Mexico",
+        "country": "Mexico"
+    },
+    "toluca": {
+        "city": "Toluca",
+        "region": "State of Mexico",
+        "country": "Mexico"
+    },
+    "puebla": {
+        "city": null,
+        "region": "Puebla",
+        "country": "Mexico"
+    },
+    "pueblacity": {
+        "city": "Puebla",
+        "region": "Puebla",
+        "country": "Mexico"
+    },
+    "veracruz": {
+        "city": null,
+        "region": "Veracruz",
+        "country": "Mexico"
+    },
+    "veracruzcity": {
+        "city": "Veracruz",
+        "region": "Veracruz",
+        "country": "Mexico"
+    },
+    "guanajuato": {
+        "city": null,
+        "region": "Guanajuato",
+        "country": "Mexico"
+    },
+    "leon": {
+        "city": "León",
+        "region": "Guanajuato",
+        "country": "Mexico"
+    },
+    "sanamigueldeallende": {
+        "city": "San Miguel de Allende",
+        "region": "Guanajuato",
+        "country": "Mexico"
+    },
+    "quintanaroo": {
+        "city": null,
+        "region": "Quintana Roo",
+        "country": "Mexico"
+    },
+    "cancun": {
+        "city": "Cancún",
+        "region": "Quintana Roo",
+        "country": "Mexico"
+    },
+    "playadelcarmen": {
+        "city": "Playa del Carmen",
+        "region": "Quintana Roo",
+        "country": "Mexico"
+    },
+    "tulum": {
+        "city": "Tulum",
+        "region": "Quintana Roo",
+        "country": "Mexico"
+    },
+    "bajacalifornia": {
+        "city": null,
+        "region": "Baja California",
+        "country": "Mexico"
+    },
+    "tijuana": {
+        "city": "Tijuana",
+        "region": "Baja California",
+        "country": "Mexico"
+    },
+    "chihuahua": {
+        "city": null,
+        "region": "Chihuahua",
+        "country": "Mexico"
+    },
+    "juarez": {
+        "city": "Ciudad Juárez",
+        "region": "Chihuahua",
+        "country": "Mexico"
+    },
+    "sinaloa": {
+        "city": null,
+        "region": "Sinaloa",
+        "country": "Mexico"
+    },
+    "culiacan": {
+        "city": "Culiacán",
+        "region": "Sinaloa",
+        "country": "Mexico"
+    },
+    "sonora": {
+        "city": null,
+        "region": "Sonora",
+        "country": "Mexico"
+    },
+    "hermosillo": {
+        "city": "Hermosillo",
+        "region": "Sonora",
+        "country": "Mexico"
+    },
+    "michoacan": {
+        "city": null,
+        "region": "Michoacán",
+        "country": "Mexico"
+    },
+    "morelia": {
+        "city": "Morelia",
+        "region": "Michoacán",
+        "country": "Mexico"
+    },
+    "chiapas": {
+        "city": null,
+        "region": "Chiapas",
+        "country": "Mexico"
+    },
+    "tuxtlagutierrez": {
+        "city": "Tuxtla Gutiérrez",
+        "region": "Chiapas",
+        "country": "Mexico"
+    },
+    "oaxaca": {
+        "city": null,
+        "region": "Oaxaca",
+        "country": "Mexico"
+    },
+    "oaxacacity": {
+        "city": "Oaxaca",
+        "region": "Oaxaca",
+        "country": "Mexico"
+    },
+    "yucatan": {
+        "city": null,
+        "region": "Yucatán",
+        "country": "Mexico"
+    },
+    "merida": {
+        "city": "Mérida",
+        "region": "Yucatán",
+        "country": "Mexico"
+    },
+    "sanluispotosi": {
+        "city": null,
+        "region": "San Luis Potosí",
+        "country": "Mexico"
+    },
+    "sanluispotosicity": {
+        "city": "San Luis Potosí",
+        "region": "San Luis Potosí",
+        "country": "Mexico"
+    },
+    "queretaro": {
+        "city": null,
+        "region": "Querétaro",
+        "country": "Mexico"
+    },
+    "queretarocity": {
+        "city": "Querétaro",
+        "region": "Querétaro",
+        "country": "Mexico"
+    },
+    "aguascalientes": {
+        "city": null,
+        "region": "Aguascalientes",
+        "country": "Mexico"
+    },
+    "aguascalientescity": {
+        "city": "Aguascalientes",
+        "region": "Aguascalientes",
+        "country": "Mexico"
+    },
+    "nayarit": {
+        "city": null,
+        "region": "Nayarit",
+        "country": "Mexico"
+    },
+    "tepic": {
+        "city": "Tepic",
+        "region": "Nayarit",
+        "country": "Mexico"
+    },
+    "colima": {
+        "city": null,
+        "region": "Colima",
+        "country": "Mexico"
+    },
+    "colimacity": {
+        "city": "Colima",
+        "region": "Colima",
+        "country": "Mexico"
+    },
+    "durango": {
+        "city": null,
+        "region": "Durango",
+        "country": "Mexico"
+    },
+    "durangocity": {
+        "city": "Durango",
+        "region": "Durango",
+        "country": "Mexico"
+    },
+    "guerrero": {
+        "city": null,
+        "region": "Guerrero",
+        "country": "Mexico"
+    },
+    "acapulco": {
+        "city": "Acapulco",
+        "region": "Guerrero",
+        "country": "Mexico"
+    },
+    "hidalgo": {
+        "city": null,
+        "region": "Hidalgo",
+        "country": "Mexico"
+    },
+    "pachuca": {
+        "city": "Pachuca",
+        "region": "Hidalgo",
+        "country": "Mexico"
+    },
+    "morelos": {
+        "city": null,
+        "region": "Morelos",
+        "country": "Mexico"
+    },
+    "cuernavaca": {
+        "city": "Cuernavaca",
+        "region": "Morelos",
+        "country": "Mexico"
+    },
+    "tabasco": {
+        "city": null,
+        "region": "Tabasco",
+        "country": "Mexico"
+    },
+    "villhermosa": {
+        "city": "Villahermosa",
+        "region": "Tabasco",
+        "country": "Mexico"
+    },
+    "tamaulipas": {
+        "city": null,
+        "region": "Tamaulipas",
+        "country": "Mexico"
+    },
+    "ciudadvictoria": {
+        "city": "Ciudad Victoria",
+        "region": "Tamaulipas",
+        "country": "Mexico"
+    },
+    "tlaxcala": {
+        "city": null,
+        "region": "Tlaxcala",
+        "country": "Mexico"
+    },
+    "tlaxcalacity": {
+        "city": "Tlaxcala",
+        "region": "Tlaxcala",
+        "country": "Mexico"
+    },
+    "zacatecas": {
+        "city": null,
+        "region": "Zacatecas",
+        "country": "Mexico"
+    },
+    "zacatecascity": {
+        "city": "Zacatecas",
+        "region": "Zacatecas",
+        "country": "Mexico"
+    },
+    "campeche": {
+        "city": null,
+        "region": "Campeche",
+        "country": "Mexico"
+    },
+    "campechecity": {
+        "city": "Campeche",
+        "region": "Campeche",
+        "country": "Mexico"
+    },
+    "coahuila": {
+        "city": null,
+        "region": "Coahuila",
+        "country": "Mexico"
+    },
+    "saltillo": {
+        "city": "Saltillo",
+        "region": "Coahuila",
+        "country": "Mexico"
+    },
+    "bcs": {
+        "city": null,
+        "region": "Baja California Sur",
+        "country": "Mexico"
+    },
+    "bajacaliforniasur": {
+        "city": null,
+        "region": "Baja California Sur",
+        "country": "Mexico"
+    },
+    "lapaz": {
+        "city": "La Paz",
+        "region": "Baja California Sur",
+        "country": "Mexico"
+    },
+    "cabosanlucas": {
+        "city": "Cabo San Lucas",
+        "region": "Baja California Sur",
+        "country": "Mexico"
+    },
+    "czechrepublic": {
+        "city": null,
+        "region": null,
+        "country": "Czech Republic"
+    },
+    "cz": {
+        "city": null,
+        "region": null,
+        "country": "Czech Republic"
+    },
+    "czechtravel": {
+        "city": null,
+        "region": null,
+        "country": "Czech Republic"
+    },
+    "ceskarepublika": {
+        "city": null,
+        "region": null,
+        "country": "Czech Republic"
+    },
+    "prague": {
+        "city": "Prague",
+        "region": "Prague",
+        "country": "Czech Republic"
+    },
+    "praha": {
+        "city": "Prague",
+        "region": "Prague",
+        "country": "Czech Republic"
+    },
+    "centralbohemianregion": {
+        "city": null,
+        "region": "Central Bohemian Region",
+        "country": "Czech Republic"
+    },
+    "stredoceskykraj": {
+        "city": null,
+        "region": "Central Bohemian Region",
+        "country": "Czech Republic"
+    },
+    "kladno": {
+        "city": "Kladno",
+        "region": "Central Bohemian Region",
+        "country": "Czech Republic"
+    },
+    "southbohemianregion": {
+        "city": null,
+        "region": "South Bohemian Region",
+        "country": "Czech Republic"
+    },
+    "jihoceskykraj": {
+        "city": null,
+        "region": "South Bohemian Region",
+        "country": "Czech Republic"
+    },
+    "ceskebudejovice": {
+        "city": "České Budějovice",
+        "region": "South Bohemian Region",
+        "country": "Czech Republic"
+    },
+    "plzenregion": {
+        "city": null,
+        "region": "Plzeň Region",
+        "country": "Czech Republic"
+    },
+    "plzenskykraj": {
+        "city": null,
+        "region": "Plzeň Region",
+        "country": "Czech Republic"
+    },
+    "plzen": {
+        "city": "Plzeň",
+        "region": "Plzeň Region",
+        "country": "Czech Republic"
+    },
+    "karlovyvaryregion": {
+        "city": null,
+        "region": "Karlovy Vary Region",
+        "country": "Czech Republic"
+    },
+    "karlovarskykraj": {
+        "city": null,
+        "region": "Karlovy Vary Region",
+        "country": "Czech Republic"
+    },
+    "karlovyvary": {
+        "city": "Karlovy Vary",
+        "region": "Karlovy Vary Region",
+        "country": "Czech Republic"
+    },
+    "ustiregion": {
+        "city": null,
+        "region": "Ústí nad Labem Region",
+        "country": "Czech Republic"
+    },
+    "ustinandlabem": {
+        "city": "Ústí nad Labem",
+        "region": "Ústí nad Labem Region",
+        "country": "Czech Republic"
+    },
+    "liberecregion": {
+        "city": null,
+        "region": "Liberec Region",
+        "country": "Czech Republic"
+    },
+    "liberec": {
+        "city": "Liberec",
+        "region": "Liberec Region",
+        "country": "Czech Republic"
+    },
+    "hralovehradec": {
+        "city": null,
+        "region": "Hradec Králové Region",
+        "country": "Czech Republic"
+    },
+    "hradeckralove": {
+        "city": "Hradec Králové",
+        "region": "Hradec Králové Region",
+        "country": "Czech Republic"
+    },
+    "pardubiceregion": {
+        "city": null,
+        "region": "Pardubice Region",
+        "country": "Czech Republic"
+    },
+    "pardubice": {
+        "city": "Pardubice",
+        "region": "Pardubice Region",
+        "country": "Czech Republic"
+    },
+    "olomoucregion": {
+        "city": null,
+        "region": "Olomouc Region",
+        "country": "Czech Republic"
+    },
+    "olomouc": {
+        "city": "Olomouc",
+        "region": "Olomouc Region",
+        "country": "Czech Republic"
+    },
+    "moraviansilesianregion": {
+        "city": null,
+        "region": "Moravian-Silesian Region",
+        "country": "Czech Republic"
+    },
+    "moravskoslezskykraj": {
+        "city": null,
+        "region": "Moravian-Silesian Region",
+        "country": "Czech Republic"
+    },
+    "ostrava": {
+        "city": "Ostrava",
+        "region": "Moravian-Silesian Region",
+        "country": "Czech Republic"
+    },
+    "southmoravianregion": {
+        "city": null,
+        "region": "South Moravian Region",
+        "country": "Czech Republic"
+    },
+    "jihomoravskykraj": {
+        "city": null,
+        "region": "South Moravian Region",
+        "country": "Czech Republic"
+    },
+    "brno": {
+        "city": "Brno",
+        "region": "South Moravian Region",
+        "country": "Czech Republic"
+    },
+    "zlinregion": {
+        "city": null,
+        "region": "Zlín Region",
+        "country": "Czech Republic"
+    },
+    "zlin": {
+        "city": "Zlín",
+        "region": "Zlín Region",
+        "country": "Czech Republic"
+    },
+    "vysocina": {
+        "city": null,
+        "region": "Vysočina Region",
+        "country": "Czech Republic"
+    },
+    "jihlava": {
+        "city": "Jihlava",
+        "region": "Vysočina Region",
+        "country": "Czech Republic"
+    },
+    "china": {
+        "city": null,
+        "region": null,
+        "country": "China"
+    },
+    "prc": {
+        "city": null,
+        "region": null,
+        "country": "China"
+    },
+    "zhongguo": {
+        "city": null,
+        "region": null,
+        "country": "China"
+    },
+    "beijing": {
+        "city": "Beijing",
+        "region": null,
+        "country": "China"
+    },
+    "beijingcity": {
+        "city": "Beijing",
+        "region": null,
+        "country": "China"
+    },
+    "shanghai": {
+        "city": "Shanghai",
+        "region": null,
+        "country": "China"
+    },
+    "shanghaicity": {
+        "city": "Shanghai",
+        "region": null,
+        "country": "China"
+    },
+    "guangdong": {
+        "city": null,
+        "region": "Guangdong",
+        "country": "China"
+    },
+    "guangzhou": {
+        "city": "Guangzhou",
+        "region": "Guangdong",
+        "country": "China"
+    },
+    "shenzhen": {
+        "city": "Shenzhen",
+        "region": "Guangdong",
+        "country": "China"
+    },
+    "sichuan": {
+        "city": null,
+        "region": "Sichuan",
+        "country": "China"
+    },
+    "chengdu": {
+        "city": "Chengdu",
+        "region": "Sichuan",
+        "country": "China"
+    },
+    "chongqing": {
+        "city": "Chongqing",
+        "region": null,
+        "country": "China"
+    },
+    "chongqingcity": {
+        "city": "Chongqing",
+        "region": null,
+        "country": "China"
+    },
+    "jiangsu": {
+        "city": null,
+        "region": "Jiangsu",
+        "country": "China"
+    },
+    "nanjing": {
+        "city": "Nanjing",
+        "region": "Jiangsu",
+        "country": "China"
+    },
+    "suzhou": {
+        "city": "Suzhou",
+        "region": "Jiangsu",
+        "country": "China"
+    },
+    "zhejiang": {
+        "city": null,
+        "region": "Zhejiang",
+        "country": "China"
+    },
+    "hangzhou": {
+        "city": "Hangzhou",
+        "region": "Zhejiang",
+        "country": "China"
+    },
+    "ningbo": {
+        "city": "Ningbo",
+        "region": "Zhejiang",
+        "country": "China"
+    },
+    "hubei": {
+        "city": null,
+        "region": "Hubei",
+        "country": "China"
+    },
+    "wuhan": {
+        "city": "Wuhan",
+        "region": "Hubei",
+        "country": "China"
+    },
+    "hunan": {
+        "city": null,
+        "region": "Hunan",
+        "country": "China"
+    },
+    "changsha": {
+        "city": "Changsha",
+        "region": "Hunan",
+        "country": "China"
+    },
+    "shandong": {
+        "city": null,
+        "region": "Shandong",
+        "country": "China"
+    },
+    "jinan": {
+        "city": "Jinan",
+        "region": "Shandong",
+        "country": "China"
+    },
+    "qingdao": {
+        "city": "Qingdao",
+        "region": "Shandong",
+        "country": "China"
+    },
+    "fujian": {
+        "city": null,
+        "region": "Fujian",
+        "country": "China"
+    },
+    "fuzhou": {
+        "city": "Fuzhou",
+        "region": "Fujian",
+        "country": "China"
+    },
+    "xiamen": {
+        "city": "Xiamen",
+        "region": "Fujian",
+        "country": "China"
+    },
+    "liaoning": {
+        "city": null,
+        "region": "Liaoning",
+        "country": "China"
+    },
+    "shenyang": {
+        "city": "Shenyang",
+        "region": "Liaoning",
+        "country": "China"
+    },
+    "dalian": {
+        "city": "Dalian",
+        "region": "Liaoning",
+        "country": "China"
+    },
+    "hebei": {
+        "city": null,
+        "region": "Hebei",
+        "country": "China"
+    },
+    "shijiazhuang": {
+        "city": "Shijiazhuang",
+        "region": "Hebei",
+        "country": "China"
+    },
+    "henan": {
+        "city": null,
+        "region": "Henan",
+        "country": "China"
+    },
+    "zhengzhou": {
+        "city": "Zhengzhou",
+        "region": "Henan",
+        "country": "China"
+    },
+    "shaanxi": {
+        "city": null,
+        "region": "Shaanxi",
+        "country": "China"
+    },
+    "xian": {
+        "city": "Xi'an",
+        "region": "Shaanxi",
+        "country": "China"
+    },
+    "terracotta": {
+        "city": "Xi'an",
+        "region": "Shaanxi",
+        "country": "China"
+    },
+    "yunnan": {
+        "city": null,
+        "region": "Yunnan",
+        "country": "China"
+    },
+    "kunming": {
+        "city": "Kunming",
+        "region": "Yunnan",
+        "country": "China"
+    },
+    "anhui": {
+        "city": null,
+        "region": "Anhui",
+        "country": "China"
+    },
+    "hefei": {
+        "city": "Hefei",
+        "region": "Anhui",
+        "country": "China"
+    },
+    "gansu": {
+        "city": null,
+        "region": "Gansu",
+        "country": "China"
+    },
+    "lanzhou": {
+        "city": "Lanzhou",
+        "region": "Gansu",
+        "country": "China"
+    },
+    "guizhou": {
+        "city": null,
+        "region": "Guizhou",
+        "country": "China"
+    },
+    "guiyang": {
+        "city": "Guiyang",
+        "region": "Guizhou",
+        "country": "China"
+    },
+    "heilongjiang": {
+        "city": null,
+        "region": "Heilongjiang",
+        "country": "China"
+    },
+    "harbin": {
+        "city": "Harbin",
+        "region": "Heilongjiang",
+        "country": "China"
+    },
+    "jilin": {
+        "city": null,
+        "region": "Jilin",
+        "country": "China"
+    },
+    "changchun": {
+        "city": "Changchun",
+        "region": "Jilin",
+        "country": "China"
+    },
+    "jiangxi": {
+        "city": null,
+        "region": "Jiangxi",
+        "country": "China"
+    },
+    "nanchang": {
+        "city": "Nanchang",
+        "region": "Jiangxi",
+        "country": "China"
+    },
+    "qinghai": {
+        "city": null,
+        "region": "Qinghai",
+        "country": "China"
+    },
+    "xining": {
+        "city": "Xining",
+        "region": "Qinghai",
+        "country": "China"
+    },
+    "shanxi": {
+        "city": null,
+        "region": "Shanxi",
+        "country": "China"
+    },
+    "taiyuan": {
+        "city": "Taiyuan",
+        "region": "Shanxi",
+        "country": "China"
+    },
+    "tibet": {
+        "city": null,
+        "region": "Tibet Autonomous Region",
+        "country": "China"
+    },
+    "lhasa": {
+        "city": "Lhasa",
+        "region": "Tibet Autonomous Region",
+        "country": "China"
+    },
+    "xinjiang": {
+        "city": null,
+        "region": "Xinjiang Uyghur Autonomous Region",
+        "country": "China"
+    },
+    "urumqi": {
+        "city": "Ürümqi",
+        "region": "Xinjiang Uyghur Autonomous Region",
+        "country": "China"
+    },
+    "ningxia": {
+        "city": null,
+        "region": "Ningxia Hui Autonomous Region",
+        "country": "China"
+    },
+    "yinchuan": {
+        "city": "Yinchuan",
+        "region": "Ningxia Hui Autonomous Region",
+        "country": "China"
+    },
+    "guangxi": {
+        "city": null,
+        "region": "Guangxi Zhuang Autonomous Region",
+        "country": "China"
+    },
+    "nanning": {
+        "city": "Nanning",
+        "region": "Guangxi Zhuang Autonomous Region",
+        "country": "China"
+    },
+    "innermongolia": {
+        "city": null,
+        "region": "Inner Mongolia Autonomous Region",
+        "country": "China"
+    },
+    "hohhot": {
+        "city": "Hohhot",
+        "region": "Inner Mongolia Autonomous Region",
+        "country": "China"
+    },
+    "hongkong": {
+        "city": null,
+        "region": null,
+        "country": "Hong Kong"
+    },
+    "hk": {
+        "city": null,
+        "region": null,
+        "country": "Hong Kong"
+    },
+    "macau": {
+        "city": "Macau",
+        "region": "Macau SAR",
+        "country": "China"
+    },
+    "macao": {
+        "city": "Macau",
+        "region": "Macau SAR",
+        "country": "China"
+    },
+    "tianjin": {
+        "city": "Tianjin",
+        "region": "Tianjin",
+        "country": "China"
+    },
+    "tianjincity": {
+        "city": "Tianjin",
+        "region": "Tianjin",
+        "country": "China"
+    },
+    "brasil": {
+        "city": null,
+        "region": null,
+        "country": "Brazil"
+    },
+    "br": {
+        "city": null,
+        "region": null,
+        "country": "Brazil"
+    },
+    "braziltravel": {
+        "city": null,
+        "region": null,
+        "country": "Brazil"
+    },
+    "saopaulocity": {
+        "city": "São Paulo",
+        "region": "São Paulo",
+        "country": "Brazil"
+    },
+    "saopaulostate": {
+        "city": null,
+        "region": "São Paulo",
+        "country": "Brazil"
+    },
+    "riodejaneiro": {
+        "city": "Rio de Janeiro",
+        "region": "Rio de Janeiro",
+        "country": "Brazil"
+    },
+    "riodejaneirocity": {
+        "city": "Rio de Janeiro",
+        "region": "Rio de Janeiro",
+        "country": "Brazil"
+    },
+    "riodejaneirostate": {
+        "city": null,
+        "region": "Rio de Janeiro",
+        "country": "Brazil"
+    },
+    "minasgerais": {
+        "city": null,
+        "region": "Minas Gerais",
+        "country": "Brazil"
+    },
+    "belohorizonte": {
+        "city": "Belo Horizonte",
+        "region": "Minas Gerais",
+        "country": "Brazil"
+    },
+    "bahia": {
+        "city": null,
+        "region": "Bahia",
+        "country": "Brazil"
+    },
+    "salvador": {
+        "city": "Salvador",
+        "region": "Bahia",
+        "country": "Brazil"
+    },
+    "riograndedosul": {
+        "city": null,
+        "region": "Rio Grande do Sul",
+        "country": "Brazil"
+    },
+    "portoalegre": {
+        "city": "Porto Alegre",
+        "region": "Rio Grande do Sul",
+        "country": "Brazil"
+    },
+    "parana": {
+        "city": null,
+        "region": "Paraná",
+        "country": "Brazil"
+    },
+    "curitiba": {
+        "city": "Curitiba",
+        "region": "Paraná",
+        "country": "Brazil"
+    },
+    "pernambuco": {
+        "city": null,
+        "region": "Pernambuco",
+        "country": "Brazil"
+    },
+    "recife": {
+        "city": "Recife",
+        "region": "Pernambuco",
+        "country": "Brazil"
+    },
+    "ceara": {
+        "city": null,
+        "region": "Ceará",
+        "country": "Brazil"
+    },
+    "fortaleza": {
+        "city": "Fortaleza",
+        "region": "Ceará",
+        "country": "Brazil"
+    },
+    "goias": {
+        "city": null,
+        "region": "Goiás",
+        "country": "Brazil"
+    },
+    "goiania": {
+        "city": "Goiânia",
+        "region": "Goiás",
+        "country": "Brazil"
+    },
+    "federaldistrict": {
+        "city": null,
+        "region": "Federal District",
+        "country": "Brazil"
+    },
+    "brasilia": {
+        "city": "Brasília",
+        "region": "Federal District",
+        "country": "Brazil"
+    },
+    "amazonas": {
+        "city": null,
+        "region": "Amazonas",
+        "country": "Brazil"
+    },
+    "manaus": {
+        "city": "Manaus",
+        "region": "Amazonas",
+        "country": "Brazil"
+    },
+    "espiritosanto": {
+        "city": null,
+        "region": "Espírito Santo",
+        "country": "Brazil"
+    },
+    "vitoria": {
+        "city": "Vitória",
+        "region": "Espírito Santo",
+        "country": "Brazil"
+    },
+    "santacatarina": {
+        "city": null,
+        "region": "Santa Catarina",
+        "country": "Brazil"
+    },
+    "florianopolis": {
+        "city": "Florianópolis",
+        "region": "Santa Catarina",
+        "country": "Brazil"
+    },
+    "para": {
+        "city": null,
+        "region": "Pará",
+        "country": "Brazil"
+    },
+    "belem": {
+        "city": "Belém",
+        "region": "Pará",
+        "country": "Brazil"
+    },
+    "maranhao": {
+        "city": null,
+        "region": "Maranhão",
+        "country": "Brazil"
+    },
+    "saoluis": {
+        "city": "São Luís",
+        "region": "Maranhão",
+        "country": "Brazil"
+    },
+    "matogrosso": {
+        "city": null,
+        "region": "Mato Grosso",
+        "country": "Brazil"
+    },
+    "cuiaba": {
+        "city": "Cuiabá",
+        "region": "Mato Grosso",
+        "country": "Brazil"
+    },
+    "matogrossodosul": {
+        "city": null,
+        "region": "Mato Grosso do Sul",
+        "country": "Brazil"
+    },
+    "campogrande": {
+        "city": "Campo Grande",
+        "region": "Mato Grosso do Sul",
+        "country": "Brazil"
+    },
+    "riograndedonorte": {
+        "city": null,
+        "region": "Rio Grande do Norte",
+        "country": "Brazil"
+    },
+    "natal": {
+        "city": "Natal",
+        "region": "Rio Grande do Norte",
+        "country": "Brazil"
+    },
+    "paraiba": {
+        "city": null,
+        "region": "Paraíba",
+        "country": "Brazil"
+    },
+    "joaopessoa": {
+        "city": "João Pessoa",
+        "region": "Paraíba",
+        "country": "Brazil"
+    },
+    "alagoas": {
+        "city": null,
+        "region": "Alagoas",
+        "country": "Brazil"
+    },
+    "maceio": {
+        "city": "Maceió",
+        "region": "Alagoas",
+        "country": "Brazil"
+    },
+    "sergipe": {
+        "city": null,
+        "region": "Sergipe",
+        "country": "Brazil"
+    },
+    "aracaju": {
+        "city": "Aracaju",
+        "region": "Sergipe",
+        "country": "Brazil"
+    },
+    "piaui": {
+        "city": null,
+        "region": "Piauí",
+        "country": "Brazil"
+    },
+    "teresina": {
+        "city": "Teresina",
+        "region": "Piauí",
+        "country": "Brazil"
+    },
+    "tocantins": {
+        "city": null,
+        "region": "Tocantins",
+        "country": "Brazil"
+    },
+    "palmas": {
+        "city": "Palmas",
+        "region": "Tocantins",
+        "country": "Brazil"
+    },
+    "rondonia": {
+        "city": null,
+        "region": "Rondônia",
+        "country": "Brazil"
+    },
+    "portovelho": {
+        "city": "Porto Velho",
+        "region": "Rondônia",
+        "country": "Brazil"
+    },
+    "acre": {
+        "city": null,
+        "region": "Acre",
+        "country": "Brazil"
+    },
+    "riobranco": {
+        "city": "Rio Branco",
+        "region": "Acre",
+        "country": "Brazil"
+    },
+    "roraima": {
+        "city": null,
+        "region": "Roraima",
+        "country": "Brazil"
+    },
+    "boavista": {
+        "city": "Boa Vista",
+        "region": "Roraima",
+        "country": "Brazil"
+    },
+    "amapa": {
+        "city": null,
+        "region": "Amapá",
+        "country": "Brazil"
+    },
+    "macapa": {
+        "city": "Macapá",
+        "region": "Amapá",
+        "country": "Brazil"
+    },
+    "hongkongtravel": {
+        "city": null,
+        "region": null,
+        "country": "Hong Kong"
+    },
+    "hksar": {
+        "city": null,
+        "region": null,
+        "country": "Hong Kong"
+    },
+    "hongkongcity": {
+        "city": "Hong Kong",
+        "region": null,
+        "country": "Hong Kong"
+    },
+    "kowloon": {
+        "city": "Kowloon",
+        "region": "Kowloon",
+        "country": "Hong Kong"
+    },
+    "victoriapeak": {
+        "city": "Victoria Peak",
+        "region": "Hong Kong Island",
+        "country": "Hong Kong"
+    },
+    "lantauisland": {
+        "city": "Lantau Island",
+        "region": "Islands District",
+        "country": "Hong Kong"
+    },
+    "tsimshatsui": {
+        "city": "Tsim Sha Tsui",
+        "region": "Kowloon",
+        "country": "Hong Kong"
+    },
+    "centralhk": {
+        "city": "Central",
+        "region": "Hong Kong Island",
+        "country": "Hong Kong"
+    },
+    "causewaybay": {
+        "city": "Causeway Bay",
+        "region": "Hong Kong Island",
+        "country": "Hong Kong"
+    },
+    "mongkok": {
+        "city": "Mong Kok",
+        "region": "Kowloon",
+        "country": "Hong Kong"
+    },
+    "newterritories": {
+        "city": null,
+        "region": "New Territories",
+        "country": "Hong Kong"
+    },
+    "thebigapple": {
+        "city": "New York City",
+        "region": "New York",
+        "country": "USA"
+    },
+    "londoncity": {
+        "city": "London",
+        "region": "England",
+        "country": "United Kingdom"
+    },
+    "tokyocity": {
+        "city": "Tokyo",
+        "region": "Tokyo Prefecture",
+        "country": "Japan"
+    },
+    "singapore": {
+        "city": "Singapore",
+        "region": null,
+        "country": "Singapore"
+    },
+    "singaporecity": {
+        "city": "Singapore",
+        "region": null,
+        "country": "Singapore"
+    },
+    "sydneycity": {
+        "city": "Sydney",
+        "region": "New South Wales",
+        "country": "Australia"
+    },
+    "cairo": {
+        "city": "Cairo",
+        "region": "Cairo Governorate",
+        "country": "Egypt"
+    },
+    "cairocity": {
+        "city": "Cairo",
+        "region": "Cairo Governorate",
+        "country": "Egypt"
+    },
+    "buenosaires": {
+        "city": "Buenos Aires",
+        "region": "Buenos Aires Province",
+        "country": "Argentina"
+    },
+    "bsas": {
+        "city": "Buenos Aires",
+        "region": "Buenos Aires Province",
+        "country": "Argentina"
+    },
+    "riocity": {
+        "city": "Rio de Janeiro",
+        "region": "Rio de Janeiro",
+        "country": "Brazil"
+    },
+    "vienna": {
+        "city": "Vienna",
+        "region": "Vienna",
+        "country": "Austria"
+    },
+    "viennacity": {
+        "city": "Vienna",
+        "region": "Vienna",
+        "country": "Austria"
+    },
+    "istanbul": {
+        "city": "Istanbul",
+        "region": "Marmara Region",
+        "country": "Turkey"
+    },
+    "istanbulcity": {
+        "city": "Istanbul",
+        "region": "Marmara Region",
+        "country": "Turkey"
+    },
+    "seoul": {
+        "city": "Seoul",
+        "region": "Seoul Capital Area",
+        "country": "South Korea"
+    },
+    "seoulcity": {
+        "city": "Seoul",
+        "region": "Seoul Special City",
+        "country": "South Korea"
+    },
+    "bangkok": {
+        "city": "Bangkok",
+        "region": "Bangkok",
+        "country": "Thailand"
+    },
+    "bangkokcity": {
+        "city": "Bangkok",
+        "region": "Bangkok",
+        "country": "Thailand"
+    },
+    "newdelhi": {
+        "city": "New Delhi",
+        "region": "National Capital Territory of Delhi",
+        "country": "India"
+    },
+    "delhi": {
+        "city": "Delhi",
+        "region": "National Capital Territory of Delhi",
+        "country": "India"
+    },
+    "chicagocity": {
+        "city": "Chicago",
+        "region": "Illinois",
+        "country": "USA"
+    },
+    "vancouvercity": {
+        "city": "Vancouver",
+        "region": "British Columbia",
+        "country": "Canada"
+    },
+    "johannesburg": {
+        "city": "Johannesburg",
+        "region": "Gauteng",
+        "country": "South Africa"
+    },
+    "joburg": {
+        "city": "Johannesburg",
+        "region": "Gauteng",
+        "country": "South Africa"
+    },
+    "melbournecity": {
+        "city": "Melbourne",
+        "region": "Victoria",
+        "country": "Australia"
+    },
+    "bcn": {
+        "city": "Barcelona",
+        "region": "Catalonia",
+        "country": "Spain"
+    },
+    "mnchen": {
+        "city": "Munich",
+        "region": "Bavaria",
+        "country": "Germany"
+    },
+    "dublin": {
+        "city": "Dublin",
+        "region": "Leinster",
+        "country": "Ireland"
+    },
+    "dublincity": {
+        "city": "Dublin",
+        "region": "Leinster",
+        "country": "Ireland"
+    },
+    "lisbon": {
+        "city": "Lisbon",
+        "region": "Lisbon District",
+        "country": "Portugal"
+    },
+    "lisboa": {
+        "city": "Lisbon",
+        "region": "Lisbon District",
+        "country": "Portugal"
+    },
+    "kualalumpur": {
+        "city": "Kuala Lumpur",
+        "region": null,
+        "country": "Malaysia"
+    },
+    "kl": {
+        "city": "Kuala Lumpur",
+        "region": null,
+        "country": "Malaysia"
+    },
+    "jakarta": {
+        "city": "Jakarta",
+        "region": null,
+        "country": "Indonesia"
+    },
+    "jakartacity": {
+        "city": "Jakarta",
+        "region": null,
+        "country": "Indonesia"
+    },
+    "montrealcity": {
+        "city": "Montreal",
+        "region": "Quebec",
+        "country": "Canada"
+    },
+    "santiago": {
+        "city": "Santiago",
+        "region": "Santiago Metropolitan Region",
+        "country": "Chile"
+    },
+    "santiagocity": {
+        "city": "Santiago",
+        "region": "Santiago Metropolitan Region",
+        "country": "Chile"
+    },
+    "nairobi": {
+        "city": "Nairobi",
+        "region": "Nairobi County",
+        "country": "Kenya"
+    },
+    "nairobithegreenity": {
+        "city": "Nairobi",
+        "region": "Nairobi County",
+        "country": "Kenya"
+    },
+    "lagoscity": {
+        "city": "Lagos",
+        "region": "Lagos State",
+        "country": "Nigeria"
+    },
+    "auckland": {
+        "city": "Auckland",
+        "region": "Auckland",
+        "country": "New Zealand"
+    },
+    "aucklandnz": {
+        "city": "Auckland",
+        "region": "Auckland",
+        "country": "New Zealand"
+    },
+    "seoulkorea": {
+        "city": "Seoul",
+        "region": "Seoul Capital Area",
+        "country": "South Korea"
+    },
+    "busan": {
+        "city": "Busan",
+        "region": "Busan Metropolitan City",
+        "country": "South Korea"
+    },
+    "busankorea": {
+        "city": "Busan",
+        "region": "Busan Metropolitan City",
+        "country": "South Korea"
+    },
+    "baires": {
+        "city": "Buenos Aires",
+        "region": "Buenos Aires Province",
+        "country": "Argentina"
+    },
+    "ba": {
+        "city": "Buenos Aires",
+        "region": "Buenos Aires Province",
+        "country": "Argentina"
+    },
+    "ankara": {
+        "city": "Ankara",
+        "region": "Central Anatolia Region",
+        "country": "Turkey"
+    },
+    "ankaraofficial": {
+        "city": "Ankara",
+        "region": "Central Anatolia Region",
+        "country": "Turkey"
+    }
+}

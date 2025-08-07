@@ -1,6 +1,6 @@
 # Use a lightweight Python base image
 # python:3.10-slim-buster is a good choice for production as it's small
-FROM python:3.10-slim-buster
+FROM python:3.10-slim
 
 # Set environment variables for Python to optimize performance and logging
 # PYTHONDONTWRITEBYTECODE: Prevents Python from writing .pyc files to disk
@@ -11,7 +11,8 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory in the container. All subsequent commands will run from here.
 WORKDIR /app
 
-# Create a non-root user and group
+# Install fonts and create non-root user
+RUN apt-get update && apt-get install -y fonts-dejavu-core fonts-liberation fonts-dejavu && rm -rf /var/lib/apt/lists/*
 RUN adduser --system --group appuser
 
 # Copy the requirements file into the container

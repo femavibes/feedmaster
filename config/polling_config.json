@@ -1,0 +1,39 @@
+{
+  "deactivation_rules": {
+    "hard_stop_hours": 168.0,
+    "first_poll_age_hours": 0.084,  
+    "second_poll_age_hours": 0.167, 
+    "third_poll_age_hours": 0.334,  
+    "fourth_poll_age_hours": 0.5,   
+    "fourth_poll_elimination_score": 0, 
+    "fifth_poll_age_hours": 1.0,    
+    "fifth_poll_elimination_score_threshold": 3 
+  },
+  "polling_tiers": [
+    {
+      "description": "Hour 1 to Hour 6",
+      "max_age_hours": 6.0,
+      "interval_hours": 1.0
+    },
+    {
+      "description": "Hour 6 to Day 1",
+      "max_age_hours": 24.0,
+      "interval_hours": 2.0
+    },
+    {
+      "description": "Day 1 to Day 2",
+      "max_age_hours": 48.0,
+      "interval_hours": 6.0
+    },
+    {
+      "description": "Day 2 to Day 3",
+      "max_age_hours": 72.0,
+      "interval_hours": 12.0
+    },
+    {
+      "description": "Day 3 to Day 7",
+      "max_age_hours": 168.0,
+      "interval_hours": 24.0
+    }
+  ]
+}

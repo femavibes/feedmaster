@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedmaster - Leaderboards</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+        .leaderboard-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        .leaderboard-controls label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .leaderboard-controls select {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1.1em;
+            min-width: 300px;
+            cursor: pointer;
+        }
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+        }
+        .leaderboard-list li {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .leaderboard-list li:hover {
+            background-color: #f0f8ff;
+            transform: translateY(-2px);
+        }
+        .rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #888;
+            width: 50px;
+            text-align: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-grow: 1;
+            text-decoration: none;
+            color: inherit;
+        }
+        .user-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .user-info .details {
+            display: flex;
+            flex-direction: column;
+        }
+        .user-info .display-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .user-info .handle {
+            color: #555;
+            font-size: 0.9em;
+        }
+        .score {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #3f51b5;
+            min-width: 100px;
+            text-align: right;
+        }
+        .loading, .error-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #65676b;
+        }
+        .error-message { color: #d32f2f; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 90%; max-width: 1100px; max-height: 90vh; display: flex; flex-direction: column; position: relative; }
+        .modal-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #e0e0e0; padding-bottom: 20px; margin-bottom: 20px; }
+        .modal-header img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+        .modal-header .user-details h3 { margin: 0; font-size: 1.8em; color: #2c3e50; }
+        .modal-header .user-details p { margin: 5px 0 0; color: #666; font-size: 1.1em; }
+        .modal-close-btn { position: absolute; top: 15px; right: 15px; font-size: 2em; color: #aaa; cursor: pointer; border: none; background: none; line-height: 1; }
+        .modal-close-btn:hover { color: #333; }
+        .modal-body { overflow-y: auto; padding-right: 15px; }        
+        .modal-grid-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two equal columns */
+            gap: 30px; /* Gap between columns */
+            align-items: start;
+        }
+        .modal-grid-column {
+            display: flex;
+            flex-direction: column;
+            gap: 25px; /* Gap between sections in a column */
+        }
+        .modal-section { margin-bottom: 25px; }
+        .section-title { color: #2c3e50; margin-top: 30px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e0e0e0; font-size: 1.5em; }
+        .aggregate-list { list-style: none; padding: 0; margin-top: 10px; }
+        .aggregate-list li { background-color: #f9f9f9; border: 1px solid #eee; margin-bottom: 8px; padding: 10px 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .aggregate-list li span.count { background-color: #e0eaff; color: #3f51b5; padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 0.9em; }
+        .rarity-label { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-left: 8px; color: white; text-transform: uppercase; letter-spacing: 0.5px; }
+        .rarity-common { background-color: #f0f2f5; border: 1px solid #ced4da; color: #495057; }
+        .rarity-bronze { background-color: #cd7f32; }
+        .rarity-silver { background-color: #c0c0c0; color: #333; }
+        .rarity-gold { background-color: #ffd700; color: #333; }
+        .rarity-platinum { background-color: #e5e4e2; color: #333; }
+        .rarity-diamond { background-color: #b9f2ff; color: #333; }
+        .rarity-rare { background-color: #007bff; }
+        .rarity-epic { background-color: #6f42c1; }
+        .rarity-legendary { background-color: #9400d3; }
+        .rarity-mythic { background: linear-gradient(45deg, #ff00ff, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff); background-size: 400% 400%; animation: gradient 5s ease infinite; }
+        .scrollable-list {
+            max-height: 400px; /* Adjust as needed */
+            overflow-y: auto;
+        }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        body.modal-open { overflow: hidden; }
+        .admin-nav { background-color: #fff; padding: 1rem 2rem; border-bottom: 1px solid #e0e0e0; margin: -25px -25px 25px -25px; border-radius: 10px 10px 0 0; }
+        .admin-nav ul { list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem; }
+        .admin-nav a { color: #2c3e50; text-decoration: none; font-weight: 600; }
+        .admin-nav a:hover { color: #3f51b5; }
+        .admin-nav a.active { color: #3f51b5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="/leaderboards" class="active">🏆 Leaderboards</a></li>
+                <li><a href="/testpage">Test Page</a></li> <!-- Removed the admin link as requested -->
+            </ul>
+        </nav>
+        <h1>Leaderboards</h1>
+        <div class="leaderboard-controls">
+            <label for="leaderboard-select">Select Leaderboard:</label>
+            <select id="leaderboard-select">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+        <div id="leaderboard-container">
+            <!-- Leaderboard content will be injected here -->
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="user-profile-modal" class="modal-overlay">
+        <div class="modal-container">
+            <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+            <div id="modal-content-area">
+                <div class="loading" style="padding: 50px;"><p>Loading user profile...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const getApiBaseUrl = () => {
+            const hostname = window.location.hostname;
+            const isIpAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || isIpAddress) {
+                return `http://${hostname}:8000`;
+            }
+            return `${window.location.protocol}//${hostname}`;
+        };
+        const API_BASE_URL = getApiBaseUrl();
+        const API_PREFIX = '/api/v1';
+
+        const leaderboardSelect = document.getElementById('leaderboard-select');
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+
+        async function populateLeaderboardSelector() {
+            try {
+                const response = await fetch(`${API_BASE_URL}${API_PREFIX}/leaderboards/feeds`);
+                if (!response.ok) throw new Error('Failed to fetch feed list');
+                const feeds = await response.json();
+
+                leaderboardSelect.innerHTML = '<option value="global">🏆 Global Leaderboard</option>'; // Global is always first
+
+                feeds.forEach(feed => {
+                    const option = document.createElement('option');
+                    option.value = feed.id;
+                    option.textContent = feed.name;
+                    leaderboardSelect.appendChild(option);
+                });
+
+                // Automatically load the global leaderboard on page load
+                fetchAndDisplayLeaderboard('global');
+
+            } catch (error) {
+                leaderboardSelect.innerHTML = '<option value="">Error loading feeds</option>';
+                leaderboardContainer.innerHTML = `<p class="error-message">Could not load leaderboard list: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+
+        async function fetchAndDisplayLeaderboard(boardId) {
+            leaderboardContainer.innerHTML = `<p class="loading">Loading leaderboard...</p>`;
+            const endpoint = boardId === 'global' ? `${API_PREFIX}/leaderboards/global` : `${API_PREFIX}/leaderboards/feed/${boardId}`;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`);
+                if (!response.ok) throw new Error(`Failed to fetch leaderboard data (status: ${response.status})`);
+                const data = await response.json();
+                renderLeaderboard(data);
+            } catch (error) {
+                leaderboardContainer.innerHTML = `<p class="error-message">Could not load leaderboard: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+
+        function renderLeaderboard(data) {
+            if (!data || data.length === 0) {
+                leaderboardContainer.innerHTML = `<p class="loading">This leaderboard is empty.</p>`;
+                return;
+            }
+
+            const list = document.createElement('ul');
+            list.className = 'leaderboard-list';
+
+            data.forEach(entry => {
+                const li = document.createElement('li');
+                const user = entry.user;
+                const userDisplayName = user.display_name || user.handle;
+                const userHandle = user.display_name ? `@${user.handle}` : '';
+
+                li.innerHTML = `
+                    <div class="rank">${entry.rank}</div>
+                    <a href="#" class="user-info" data-did="${user.did}" data-handle="${user.handle}" data-display-name="${(user.display_name || '').replace(/"/g, '&quot;')}" data-avatar-url="${user.avatar_url || ''}">
+                        <img src="${user.avatar_url || 'https://via.placeholder.com/50'}" alt="${user.handle}'s avatar">
+                        <div class="details">
+                            <span class="display-name">${userDisplayName}</span>
+                            <span class="handle">${userHandle}</span>
+                        </div>
+                    </a>
+                    <div class="score">${entry.score.toLocaleString()} pts</div>
+                `;
+                list.appendChild(li);
+            });
+
+            leaderboardContainer.innerHTML = '';
+            leaderboardContainer.appendChild(list);
+        }
+
+        // --- User Profile Modal Functions (copied from testpage.html) ---
+        const userProfileModal = document.getElementById('user-profile-modal');
+
+        function closeUserProfileModal() {
+            userProfileModal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        async function openUserProfileModal({ did, handle, displayName, avatarUrl }) {
+            const modal = document.getElementById('user-profile-modal');
+            const contentArea = document.getElementById('modal-content-area');
+            const feedId = leaderboardSelect.value; // Use the currently selected feed for context
+
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            contentArea.innerHTML = `<div class="loading" style="padding: 50px;"><p>Loading profile for @${handle}...</p></div>`;
+
+            try {
+                const [profileRes, achievementsRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}${API_PREFIX}/profiles/${did}/details`),
+                    fetch(`${API_BASE_URL}${API_PREFIX}/profiles/${did}/achievements`)
+                ]);
+
+                if (!profileRes.ok) throw new Error('Failed to load profile details');
+                if (!achievementsRes.ok) throw new Error('Failed to load achievements');
+
+                const profileDetails = await profileRes.json();
+                const achievements = await achievementsRes.json();
+
+                achievements.sort((a, b) => (a.achievement.rarity_percentage || 100) - (b.achievement.rarity_percentage || 100));
+
+                let feedStatsHtml = '<p>Select a specific feed to see stats.</p>';
+                if (feedId !== 'global') {
+                    try {
+                        const statsRes = await fetch(`${API_BASE_URL}${API_PREFIX}/profiles/${did}/stats/${feedId}`);
+                        if (statsRes.ok) {
+                            const feedStats = await statsRes.json();
+                            feedStatsHtml = `
+                                <ul class="aggregate-list">
+                                    <li>Total Posts: <span class="count">${feedStats.post_count || 0}</span></li>
+                                    <li>Total Likes Received: <span class="count">${feedStats.total_likes_received || 0}</span></li>
+                                    <li>Total Reposts Received: <span class="count">${feedStats.total_reposts_received || 0}</span></li>
+                                </ul>`;
+                        } else {
+                           feedStatsHtml = '<p>No stats available for this user in this feed.</p>';
+                        }
+                    } catch (e) {
+                        feedStatsHtml = '<p>Could not load stats for this feed.</p>';
+                    }
+                }
+
+                contentArea.innerHTML = `
+                    <div class="modal-header">
+                        <img src="${avatarUrl}" alt="${handle}'s avatar">
+                        <div class="user-details">
+                            <h3>${displayName || handle}</h3>
+                            <p>@${handle}</p>
+                            <p style="font-size: 0.9em; color: #333;">${profileDetails.description || 'No bio available.'}</p>
+                            <p style="font-size: 0.8em; color: #666;">
+                                <strong>${profileDetails.followers_count || 0}</strong> Followers | 
+                                <strong>${profileDetails.following_count || 0}</strong> Following
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-body modal-grid-body">
+                        <div class="modal-grid-column">
+                            <div class="modal-section">
+                                <h4 class="section-title" style="margin-top:0;">Stats in this Feed</h4>
+                                ${feedStatsHtml}
+                            </div>
+                        </div>
+                        <div class="modal-grid-column">
+                            <div class="modal-section">
+                                <h4 class="section-title" style="margin-top:0;">Achievements</h4>
+                                ${achievements.length > 0 ? `
+                                    <ul class="aggregate-list scrollable-list">
+                                        ${achievements.map(userAch => `
+                                            <li>
+                                                <div style="flex-grow: 1; margin-right: 15px;">
+                                                    <strong>
+                                                        ${userAch.achievement.icon || '🏅'} ${userAch.achievement.name}
+                                                        ${userAch.feed ? `<span style="font-style: italic; color: #555; font-weight: normal;"> (in ${userAch.feed.name})</span>` : ''}
+                                                    </strong>
+                                                    <small style="display: block; color: #666;">${userAch.achievement.description}</small>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <span class="rarity-label rarity-${userAch.achievement.rarity_label.split(' ')[0].toLowerCase()}">${userAch.achievement.rarity_label}</span>
+                                                </div>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                ` : '<p>No achievements earned yet.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load user profile modal:', error);
+                contentArea.innerHTML = `<div class="error-message" style="padding: 50px;">❌ Could not load profile. ${error.message}</div>`;
+            }
+        }
+
+        // --- Event Listeners ---
+        leaderboardSelect.addEventListener('change', (event) => {
+            fetchAndDisplayLeaderboard(event.target.value);
+        });
+
+        leaderboardContainer.addEventListener('click', (event) => {
+            const userInfoLink = event.target.closest('.user-info');
+            if (userInfoLink) {
+                event.preventDefault();
+                const userData = {
+                    did: userInfoLink.dataset.did,
+                    handle: userInfoLink.dataset.handle,
+                    displayName: userInfoLink.dataset.displayName,
+                    avatarUrl: userInfoLink.dataset.avatarUrl
+                };
+                openUserProfileModal(userData);
+            }
+        });
+
+        document.getElementById('modal-close-btn').addEventListener('click', closeUserProfileModal);
+        userProfileModal.addEventListener('click', (event) => { if (event.target === userProfileModal) closeUserProfileModal(); });
+
+        document.addEventListener('DOMContentLoaded', populateLeaderboardSelector);
+    </script>
+</body>
+</html>

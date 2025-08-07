@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedmaster - Admin</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f0f2f5; color: #1c1e21; }
+        .container { max-width: 1200px; margin: 20px auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #1877f2; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f5f6f7; font-weight: 600; }
+        tr:hover { background-color: #f5f6f7; }
+        .actions button { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-right: 5px; }
+        .edit-btn { background-color: #1877f2; color: white; }
+        .edit-btn:hover { background-color: #166fe5; }
+        .toggle-btn.active { background-color: #42b72a; color: white; }
+        .toggle-btn.inactive { background-color: #f02849; color: white; }
+        .create-btn {
+            background-color: #42b72a;
+            color: white;
+        }
+        .create-btn:hover {
+            background-color: #36a420;
+        }
+        .add-tier-btn {
+            background-color: #e4e6eb;
+            color: #1c1e21;
+            font-weight: 600;
+        }
+        .header-with-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-container { background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; }
+        .modal-close-btn { font-size: 24px; cursor: pointer; border: none; background: none; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 1em; }
+        .modal-footer { text-align: right; margin-top: 20px; }
+        .form-group small {
+            display: block;
+            font-size: 12px;
+            color: #65676b;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        .save-btn { background-color: #42b72a; color: white; padding: 10px 20px; }
+        .save-btn:hover { background-color: #36a420; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+        .status-active { background-color: #42b72a; }
+        .status-inactive { background-color: #f02849; }
+        .loading, .error { text-align: center; padding: 40px; font-size: 1.2em; color: #65676b; }
+        .error { color: #f02849; }
+        .admin-nav { background-color: #fff; padding: 1rem 2rem; border-bottom: 1px solid #e0e0e0; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; }
+        .admin-nav ul { list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem; }
+        .admin-nav a { color: #1c1e21; text-decoration: none; font-weight: 600; }
+        .admin-nav a:hover { color: #166fe5; }
+        .admin-nav a.active { color: #1877f2; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="/admin" class="active">Achievements</a></li>
+                <li><a href="/config_manager">Polling Config</a></li>
+            </ul>
+        </nav>
+        <div class="header-with-button">
+            <h1>Achievement Management</h1>
+            <button id="open-create-modal-btn" class="actions create-btn">Create Achievement</button>
+        </div>
+        <div id="achievements-table-container">
+            <p class="loading">Loading achievements...</p>
+        </div>
+    </div>
+
+    <!-- Edit Achievement Modal -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modal-title">Edit Achievement</h2>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <form id="edit-form">
+                <input type="hidden" id="edit-achievement-id">
+                <div class="form-group">
+                    <label for="edit-name">Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-description">Description</label>
+                    <textarea id="edit-description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-icon">Icon</label>
+                    <input type="text" id="edit-icon">
+                </div>
+                <div class="form-group" id="criteria-value-group">
+                    <label for="edit-criteria-value">Requirement Value</label>
+                    <small>The number a user must reach to earn this (e.g., 10 for 10 posts).</small>
+                    <input type="number" id="edit-criteria-value" step="any">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="actions save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Achievement Modal -->
+    <div id="create-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Create New Achievement</h2>
+                <button id="create-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <form id="create-form">
+                <div class="form-group">
+                    <label for="create-key">Key</label>
+                    <small>Unique identifier (e.g., `global_likes_viii`). Cannot be changed.</small>
+                    <input type="text" id="create-key" required pattern="[a-z0-9_]+">
+                </div>
+                <div class="form-group">
+                    <label for="create-name">Name</label>
+                    <small>Display name (e.g., `Global Icon VIII`).</small>
+                    <input type="text" id="create-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="create-series-key">Series Key</label>
+                    <small>Key to group tiers (e.g., `global_likes`). Use a new key for a new series.</small>
+                    <input type="text" id="create-series-key" required>
+                </div>
+                <div class="form-group">
+                    <label for="create-description">Description</label>
+                    <textarea id="create-description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="create-icon">Icon</label>
+                    <input type="text" id="create-icon">
+                </div>
+                <div class="form-group">
+                    <label for="create-type">Type</label>
+                    <select id="create-type" required>
+                        <option value="per_feed">Per-Feed (based on stats in one feed)</option>
+                        <option value="global">Global (based on stats across all feeds)</option>
+                    </select>
+                </div>
+                <hr style="border: 1px solid #f0f2f5; margin: 20px 0;">
+                <h4>Criteria</h4>
+                <div class="form-group">
+                    <label for="create-criteria-stat">Stat Name</label>
+                    <small>The `user_stats` column to check (e.g., `post_count`, `total_likes_received`).</small>
+                    <select id="create-criteria-stat" required>
+                        <option value="">-- Select Stat --</option>
+                        <option value="post_count">post_count</option>
+                        <option value="total_likes_received">total_likes_received</option>
+                        <option value="total_reposts_received">total_reposts_received</option>
+                        <option value="total_replies_received">total_replies_received</option>
+                        <option value="total_quotes_received">total_quotes_received</option>
+                        <option value="image_post_count">image_post_count</option>
+                        <option value="video_post_count">video_post_count</option>
+                        <option value="max_post_engagement">max_post_engagement</option>
+                        <option value="feed_count">feed_count (Global Only)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="agg-method-group" style="display: none;">
+                    <label for="create-criteria-agg-method">Aggregation Method (Global Only)</label>
+                    <small>How to combine stats across feeds (e.g., `sum`, `count`).</small>
+                    <select id="create-criteria-agg-method">
+                        <option value="">-- None --</option>
+                        <option value="sum">sum</option>
+                        <option value="count">count</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="create-criteria-value">Requirement Value</label>
+                    <input type="number" id="create-criteria-value" step="any" required>
+                </div>
+                <hr style="border: 1px solid #f0f2f5; margin: 20px 0;">
+                <div class="form-group">
+                    <label><input type="checkbox" id="create-is-active" checked> Is Active?</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="actions save-btn">Create Achievement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const getApiBaseUrl = () => {
+            const hostname = window.location.hostname;
+            // Regex to check if the hostname is an IP address.
+            const isIpAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
+
+            // For local development (localhost, 127.0.0.1, or any direct IP access),
+            // the API is expected to be on port 8000.
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || isIpAddress) {
+                return `http://${hostname}:8000`;
+            }
+            
+            // For production hostnames (e.g., a custom domain), assume it's behind a 
+            // reverse proxy and use the same protocol (http/https) without a port.
+            return `${window.location.protocol}//${hostname}`;
+        };
+        const API_BASE_URL = getApiBaseUrl();
+        const API_PREFIX = '/api/v1';
+        const achievementsContainer = document.getElementById('achievements-table-container');
+
+        // --- API Functions ---
+
+        async function apiRequest(endpoint, options = {}) {
+            // In a real app, you'd add an Authorization header here.
+            // options.headers = { ...options.headers, 'Authorization': 'Bearer YOUR_ADMIN_TOKEN' };
+            const response = await fetch(`${API_BASE_URL}${API_PREFIX}${endpoint}`, options);
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                throw new Error(error.detail);
+            }
+            return response.json();
+        }
+
+        async function fetchAchievements() {
+            try {
+                const achievements = await apiRequest('/admin/achievements');
+                renderGroupedAchievements(achievements);
+            } catch (error) {
+                achievementsContainer.innerHTML = `<p class="error">Failed to load achievements: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+
+        async function createAchievement(data) {
+            return apiRequest(`/admin/achievements`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function updateAchievement(id, data) {
+            return apiRequest(`/admin/achievements/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function toggleAchievementStatus(id) {
+            return apiRequest(`/admin/achievements/${id}/toggle_active`, {
+                method: 'PATCH'
+            });
+        }
+
+        // --- Rendering and UI ---
+
+        // Edit Modal Elements
+        const editModal = document.getElementById('edit-modal');
+        const editModalCloseBtn = document.getElementById('modal-close');
+        const editForm = document.getElementById('edit-form');
+
+        // Create Modal Elements
+        const createModal = document.getElementById('create-modal');
+        const openCreateModalBtn = document.getElementById('open-create-modal-btn');
+        const createModalCloseBtn = document.getElementById('create-modal-close');
+        const createForm = document.getElementById('create-form');
+        const createTypeSelect = document.getElementById('create-type');
+        const createAggMethodGroup = document.getElementById('agg-method-group');
+
+        // --- Global State ---
+        // Store all achievements globally to access them for pre-filling forms
+        let allAchievements = [];
+
+
+
+        function renderGroupedAchievements(achievements) {
+            if (!achievements.length) {
+                achievementsContainer.innerHTML = '<p>No achievements found.</p>';
+                return;
+            }
+
+            allAchievements = achievements; // Store for later use
+
+            achievementsContainer.innerHTML = '';
+
+            // 1. Group achievements by their series_key
+            const grouped = achievements.reduce((acc, ach) => {
+                const series = ach.series_key || 'general'; // Group achievements without a series
+                if (!acc[series]) acc[series] = [];
+                acc[series].push(ach);
+                return acc;
+            }, {});
+
+            // 2. Render each group with its own header and table
+            for (const seriesKey in grouped) {
+                const seriesAchievements = grouped[seriesKey];
+                const seriesName = seriesAchievements[0].name.split(' (')[0].split(' I')[0];
+
+                const seriesHeaderContainer = document.createElement('div');
+                seriesHeaderContainer.className = 'header-with-button';
+                seriesHeaderContainer.style.marginTop = '2rem';
+
+                const seriesHeader = document.createElement('h3');
+                seriesHeader.textContent = seriesName;
+                seriesHeader.style.borderBottom = 'none'; // Override h1 style if needed
+                seriesHeader.style.paddingBottom = '0';
+
+                const addTierButton = document.createElement('button');
+                addTierButton.textContent = '+ Add Tier';
+                addTierButton.className = 'actions add-tier-btn';
+                addTierButton.dataset.action = 'add-tier';
+                addTierButton.dataset.seriesKey = seriesKey;
+
+                seriesHeaderContainer.appendChild(seriesHeader);
+                seriesHeaderContainer.appendChild(addTierButton);
+                achievementsContainer.appendChild(seriesHeaderContainer);
+
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Series Key</th>
+                            <th>Key</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Icon</th>
+                            <th>Type</th>
+                            <th>Criteria Stat</th>
+                            <th>Criteria Value</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${seriesAchievements.map(ach => `
+                            <tr data-achievement-id="${ach.id}">
+                                <td><span class="status-indicator ${ach.is_active ? 'status-active' : 'status-inactive'}"></span></td>
+                                <td>${ach.series_key || '<em>general</em>'}</td>
+                                <td>${ach.key}</td>
+                                <td class="name">${ach.name}</td>
+                                <td class="description">${ach.description}</td>
+                                <td class="icon">${ach.icon || ''}</td>
+                                <td>${ach.type}</td>
+                                <td><code>${ach.criteria && ach.criteria.stat ? ach.criteria.stat : '—'}</code></td>
+                                <td class="criteria-value">${ach.criteria && ach.criteria.value !== undefined ? ach.criteria.value : '—'}</td>
+                                <td class="actions">
+                                    <button class="edit-btn" data-action="edit">Edit</button>
+                                    <button class="toggle-btn ${ach.is_active ? 'active' : 'inactive'}" data-action="toggle">
+                                        ${ach.is_active ? 'Deactivate' : 'Activate'}
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                achievementsContainer.appendChild(table);
+            }
+            // Add a single event listener to the container for all actions
+            achievementsContainer.addEventListener('click', handleContainerClick);
+        }
+
+        function openEditModal(id) {
+            const row = document.querySelector(`tr[data-achievement-id='${id}']`);
+            if (!row) return;
+
+            document.getElementById('edit-achievement-id').value = id;
+            document.getElementById('modal-title').textContent = `Edit Achievement (ID: ${id})`;
+            document.getElementById('edit-name').value = row.querySelector('.name').textContent;
+            document.getElementById('edit-description').value = row.querySelector('.description').textContent;
+            document.getElementById('edit-icon').value = row.querySelector('.icon').textContent;
+            
+            const criteriaValueCell = row.querySelector('.criteria-value');
+            const criteriaValue = criteriaValueCell.textContent;
+            const criteriaGroup = document.getElementById('criteria-value-group');
+
+            if (criteriaValue !== '—') {
+                document.getElementById('edit-criteria-value').value = criteriaValue;
+                criteriaGroup.style.display = 'block';
+            } else {
+                document.getElementById('edit-criteria-value').value = '';
+                criteriaGroup.style.display = 'none';
+            }
+
+            editModal.style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            editModal.style.display = 'none';
+        }
+
+        function resetCreateForm() {
+            createForm.reset();
+            createAggMethodGroup.style.display = 'none';
+        }
+
+        function openCreateModal() {
+            resetCreateForm();
+            createModal.style.display = 'flex';
+        }
+
+        function romanToDecimal(roman) {
+            const map = { 'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000 };
+            let result = 0;
+            for (let i = 0; i < roman.length; i++) {
+                const current = map[roman[i]];
+                const next = map[roman[i + 1]];
+                if (next && current < next) {
+                    result -= current;
+                } else {
+                    result += current;
+                }
+            }
+            return result;
+        }
+
+        function decimalToRoman(num) {
+            const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+            let result = '';
+            for (let key in map) {
+                while (num >= map[key]) {
+                    result += key;
+                    num -= map[key];
+                }
+            }
+            return result;
+        }
+
+        function getNextTierInfo(base, lastSuffix) {
+            // Try to parse as a Roman numeral (case-insensitive)
+            const romanMatch = lastSuffix.match(/^(i|v|x|l|c|d|m)+$/i);
+            if (romanMatch) {
+                const decimal = romanToDecimal(lastSuffix.toUpperCase());
+                const nextDecimal = decimal + 1;
+                const nextRoman = decimalToRoman(nextDecimal);
+                // Preserve case of the original suffix
+                return {
+                    key: `${base}_${nextRoman.toLowerCase()}`,
+                    name: `${nextRoman}`
+                };
+            }
+            // Try to parse as a number
+            const numberMatch = lastSuffix.match(/\d+$/);
+            if (numberMatch) {
+                const num = parseInt(numberMatch[0], 10);
+                const nextNum = num + 1;
+                return {
+                    key: `${base}_${nextNum}`,
+                    name: `${nextNum}`
+                };
+            }
+            // Fallback for non-standard suffixes
+            return { key: `${base}_new`, name: 'New Tier' };
+        }
+
+        function openCreateModalForNewTier(seriesKey) {
+            const seriesAchievements = allAchievements.filter(ach => ach.series_key === seriesKey);
+            if (seriesAchievements.length === 0) {
+                alert('Could not find achievements for this series.');
+                return;
+            }
+
+            // Use the last achievement in the series as a template
+            const template = seriesAchievements[seriesAchievements.length - 1];
+            const baseName = template.name.replace(/\s(I|II|III|IV|V|VI|VII|VIII|IX|X|\d+|\(.*\))$/, '').trim();
+            const lastKeySuffix = template.key.split('_').pop();
+
+            const nextTier = getNextTierInfo(seriesKey, lastKeySuffix);
+
+            resetCreateForm();
+
+            // Pre-fill the form
+            document.getElementById('create-key').value = nextTier.key;
+            document.getElementById('create-name').value = `${baseName} ${nextTier.name}`;
+            document.getElementById('create-series-key').value = seriesKey;
+            document.getElementById('create-description').value = template.description.replace(/[\d,]+/, '{value}');
+            document.getElementById('create-icon').value = template.icon || '';
+            document.getElementById('create-type').value = template.type;
+            document.getElementById('create-criteria-stat').value = template.criteria.stat;
+            
+            if (template.type === 'global' && template.criteria.agg_method) {
+                document.getElementById('create-criteria-agg-method').value = template.criteria.agg_method;
+                createAggMethodGroup.style.display = 'block';
+            } else {
+                createAggMethodGroup.style.display = 'none';
+            }
+
+            // Clear the value and focus it for the user
+            const valueInput = document.getElementById('create-criteria-value');
+            valueInput.value = '';
+            
+            createModal.style.display = 'flex';
+            valueInput.focus();
+        }
+        function closeCreateModal() {
+            createModal.style.display = 'none';
+        }
+
+        // --- Event Handlers ---
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-achievement-id').value;
+            const saveBtn = event.target.querySelector('.save-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            const updateData = {
+                name: document.getElementById('edit-name').value,
+                description: document.getElementById('edit-description').value,
+                icon: document.getElementById('edit-icon').value,
+            };
+
+            const criteriaInput = document.getElementById('edit-criteria-value');
+            if (criteriaInput.parentElement.style.display !== 'none') {
+                updateData.criteria = {
+                    value: parseFloat(criteriaInput.value)
+                };
+            }
+
+            try {
+                await updateAchievement(id, updateData);
+                closeEditModal();
+                fetchAchievements(); // Refresh the table
+            } catch (error) {
+                alert(`Failed to save changes: ${error.message}`);
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function handleCreateFormSubmit(event) {
+            event.preventDefault();
+            const saveBtn = event.target.querySelector('.save-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Creating...';
+            saveBtn.disabled = true;
+
+            const criteria = {
+                stat: document.getElementById('create-criteria-stat').value,
+                operator: ">=", // Default operator, can be made dynamic if needed
+                value: parseFloat(document.getElementById('create-criteria-value').value)
+            };
+
+            const type = document.getElementById('create-type').value;
+            if (type === 'global') {
+                const aggMethod = document.getElementById('create-criteria-agg-method').value;
+                if (aggMethod) {
+                    criteria.agg_method = aggMethod;
+                }
+            }
+
+            const createData = {
+                key: document.getElementById('create-key').value,
+                name: document.getElementById('create-name').value,
+                description: document.getElementById('create-description').value,
+                icon: document.getElementById('create-icon').value,
+                type: type,
+                series_key: document.getElementById('create-series-key').value,
+                is_repeatable: false, // Defaulting, can be added as a checkbox if needed
+                is_active: document.getElementById('create-is-active').checked,
+                criteria: criteria
+            };
+
+            try {
+                await createAchievement(createData);
+                closeCreateModal();
+                fetchAchievements(); // Refresh the table
+            } catch (error) {
+                alert(`Failed to create achievement: ${error.message}`);
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function handleToggle(id, button) {
+            const originalText = button.textContent;
+            button.textContent = '...';
+            button.disabled = true;
+
+            try {
+                await toggleAchievementStatus(id);
+                // Instead of a full refetch, just update the UI for this row
+                const isActive = !button.classList.contains('active');
+                button.textContent = isActive ? 'Deactivate' : 'Activate';
+                button.classList.toggle('active', isActive);
+                button.classList.toggle('inactive', !isActive);
+                button.closest('tr').querySelector('.status-indicator').classList.toggle('status-active', isActive);
+                button.closest('tr').querySelector('.status-indicator').classList.toggle('status-inactive', !isActive);
+            } catch (error) {
+                alert(`Failed to toggle status: ${error.message}`);
+                button.textContent = originalText; // Revert on error
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        // --- Initial Setup ---
+
+        function handleContainerClick(event) {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            if (action === 'edit' || action === 'toggle') {
+                const row = button.closest('tr');
+                const achievementId = row.dataset.achievementId;
+                if (action === 'edit') {
+                    openEditModal(achievementId);
+                } else if (action === 'toggle') {
+                    handleToggle(achievementId, button);
+                }
+            } else if (action === 'add-tier') {
+                const seriesKey = button.dataset.seriesKey;
+                openCreateModalForNewTier(seriesKey);
+            }
+        }
+
+        // Edit Modal Listeners
+        editModalCloseBtn.addEventListener('click', closeEditModal);
+        editModal.addEventListener('click', (event) => {
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+        });
+        editForm.addEventListener('submit', handleFormSubmit);
+
+        // Create Modal Listeners
+        openCreateModalBtn.addEventListener('click', openCreateModal);
+        createModalCloseBtn.addEventListener('click', closeCreateModal);
+        createModal.addEventListener('click', (event) => {
+            if (event.target === createModal) {
+                closeCreateModal();
+            }
+        });
+        createForm.addEventListener('submit', handleCreateFormSubmit);
+        createTypeSelect.addEventListener('change', (event) => {
+            createAggMethodGroup.style.display = (event.target.value === 'global') ? 'block' : 'none';
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchAchievements);
+    </script>
+</body>
+</html>

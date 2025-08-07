@@ -1,16 +1,19 @@
 # Feedmaster Application Deployment Guide
 
-This section outlines the necessary steps to deploy and run the Feedmaster application, including setting up the environment, managing the database, and launching the services using Docker Compose.
+This guide outlines the necessary steps to set up, run, and develop the Feedmaster application, which includes a FastAPI backend and a Vue.js frontend.
 
 ---
 
-## 1. Project Setup and Configuration
+## 1. Overview
 
-Ensure your project structure and configuration files are correctly set up.
+Feedmaster is a monorepo application composed of:
+-   **Backend**: A FastAPI application that provides a REST API, connects to a PostgreSQL database, and runs several background workers for data ingestion and processing.
+-   **Frontend**: A Vue.js 3 single-page application (SPA) built with Vite, providing a modern and interactive user interface.
+-   **Services**: The entire stack is orchestrated using Docker and Docker Compose for both development and production environments.
 
-### Directory Structure:
+---
 
-Your project root should look similar to this:
+## 2. Project Structure
 
 ```
 your_project_root/

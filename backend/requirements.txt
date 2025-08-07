@@ -11,6 +11,7 @@ alembic==1.13.1 # Or the latest stable version you prefer, e.g., 1.16.2 as of my
 
 # Environment variable management
 python-dotenv==1.0.1
+pydantic-settings==2.3.3 # For loading settings from environment variables
 
 # Password hashing
 passlib[bcrypt]==1.7.4
@@ -25,6 +26,12 @@ websockets==12.0 # For the Contrails listener
 asyncio-throttle==1.0 # Optional, for rate limiting if needed
 
 # --- Optional Additions (Uncomment if needed) ---
-# asyncpg==0.29.0 # If you plan to use SQLAlchemy's async capabilities with PostgreSQL
-# httpx==0.27.0   # For making asynchronous HTTP requests to external services
+asyncpg==0.29.0 # If you plan to use SQLAlchemy's async capabilities with PostgreSQL
+httpx==0.27.0   # For making asynchronous HTTP requests to external services
 # email-validator==2.1.1 # For robust email field validation
+
+# Image generation
+Pillow==10.4.0
+
+# Image generation
+Pillow==10.4.0

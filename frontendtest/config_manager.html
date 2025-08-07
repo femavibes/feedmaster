@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polling Configuration Manager</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #212529; }
+        .container { max-width: 960px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2 { color: #343a40; border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; }
+        .tier { display: grid; grid-template-columns: 3fr 1fr 1fr auto; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid #e9ecef; border-radius: 4px; margin-bottom: 1rem; }
+        .tier-header { font-weight: bold; }
+        button { cursor: pointer; padding: 0.6rem 1.2rem; border: none; border-radius: 4px; font-weight: 600; }
+        .btn-save { background-color: #007bff; color: white; }
+        .btn-add { background-color: #28a745; color: white; }
+        .btn-remove { background-color: #dc3545; color: white; }
+        .footer-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+        .notification { padding: 1rem; margin-bottom: 1rem; border-radius: 4px; display: none; }
+        .notification.success { background-color: #d4edda; color: #155724; }
+        .notification.error { background-color: #f8d7da; color: #721c24; }
+        .admin-nav { background-color: #fff; padding: 1rem 2rem; border-bottom: 1px solid #dee2e6; margin: -2rem -2rem 2rem -2rem; border-radius: 8px 8px 0 0; }
+        .admin-nav ul { list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem; }
+        .admin-nav a { color: #495057; text-decoration: none; font-weight: 600; }
+        .admin-nav a:hover { color: #0056b3; }
+        .admin-nav a.active { color: #007bff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <nav class="admin-nav">
+        <ul>
+            <li><a href="/admin">Achievements</a></li>
+            <li><a href="/config_manager" class="active">Polling Config</a></li>
+        </ul>
+    </nav>
+    <h1>Polling Configuration Manager</h1>
+    <div id="notification" class="notification"></div>
+
+    <form id="config-form">
+        <h2>Deactivation Rules</h2>
+        <div id="deactivation-rules-container" class="form-group">
+            <!-- Deactivation rules will be populated here by JS -->
+        </div>
+
+        <h2>Polling Tiers</h2>
+        <div id="polling-tiers-container">
+            <div class="tier tier-header">
+                <span>Description</span>
+                <span>Max Age (hrs)</span>
+                <span>Interval (hrs)</span>
+                <span>Action</span>
+            </div>
+            <!-- Tiers will be populated here by JS -->
+        </div>
+
+        <div class="footer-actions">
+            <button type="button" id="add-tier-btn" class="btn-add">Add Tier</button>
+            <button type="submit" class="btn-save">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const getApiBaseUrl = () => {
+        const hostname = window.location.hostname;
+        // Regex to check if the hostname is an IP address.
+        const isIpAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
+
+        // For local development (localhost, 127.0.0.1, or any direct IP access),
+        // the API is expected to be on port 8000.
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || isIpAddress) {
+            return `http://${hostname}:8000`;
+        }
+        
+        // For production hostnames (e.g., a custom domain), assume it's behind a 
+        // reverse proxy and use the same protocol (http/https) without a port.
+        return `${window.location.protocol}//${hostname}`;
+    };
+    const API_BASE_URL = getApiBaseUrl();
+    const API_PREFIX = '/api/v1';
+    const rulesContainer = document.getElementById('deactivation-rules-container');
+    const tiersContainer = document.getElementById('polling-tiers-container');
+    const form = document.getElementById('config-form');
+    const notification = document.getElementById('notification');
+    const addTierBtn = document.getElementById('add-tier-btn');
+
+    // --- Data Loading and Rendering ---
+
+    async function loadConfig() {
+        try {
+            const response = await fetch(`${API_BASE_URL}${API_PREFIX}/config_manager/polling`);
+            if (!response.ok) throw new Error(`Failed to load config: ${response.statusText}`);
+            const config = await response.json();
+            
+            renderDeactivationRules(config.deactivation_rules);
+            renderTiers(config.polling_tiers);
+
+        } catch (error) {
+            showNotification(`Error: ${error.message}`, 'error');
+        }
+    }
+
+    function renderDeactivationRules(rules) {
+        rulesContainer.innerHTML = '';
+        for (const key in rules) {
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            const label = document.createElement('label');
+            label.htmlFor = `rule-${key}`;
+            label.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = `rule-${key}`;
+            input.name = key;
+            input.value = rules[key];
+            input.step = "any";
+            
+            div.appendChild(label);
+            div.appendChild(input);
+            rulesContainer.appendChild(div);
+        }
+    }
+
+    function renderTiers(tiers) {
+        // Clear existing tiers, but keep the header
+        const existingTiers = tiersContainer.querySelectorAll('.tier:not(.tier-header)');
+        existingTiers.forEach(t => t.remove());
+
+        tiers.forEach((tier, index) => {
+            const tierDiv = createTierElement(tier, index);
+            tiersContainer.appendChild(tierDiv);
+        });
+    }
+
+    function createTierElement(tier, index) {
+        const div = document.createElement('div');
+        div.className = 'tier';
+        div.dataset.index = index;
+
+        div.innerHTML = `
+            <input type="text" value="${tier.description}" placeholder="Description">
+            <input type="number" step="any" value="${tier.max_age_hours}" placeholder="Max Age">
+            <input type="number" step="any" value="${tier.interval_hours}" placeholder="Interval">
+            <button type="button" class="btn-remove">Remove</button>
+        `;
+        return div;
+    }
+
+    // --- Data Saving ---
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const config = {
+            deactivation_rules: {},
+            polling_tiers: []
+        };
+
+        // Collect deactivation rules
+        const ruleInputs = rulesContainer.querySelectorAll('input');
+        ruleInputs.forEach(input => {
+            config.deactivation_rules[input.name] = parseFloat(input.value);
+        });
+
+        // Collect polling tiers
+        const tierElements = tiersContainer.querySelectorAll('.tier:not(.tier-header)');
+        tierElements.forEach(tierDiv => {
+            const inputs = tierDiv.querySelectorAll('input');
+            config.polling_tiers.push({
+                description: inputs[0].value,
+                max_age_hours: parseFloat(inputs[1].value),
+                interval_hours: parseFloat(inputs[2].value)
+            });
+        });
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${API_PREFIX}/config_manager/polling`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Failed to save: ${errorData.detail || response.statusText}`);
+            }
+            
+            showNotification('Configuration saved successfully! The polling worker will use the new settings on its next cycle.', 'success');
+
+        } catch (error) {
+            showNotification(`Error: ${error.message}`, 'error');
+        }
+    });
+
+    function showNotification(message, type) {
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000);
+    }
+
+    // --- Event Listeners ---
+    tiersContainer.addEventListener('click', (event) => {
+        if (event.target.classList.contains('btn-remove')) {
+            event.target.closest('.tier').remove();
+        }
+    });
+
+    addTierBtn.addEventListener('click', () => {
+        const newTier = { description: "New Tier", max_age_hours: 0, interval_hours: 0 };
+        const index = tiersContainer.querySelectorAll('.tier:not(.tier-header)').length;
+        const tierDiv = createTierElement(newTier, index);
+        tiersContainer.appendChild(tierDiv);
+    });
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', loadConfig);
+</script>
+
+</body>
+</html>
