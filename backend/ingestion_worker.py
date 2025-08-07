@@ -106,7 +106,11 @@ def _parse_quoted_post_details(record_data: Optional[Dict[str, Any]]) -> Dict[st
     created_at = None
     if created_at_str := quoted_post_value.get("createdAt"):
         try:
-            created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
+            parsed_time = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
+            # Validate against future timestamps for quoted posts too
+            current_time = datetime.now(timezone.utc)
+            if parsed_time <= current_time + timedelta(minutes=5):  # Allow 5 min clock skew
+                created_at = parsed_time
         except (ValueError, TypeError):
             pass # Ignore parsing errors
 
@@ -227,7 +231,7 @@ async def process_firehose_message(message: Dict[str, Any], feed_id: str):
         logger.info(f"Skipping malformed post from Contrails for feed {feed_id}: Missing required fields.")
         return
 
-    # Parse created_at with timezone awareness
+    # Parse created_at with timezone awareness and validate against future timestamps
     try:
         # Python's fromisoformat can fail on >6 microsecond digits.
         # This safely truncates the fractional part before parsing.
@@ -240,6 +244,13 @@ async def process_firehose_message(message: Dict[str, Any], feed_id: str):
             created_at = datetime.fromisoformat(reformatted_str)
         else:
             created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
+        
+        # Validate against future timestamps (AT Protocol allows any timestamp)
+        current_time = datetime.now(timezone.utc)
+        if created_at > current_time + timedelta(minutes=5):  # Allow 5 min clock skew
+            logger.warning(f"Rejecting post {uri} with future timestamp: {created_at} (current: {current_time})")
+            return
+            
     except (ValueError, TypeError):
         logger.warning(f"Could not parse created_at timestamp: {post_record.get('createdAt')} for post {uri}")
         return
