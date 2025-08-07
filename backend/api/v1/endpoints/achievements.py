@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_, desc, text
 from backend.database import get_db
 from backend import models, crud
 from backend.image_generator import card_generator
+from datetime import datetime
+from typing import Optional, List
 import os
 
 router = APIRouter()
@@ -279,6 +281,85 @@ async def get_achievement_card_image(
         )
         
         return FileResponse(card_path, media_type="image/png")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/recent")
+async def get_recent_achievements(
+    feed_ids: str = Query(..., description="Comma-separated feed IDs"),
+    since: Optional[datetime] = Query(None, description="ISO datetime to get achievements since"),
+    limit: int = Query(50, description="Maximum number of achievements to return"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get recent achievements for specified feeds.
+    Used by bots to poll for new achievements.
+    """
+    try:
+        # Parse feed IDs
+        feed_id_list = [fid.strip() for fid in feed_ids.split(',') if fid.strip()]
+        
+        if not feed_id_list:
+            raise HTTPException(status_code=400, detail="At least one feed_id required")
+        
+        # Simple query using raw SQL for reliability
+        since_clause = ""
+        params = {"feed_ids": tuple(feed_id_list), "limit": limit}
+        
+        if since:
+            since_clause = "AND ua.earned_at >= :since"
+            params["since"] = since
+        
+        query = f"""
+        SELECT 
+            ua.id,
+            ua.user_did,
+            u.handle as user_handle,
+            u.display_name as user_display_name,
+            a.name as achievement_name,
+            a.description as achievement_description,
+            a.rarity_tier,
+            a.rarity_percentage,
+            ua.feed_id,
+            f.name as feed_name,
+            ua.earned_at
+        FROM user_achievements ua
+        JOIN achievements a ON ua.achievement_id = a.id
+        JOIN users u ON ua.user_did = u.did
+        LEFT JOIN feeds f ON ua.feed_id = f.id
+        WHERE ua.feed_id = ANY(:feed_ids)
+        {since_clause}
+        ORDER BY ua.earned_at DESC
+        LIMIT :limit
+        """
+        
+        result = await db.execute(text(query), params)
+        rows = result.fetchall()
+        
+        # Format response
+        achievements = []
+        for row in rows:
+            achievements.append({
+                "id": row.id,
+                "user_did": row.user_did,
+                "user_handle": row.user_handle,
+                "user_display_name": row.user_display_name,
+                "achievement_name": row.achievement_name,
+                "achievement_description": row.achievement_description,
+                "rarity_tier": row.rarity_tier,
+                "rarity_percentage": float(row.rarity_percentage) if row.rarity_percentage else 0.0,
+                "feed_id": row.feed_id,
+                "feed_name": row.feed_name,
+                "earned_at": row.earned_at.isoformat(),
+                "share_url": f"https://feedmaster.fema.monster/achievement/{row.user_did}/{row.achievement_name}"
+            })
+        
+        return {
+            "achievements": achievements,
+            "count": len(achievements),
+            "feed_ids": feed_id_list
+        }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

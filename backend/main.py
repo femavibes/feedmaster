@@ -63,7 +63,8 @@ async def debug_read_feeds_json():
 
 # --- API Routes ---
 # Include all routers directly with their full path prefix.
-app.include_router(achievements.router, prefix="/achievement", tags=["Achievements"])
+app.include_router(achievements.router, prefix="/api/v1/achievements", tags=["Achievements"])
+app.include_router(achievements.router, prefix="/achievement", tags=["Achievement Pages"])
 app.include_router(feeds.router, prefix="/api/v1/feeds", tags=["Feeds"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
 app.include_router(leaderboards.router, prefix="/api/v1/leaderboards", tags=["Leaderboards"])
