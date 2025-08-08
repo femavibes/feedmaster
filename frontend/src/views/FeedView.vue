@@ -5,7 +5,7 @@
     </div>
     <div v-if="loading" class="loading">Loading posts for {{ feedStore.selectedFeed?.name }}...</div>
     <div v-if="error" class="error">{{ error }}</div>
-    <div v-if="posts.length" class="posts-list">
+    <div v-if="posts.length" class="posts-list" @scroll="handleScroll">
       <div class="post-item" v-for="post in posts" :key="post.uri">
         <div class="post-author clickable" @click="openUserModal(post.author)">
           <img :src="proxyImageUrl(post.author.avatar_url)" alt="avatar" class="avatar" @error="onAvatarError" />
@@ -32,6 +32,19 @@
           <span class="post-time">{{ new Date(post.created_at).toLocaleString() }}</span>
         </a>
       </div>
+      
+      <!-- Loading more indicator -->
+      <div v-if="loadingMore" class="loading-more">
+        Loading more posts...
+      </div>
+      
+      <!-- End of posts indicator -->
+      <div v-if="!hasMore && posts.length >= MAX_POSTS" class="end-of-posts">
+        Showing latest {{ MAX_POSTS }} posts
+      </div>
+      <div v-else-if="!hasMore && !loadingMore" class="end-of-posts">
+        No more posts to load
+      </div>
     </div>
     
     <HashtagModal 
@@ -57,6 +70,11 @@ const posts = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const mentionUserCache = ref(new Map());
+const loadingMore = ref(false);
+const hasMore = ref(true);
+const currentPage = ref(0);
+const POSTS_PER_PAGE = 50;
+const MAX_POSTS = 150;
 const showHashtagModal = ref(false);
 const selectedHashtag = ref(null);
 
@@ -64,7 +82,7 @@ const feedStore = useFeedStore();
 
 let currentFetchController = null;
 
-const fetchPosts = async (feedId) => {
+const fetchPosts = async (feedId, reset = true) => {
   if (!feedId) return;
   
   // Cancel any ongoing request
@@ -74,20 +92,41 @@ const fetchPosts = async (feedId) => {
   
   // Create new abort controller for this request
   currentFetchController = new AbortController();
-  const requestId = Date.now();
   
-  loading.value = true;
-  error.value = null;
-  posts.value = [];
+  if (reset) {
+    loading.value = true;
+    error.value = null;
+    posts.value = [];
+    currentPage.value = 0;
+    hasMore.value = true;
+  } else {
+    loadingMore.value = true;
+  }
+  
+  const skip = reset ? 0 : currentPage.value * POSTS_PER_PAGE;
   
   try {
-    const fetchedPosts = await apiService.fetchPosts(feedId);
+    const response = await fetch(`/api/v1/feeds/${feedId}/posts?limit=${POSTS_PER_PAGE}&skip=${skip}`);
+    if (!response.ok) throw new Error('Failed to fetch posts');
+    
+    const data = await response.json();
+    const fetchedPosts = data.posts || [];
     
     // Only update if this is still the current request
     if (currentFetchController && !currentFetchController.signal.aborted) {
-      // Process mentions for all posts
+      // Process mentions for new posts
       await processMentionsForPosts(fetchedPosts);
-      posts.value = fetchedPosts;
+      
+      if (reset) {
+        posts.value = fetchedPosts;
+      } else {
+        posts.value = [...posts.value, ...fetchedPosts];
+      }
+      
+      currentPage.value++;
+      
+      // Check if we have more posts to load
+      hasMore.value = fetchedPosts.length === POSTS_PER_PAGE && posts.value.length < MAX_POSTS;
     }
   } catch (err) {
     // Only show error if this is still the current request
@@ -99,7 +138,21 @@ const fetchPosts = async (feedId) => {
     // Only update loading state if this is still the current request
     if (currentFetchController && !currentFetchController.signal.aborted) {
       loading.value = false;
+      loadingMore.value = false;
     }
+  }
+};
+
+const loadMorePosts = () => {
+  if (!loadingMore.value && hasMore.value && feedStore.selectedFeedId) {
+    fetchPosts(feedStore.selectedFeedId, false);
+  }
+};
+
+const handleScroll = (event) => {
+  const { scrollTop, scrollHeight, clientHeight } = event.target;
+  if (scrollTop + clientHeight >= scrollHeight - 100 && hasMore.value && !loadingMore.value) {
+    loadMorePosts();
   }
 };
 
@@ -306,7 +359,7 @@ const splitByNewlines = (text) => {
 watch(() => route.params.feed_id, (newFeedId) => {
   if (newFeedId) {
     feedStore.selectedFeedId = newFeedId;
-    fetchPosts(newFeedId);
+    fetchPosts(newFeedId, true);
     
     // Fallback timeout to prevent infinite loading
     setTimeout(() => {
@@ -399,4 +452,6 @@ h1 {
 .clickable-meta:hover { background-color: #404249; transform: translateY(-1px); }
 .bluesky-icon { flex-grow: 1; text-align: center; font-size: 0.9rem; }
 .post-time { margin-left: auto; }
+.loading-more, .end-of-posts { text-align: center; padding: 1rem; color: #949ba4; font-size: 0.9rem; }
+.end-of-posts { border-top: 1px solid #404249; margin-top: 1rem; }
 </style>

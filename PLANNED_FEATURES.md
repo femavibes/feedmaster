@@ -95,6 +95,34 @@ LABEL_STRATEGY=rarest        # 'rarest' = one label per user, 'threshold' = all 
 - [ ] Optimize database queries with better indexing
 - [ ] Implement pagination for large result sets
 
+### 🚀 Scaling for Thousands of Users
+**Current Capacity**: ~10-20 concurrent users comfortably, ~50-100 with slowdown
+**Target**: Scale to thousands/tens of thousands of users
+
+**Limiting Factors (in order of impact):**
+1. **Database Connection Pool** - Currently ~10 connections, each user query blocks a connection
+2. **No HTTP Caching** - Every user generates fresh database queries for same data
+3. **Single API Server** - One FastAPI process handling all requests
+4. **Database Query Performance** - Complex joins without proper indexing
+5. **No CDN** - Static assets served from origin server
+
+**Scaling Solutions:**
+- [ ] **HTTP Response Caching** - Cache posts/aggregates for 2-5 minutes (10x capacity improvement)
+- [ ] **Database Connection Pooling** - Increase to 50-100 connections with pgbouncer
+- [ ] **Redis Caching Layer** - Cache frequent queries (user profiles, hashtag searches)
+- [ ] **API Server Scaling** - Multiple FastAPI instances behind load balancer
+- [ ] **Database Read Replicas** - Separate read/write databases
+- [ ] **CDN Implementation** - CloudFlare for static assets and API caching
+- [ ] **Database Indexing** - Add indexes for common query patterns
+- [ ] **Background Job Queue** - Move heavy operations (mention processing) to background
+
+**Quick Wins for 10x Capacity:**
+1. Add HTTP caching headers (2 hours work, 10x improvement)
+2. Increase database connections (30 minutes work, 3x improvement)
+3. Add Redis for user/hashtag caching (4 hours work, 5x improvement)
+
+**Status**: Critical for public launch
+
 *Add new ideas below as they come up...*
 
 ---
