@@ -37,8 +37,10 @@ async_engine = create_async_engine(
     DATABASE_URL,
     echo=False, # Set to True to see SQL queries for debugging
     pool_pre_ping=True,
-    pool_size=10, # Adjust based on expected concurrent connections
-    max_overflow=20 # Max additional connections beyond pool_size
+    pool_size=50, # Increased for better concurrent user handling
+    max_overflow=50, # Max additional connections beyond pool_size
+    pool_timeout=30, # Wait up to 30 seconds for a connection
+    pool_recycle=3600 # Recycle connections every hour
 )
 
 # Create an asynchronous SessionLocal class

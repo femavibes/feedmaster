@@ -16,5 +16,14 @@ export const useFeedStore = defineStore('feed', {
     selectFeed(feedId) {
       this.selectedFeedId = feedId;
     },
+    setFeeds(feeds) {
+      this.availableFeeds = feeds;
+    },
+    setLoading(loading) {
+      this.feedsLoading = loading;
+    },
+    setError(error) {
+      this.feedsError = error;
+    },
   },
 });

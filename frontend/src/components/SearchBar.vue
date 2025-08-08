@@ -45,16 +45,15 @@
   </div>
 </template>
 
-<script setup>
-import { ref, watch } from 'vue'
-
+<script setup lang="ts">
+import { ref } from 'vue'
 
 const searchQuery = ref('')
 const results = ref({ users: [], hashtags: [] })
 const loading = ref(false)
-const error = ref(null)
+const error = ref<string | null>(null)
 const showResults = ref(false)
-let searchTimeout = null
+let searchTimeout: NodeJS.Timeout | null = null
 
 const emit = defineEmits(['openUserModal', 'openHashtagModal'])
 
@@ -72,14 +71,18 @@ const handleSearch = () => {
     
     try {
       const response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`)
+      console.log('Search request URL:', `/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`)
+      console.log('Search response status:', response.status)
       if (!response.ok) throw new Error('Search failed')
       
       const data = await response.json()
+      console.log('Search response data:', data)
       results.value = {
         users: data.users || [],
         hashtags: data.hashtags || []
       }
     } catch (err) {
+      console.error('Search error:', err)
       error.value = 'Search failed'
       results.value = { users: [], hashtags: [] }
     } finally {
@@ -88,7 +91,7 @@ const handleSearch = () => {
   }, 300)
 }
 
-const openUserModal = (user) => {
+const openUserModal = (user: any) => {
   emit('openUserModal', {
     did: user.did,
     handle: user.handle,
@@ -99,7 +102,7 @@ const openUserModal = (user) => {
   searchQuery.value = ''
 }
 
-const openHashtagModal = (hashtag) => {
+const openHashtagModal = (hashtag: string) => {
   emit('openHashtagModal', hashtag)
   showResults.value = false
   searchQuery.value = ''

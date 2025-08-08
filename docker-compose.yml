@@ -89,6 +89,15 @@ services:
       db:
         condition: service_healthy
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
   cloudflared-tunnel:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
@@ -98,3 +107,4 @@ services:
 
 volumes:
   pgdata:
+  redis_data:

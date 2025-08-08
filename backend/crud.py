@@ -277,9 +277,21 @@ async def delete_user(db: AsyncSession, user_did: str) -> Optional[models.User]:
     return db_user
 
 async def search_users(db: AsyncSession, query: str, limit: int = 10) -> Sequence[models.User]:
-    """Searches for users by handle or display name."""
-    if not query or len(query) < 3:
+    """Searches for users by handle or display name with optional Redis caching."""
+    if not query or len(query) < 2:
         return []
+    
+    # Try cache first (with fallback if Redis unavailable)
+    try:
+        from backend.cache import Cache, user_search_key
+        cache_key = user_search_key(f"{query}:{limit}")
+        cached_result = Cache.get(cache_key)
+        if cached_result:
+            return [models.User(**user_data) for user_data in cached_result]
+    except Exception as e:
+        logger.warning(f"Cache unavailable for user search: {e}")
+    
+    # Query database
     search_query = f"%{query}%"
     stmt = (
         select(models.User)
@@ -292,12 +304,37 @@ async def search_users(db: AsyncSession, query: str, limit: int = 10) -> Sequenc
         .limit(limit)
     )
     result = await db.execute(stmt)
-    return result.scalars().all()
+    users = result.scalars().all()
+    
+    # Try to cache result (with fallback if Redis unavailable)
+    try:
+        user_dicts = [{
+            'did': user.did,
+            'handle': user.handle,
+            'display_name': user.display_name,
+            'avatar_url': user.avatar_url,
+            'description': user.description
+        } for user in users]
+        Cache.set(cache_key, user_dicts, 600)
+    except Exception as e:
+        logger.warning(f"Failed to cache user search results: {e}")
+    
+    return users
 
 async def search_hashtags(db: AsyncSession, query: str, limit: int = 10) -> List[Dict[str, Any]]:
-    """Searches for hashtags by partial match."""
+    """Searches for hashtags by partial match with optional Redis caching."""
     if not query or len(query) < 2:
         return []
+    
+    # Try cache first (with fallback if Redis unavailable)
+    try:
+        from backend.cache import Cache, hashtag_search_key
+        cache_key = hashtag_search_key(f"{query}:{limit}")
+        cached_result = Cache.get(cache_key)
+        if cached_result:
+            return cached_result
+    except Exception as e:
+        logger.warning(f"Cache unavailable for hashtag search: {e}")
     
     # Remove # prefix if present
     clean_query = query.lstrip('#').lower()
@@ -323,10 +360,18 @@ async def search_hashtags(db: AsyncSession, query: str, limit: int = 10) -> List
     ).limit(limit)
     
     result = await db.execute(stmt)
-    return [{
+    hashtags = [{
         'hashtag': hashtag,
         'count': count
     } for hashtag, count in result.all()]
+    
+    # Try to cache result (with fallback if Redis unavailable)
+    try:
+        Cache.set(cache_key, hashtags, 900)
+    except Exception as e:
+        logger.warning(f"Failed to cache hashtag search results: {e}")
+    
+    return hashtags
 
 # --- NEW CRUD FUNCTIONS FOR PROFILES ---
 

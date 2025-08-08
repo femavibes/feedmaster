@@ -3,8 +3,10 @@ import os
 from typing import List, Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+import json
 
 from backend import crud, schemas
 from backend.schemas import AggregateData
@@ -51,18 +53,20 @@ async def get_available_feeds(db: AsyncSession = Depends(get_db)):
     # Sort feeds by order field, fallback to id if order is None
     sorted_feeds = sorted(active_feeds, key=lambda f: (f.order or 999, f.id))
     formatted_feeds = [
-        Feed(
-            id=feed.id, 
-            name=feed.name, 
-            icon=feed.avatar_url or feed.name[0].upper(),
-            avatar_url=feed.avatar_url,
-            like_count=feed.like_count or 0,
-            bluesky_description=feed.bluesky_description
-        )
+        {
+            "id": feed.id, 
+            "name": feed.name, 
+            "icon": feed.avatar_url or feed.name[0].upper(),
+            "avatar_url": feed.avatar_url,
+            "like_count": feed.like_count or 0,
+            "bluesky_description": feed.bluesky_description
+        }
         for feed in sorted_feeds
     ]
-
-    return {"feeds": formatted_feeds}
+    
+    response_data = {"feeds": formatted_feeds}
+    
+    return response_data
 
 
 @router.get(

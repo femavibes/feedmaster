@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useFeedStore } from '@/stores/feedStore';
+import { useFeedStore } from '@/stores/useFeedStore';
 import SearchBar from './SearchBar.vue';
 
 const feedStore = useFeedStore();

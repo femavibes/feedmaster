@@ -19,17 +19,11 @@ const apiClient = axios.create({
 const apiService = {
   async fetchFeeds() {
     const store = useFeedStore();
-    store.feedsLoading = true;
+    store.setLoading(true);
+    store.setError(null);
     try {
       const fullUrl = `${API_BASE_URL}/feeds/`;
       console.log('Attempting to fetch feeds from:', fullUrl);
-      console.log('Full URL breakdown:', {
-        protocol: window.location.protocol,
-        host: window.location.host,
-        API_BASE_URL,
-        fullUrl
-      });
-      // Use native fetch to bypass axios issues
       const response = await fetch(fullUrl, {
         method: 'GET',
         headers: {
@@ -40,18 +34,16 @@ const apiService = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      const axiosLikeResponse = { data };
-      console.log('Response from /api/v1/feeds:', axiosLikeResponse.data);
-      store.availableFeeds = axiosLikeResponse.data.feeds;
-      if (store.availableFeeds.length > 0) {
-        store.selectedFeedId = store.availableFeeds[0].id;
+      console.log('Response from /api/v1/feeds:', data);
+      store.setFeeds(data.feeds);
+      if (data.feeds.length > 0 && !store.selectedFeedId) {
+        store.selectFeed(data.feeds[0].id);
       }
     } catch (error) {
-      console.error('Error fetching feeds:', error.response ? error.response.data : error.message);
-      store.feedsError = 'Failed to fetch feeds.';
-      console.error('Failed to fetch feeds:', error);
+      console.error('Error fetching feeds:', error);
+      store.setError('Failed to fetch feeds.');
     } finally {
-      store.feedsLoading = false;
+      store.setLoading(false);
     }
   },
 

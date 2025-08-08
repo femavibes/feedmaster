@@ -8,7 +8,10 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: FeedView
+      redirect: to => {
+        // This will be handled by the navigation guard below
+        return '/feed/3654' // Default to first feed as fallback
+      }
     },
     {
       path: '/feed/:feed_id',
@@ -43,6 +46,29 @@ const router = createRouter({
       component: () => import('../views/GeoHashtagsView.vue')
     }
   ]
+})
+
+// Navigation guard to redirect home to first available feed
+router.beforeEach(async (to, from, next) => {
+  if (to.path === '/') {
+    // Try to get feeds from API
+    try {
+      const response = await fetch('/api/v1/feeds/')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.feeds && data.feeds.length > 0) {
+          next(`/feed/${data.feeds[0].id}`)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching feeds for redirect:', error)
+    }
+    // Fallback to default feed
+    next('/feed/3654')
+  } else {
+    next()
+  }
 })
 
 export default router
