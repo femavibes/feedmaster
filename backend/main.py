@@ -11,8 +11,10 @@ from .api.v1.endpoints import (
     admin,
     achievements,
     feeds,
+    feedmaker,
     leaderboards,
     profiles,
+    public,
     search,
     config,
 )
@@ -67,6 +69,10 @@ app.include_router(achievements.router, prefix="/api/v1/achievements", tags=["Ac
 app.include_router(achievements.router, prefix="/achievement", tags=["Achievement Pages"])
 app.include_router(feeds.router, prefix="/api/v1/feeds", tags=["Feeds"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
+app.include_router(feedmaker.router, prefix="/api/v1/feedmaker", tags=["Feedmaker"])
+app.include_router(public.router, prefix="/api/v1/public", tags=["Public"])
+from .api.v1.endpoints.public import router as public_router
+app.include_router(public_router, prefix="/api/v1", tags=["Public API"])
 app.include_router(leaderboards.router, prefix="/api/v1/leaderboards", tags=["Leaderboards"])
 app.include_router(profiles.router, prefix="/api/v1/profiles", tags=["Profiles"])
 app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
@@ -158,4 +164,31 @@ async def serve_vue_admin_route():
         index_path = os.path.join(FRONTEND_VUE_DIR, "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
+
+@app.get("/dashboard", response_class=FileResponse, include_in_schema=False)
+async def serve_vue_feedmaker_route():
+    """Serves Vue app for feedmaker dashboard route."""
+    if os.path.exists(FRONTEND_VUE_DIR):
+        index_path = os.path.join(FRONTEND_VUE_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
+
+@app.get("/apply", response_class=FileResponse, include_in_schema=False)
+async def serve_vue_apply_route():
+    """Serves Vue app for public application route."""
+    if os.path.exists(FRONTEND_VUE_DIR):
+        index_path = os.path.join(FRONTEND_VUE_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
+
+@app.get("/geo-hashtags", response_class=FileResponse, include_in_schema=False)
+async def serve_geo_hashtags_page():
+    """Serves the standalone geo hashtags page."""
+    if os.path.exists(FRONTEND_VUE_DIR):
+        geo_path = os.path.join(FRONTEND_VUE_DIR, "geo-hashtags.html")
+        if os.path.exists(geo_path):
+            return FileResponse(geo_path)
     raise HTTPException(status_code=404, detail="Not found")

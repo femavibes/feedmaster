@@ -327,6 +327,7 @@ async def get_achievement_card_image(
 async def get_recent_achievements(
     feed_ids: str = Query(..., description="Comma-separated feed IDs"),
     since: Optional[datetime] = Query(None, description="ISO datetime to get achievements since"),
+    since_id: Optional[int] = Query(None, description="Achievement ID to get achievements after (cursor)"),
     limit: int = Query(50, description="Maximum number of achievements to return"),
     db: AsyncSession = Depends(get_db)
 ):
@@ -335,19 +336,41 @@ async def get_recent_achievements(
     Used by bots to poll for new achievements.
     """
     try:
-        # Parse feed IDs
+        # Parse feed IDs and check for global
         feed_id_list = [fid.strip() for fid in feed_ids.split(',') if fid.strip()]
         
         if not feed_id_list:
             raise HTTPException(status_code=400, detail="At least one feed_id required")
         
-        # Simple query using raw SQL for reliability
-        since_clause = ""
-        params = {"feed_ids": tuple(feed_id_list), "limit": limit}
+        # Check if requesting global achievements
+        is_global = 'global' in feed_id_list
+        if is_global:
+            # Remove 'global' from list and handle separately
+            feed_id_list = [fid for fid in feed_id_list if fid != 'global']
         
-        if since:
+        # Build query conditions
+        since_clause = ""
+        params = {"limit": limit}
+        
+        if since_id:
+            since_clause = "AND ua.id > :since_id"
+            params["since_id"] = since_id
+        elif since:
             since_clause = "AND ua.earned_at >= :since"
             params["since"] = since
+        
+        # Build WHERE clause for feed filtering
+        if is_global and feed_id_list:
+            # Both global and specific feeds
+            where_clause = "WHERE (ua.feed_id IS NULL OR ua.feed_id = ANY(:feed_ids))"
+            params["feed_ids"] = tuple(feed_id_list)
+        elif is_global:
+            # Only global achievements
+            where_clause = "WHERE ua.feed_id IS NULL"
+        else:
+            # Only specific feeds
+            where_clause = "WHERE ua.feed_id = ANY(:feed_ids)"
+            params["feed_ids"] = tuple(feed_id_list)
         
         query = f"""
         SELECT 
@@ -367,9 +390,9 @@ async def get_recent_achievements(
         JOIN users u ON ua.user_did = u.did
         LEFT JOIN feeds f ON ua.feed_id = f.id
         LEFT JOIN achievement_feed_rarity afr ON (a.id = afr.achievement_id AND ua.feed_id = afr.feed_id)
-        WHERE ua.feed_id = ANY(:feed_ids)
+        {where_clause}
         {since_clause}
-        ORDER BY ua.earned_at DESC
+        ORDER BY ua.id ASC
         LIMIT :limit
         """
         

@@ -180,6 +180,11 @@ class Feed(Base):
     
     last_aggregated_at = Column(DateTime(timezone=True), nullable=True) # When this feed was last fully aggregated
 
+    # Admin system fields
+    owner_did = Column(String(255), nullable=True, index=True)  # DID of feed owner
+    tier = Column(String(50), nullable=False, default='bronze')  # bronze, silver, gold
+    is_active = Column(Boolean, nullable=False, default=True)
+    
     # NEW: Timestamps for auditing - added timezone.utc for consistency
     created_at = Column(DateTime(timezone=True), default=func.now())
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
@@ -319,3 +324,70 @@ class UserStats(Base):
     first_post_at = Column(DateTime(timezone=True))
     latest_post_at = Column(DateTime(timezone=True))
     last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+# --- ADMIN SYSTEM MODELS ---
+
+class ApiKeyType(enum.Enum):
+    MASTER_ADMIN = "master_admin"
+    FEED_OWNER = "feed_owner"
+
+class ApiKey(Base):
+    __tablename__ = 'api_keys'
+    
+    id = Column(Integer, primary_key=True)
+    key_hash = Column(String(255), nullable=False, unique=True, index=True)
+    key_type = Column(SQLAlchemyEnum(ApiKeyType), nullable=False)
+    owner_did = Column(String(255), nullable=True, index=True)  # NULL for master admin keys
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
+    
+    def __repr__(self):
+        return f"<ApiKey(id={self.id}, type={self.key_type.value}, owner={self.owner_did})>"
+
+class ApplicationStatus(enum.Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class FeedApplication(Base):
+    __tablename__ = 'feed_applications'
+    
+    id = Column(Integer, primary_key=True)
+    applicant_did = Column(String(255), nullable=False, index=True)
+    applicant_handle = Column(String(255), nullable=True)  # Bluesky handle for human readability
+    feed_id = Column(String(255), nullable=False)
+    websocket_url = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    status = Column(SQLAlchemyEnum(ApplicationStatus), nullable=False, default=ApplicationStatus.PENDING)
+    applied_at = Column(DateTime(timezone=True), server_default=func.now())
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    reviewed_by = Column(String(255), nullable=True)  # DID of admin who reviewed
+    notes = Column(Text, nullable=True)  # Admin notes
+    
+    def __repr__(self):
+        return f"<FeedApplication(id={self.id}, feed_id={self.feed_id}, status={self.status.value})>"
+# --- CONFIGURATION MODELS ---
+
+class GeoHashtagMapping(Base):
+    __tablename__ = 'geo_hashtag_mappings'
+    
+    hashtag = Column(String(255), primary_key=True, index=True)
+    city = Column(String(255), nullable=True)
+    region = Column(String(255), nullable=True)
+    country = Column(String(255), nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    def __repr__(self):
+        return f"<GeoHashtagMapping(hashtag='{self.hashtag}', country='{self.country}')>"
+
+class NewsDomain(Base):
+    __tablename__ = 'news_domains'
+    
+    domain = Column(String(255), primary_key=True, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    def __repr__(self):
+        return f"<NewsDomain(domain='{self.domain}')>"

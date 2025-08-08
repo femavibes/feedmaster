@@ -26,6 +26,21 @@ const router = createRouter({
       name: 'admin',
       // This is lazy-loaded, meaning it's only fetched when the user navigates to it.
       component: () => import('../views/AdminView.vue')
+    },
+    {
+      path: '/dashboard',
+      name: 'feedmaker',
+      component: () => import('../views/FeedmakerView.vue')
+    },
+    {
+      path: '/apply',
+      name: 'apply',
+      component: () => import('../views/ApplyView.vue')
+    },
+    {
+      path: '/geo-hashtags',
+      name: 'geo-hashtags',
+      component: () => import('../views/GeoHashtagsView.vue')
     }
   ]
 })

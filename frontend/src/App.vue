@@ -42,7 +42,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-layout">
+  <!-- Admin, Feedmaker, and Apply pages get full layout -->
+  <div v-if="route.name === 'admin' || route.name === 'feedmaker' || route.name === 'apply'" class="admin-layout">
+    <RouterView />
+  </div>
+  
+  <!-- Regular app layout for other pages -->
+  <div v-else class="app-layout">
     <TheHeader @openUserModal="openUserModal" @openHashtagModal="openHashtagModal" />
     <LeftNavBar />
     <main class="main-content">
@@ -78,6 +84,12 @@ body {
 </style>
 
 <style scoped>
+.admin-layout {
+  width: 100%;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
 .app-layout {
   display: grid;
   /*
