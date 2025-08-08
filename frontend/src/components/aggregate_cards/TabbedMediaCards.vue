@@ -19,7 +19,7 @@
         <div v-if="videos && videos.length">
           <div v-for="(video, index) in videos" :key="video.uri + index" class="media-item">
             <a :href="video.post_url" target="_blank" class="media-thumbnail">
-              <img v-if="video.thumbnail_url" :src="video.thumbnail_url" alt="Video thumbnail" class="thumbnail-img" @error="onThumbnailError" />
+              <img v-if="video.thumbnail_url" :src="proxyImageUrl(video.thumbnail_url)" alt="Video thumbnail" class="thumbnail-img" @error="onThumbnailError" />
               <div v-else class="placeholder-thumbnail">📹</div>
               <span class="media-count">{{ video.like_count.toLocaleString() }}</span>
             </a>
@@ -39,7 +39,7 @@
         <div v-if="images && images.length">
           <div v-for="(image, index) in images" :key="image.uri + index" class="media-item">
             <a :href="image.post_url" target="_blank" class="media-thumbnail">
-              <img v-if="image.images && image.images[0] && image.images[0].url" :src="image.images[0].url" alt="Image" class="thumbnail-img" @error="onThumbnailError" />
+              <img v-if="image.images && image.images[0] && image.images[0].url" :src="proxyImageUrl(image.images[0].url)" alt="Image" class="thumbnail-img" @error="onThumbnailError" />
               <div v-else class="placeholder-thumbnail">🖼️</div>
               <span class="media-count">{{ image.like_count.toLocaleString() }}</span>
             </a>
@@ -60,6 +60,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { PropType } from 'vue'
+import { proxyImageUrl } from '@/utils/imageProxy'
 
 interface PostCard {
   uri: string

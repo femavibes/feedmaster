@@ -79,4 +79,20 @@ LABEL_STRATEGY=rarest        # 'rarest' = one label per user, 'threshold' = all 
 
 ## 📝 Future Feature Ideas
 
+### Database Storage Optimization Options
+**Current issue:** 245MB feed_posts table with 31k records, avg 1.07 feeds per post
+
+- [ ] **Option 1: Full JSON replacement** - Replace feed_posts table with JSON array in posts table. Saves ~243MB (99% reduction) but makes aggregation queries harder
+- [ ] **Option 2: Hybrid with summary** - Keep feed_posts but add JSON summary to posts for fast lookups. No space savings but faster queries
+- [ ] **Option 3: Compress join table** - Use smaller data types (SMALLINT for feed_id), remove unused columns. Saves ~75-100MB (30-40% reduction)
+- [ ] **Option 4: Partition by time** - Archive old posts (>30 days) to compressed storage. Saves ~70-80% depending on retention
+- [ ] **Option 5: Single table with nullable feed columns** - Add feed_X_ingested_at columns to posts table. Saves ~60-70% but schema changes when adding feeds
+- [ ] **Option 6: Enable PostgreSQL compression** - Compress existing tables at page level. Saves ~40-60% with 0-5% query slowdown, zero risk
+
+### Performance Improvements
+- [ ] Implement caching layer (Redis) for frequently accessed data
+- [ ] Add database connection pooling optimization
+- [ ] Optimize database queries with better indexing
+- [ ] Implement pagination for large result sets
+
 *Add new ideas below as they come up...*

@@ -525,7 +525,35 @@
       </div>
     </div>
 
-    <!-- Modals would go here but keeping minimal for now -->
+    <!-- Edit Feed Modal -->
+    <div v-if="showEditFeed" class="modal-overlay" @click="cancelEditFeed">
+      <div class="modal" @click.stop>
+        <h3>Edit Feed: {{ editingFeed?.name }}</h3>
+        <div class="edit-feed-content">
+          <div class="form-group">
+            <label>Feed ID:</label>
+            <span class="feed-id">{{ editingFeed?.id }}</span>
+          </div>
+          <div class="form-group">
+            <label>Current Owner:</label>
+            <span class="owner-did">{{ editingFeed?.owner_did || 'None' }}</span>
+          </div>
+          <div class="form-group">
+            <label for="tier-select">Tier:</label>
+            <select id="tier-select" v-model="newTier" class="tier-select">
+              <option value="bronze">🥉 Bronze</option>
+              <option value="silver">🥈 Silver</option>
+              <option value="gold">🥇 Gold</option>
+              <option value="platinum">💎 Platinum</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="cancelEditFeed" class="btn-small">Cancel</button>
+          <button @click="saveEditFeed" class="btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -546,6 +574,9 @@ export default {
     const userSearch = ref('')
     const health = ref(null)
     const activeTab = ref('api-keys')
+    const showEditFeed = ref(false)
+    const editingFeed = ref(null)
+    const newTier = ref('')
     const geoHashtags = ref({})
     const newsDomains = ref([])
     const newGeoEntry = ref({ hashtag: '', city: '', region: '', country: '' })
@@ -639,19 +670,94 @@ export default {
     }
 
     const editFeed = (feed) => {
-      console.log('Edit feed:', feed)
+      editingFeed.value = feed
+      newTier.value = feed.tier
+      showEditFeed.value = true
+    }
+    
+    const saveEditFeed = async () => {
+      if (newTier.value === editingFeed.value.tier) {
+        showEditFeed.value = false
+        return
+      }
+      
+      try {
+        await apiCall(`/feeds/${editingFeed.value.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ tier: newTier.value })
+        })
+        
+        // Reload feeds to show updated data
+        const feedsData = await apiCall('/feeds')
+        feeds.value = feedsData.feeds
+        
+        showEditFeed.value = false
+        alert('Feed tier updated successfully!')
+      } catch (error) {
+        alert('Failed to update feed: ' + error.message)
+      }
+    }
+    
+    const cancelEditFeed = () => {
+      showEditFeed.value = false
+      editingFeed.value = null
+      newTier.value = ''
     }
 
     const deleteFeed = async (feed) => {
-      console.log('Delete feed:', feed)
+      if (!confirm(`Are you sure you want to delete feed "${feed.name}" (${feed.id})?\n\nThis will permanently remove the feed and all associated data.`)) {
+        return
+      }
+      
+      try {
+        await apiCall(`/feeds/${feed.id}`, { method: 'DELETE' })
+        
+        // Reload feeds to show updated list
+        const feedsData = await apiCall('/feeds')
+        feeds.value = feedsData.feeds
+        
+        alert(`Feed "${feed.name}" deleted successfully!`)
+      } catch (error) {
+        alert('Failed to delete feed: ' + error.message)
+      }
     }
 
     const reviewApplication = async (app, status) => {
-      console.log('Review app:', app, status)
+      try {
+        await apiCall(`/applications/${app.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            status: status,
+            tier: 'bronze',
+            notes: status === 'approved' ? 'Application approved' : 'Application rejected'
+          })
+        })
+        
+        // Reload applications to show updated status
+        const appsData = await apiCall('/applications')
+        applications.value = appsData.applications
+        
+        alert(`Application ${status} successfully!`)
+      } catch (error) {
+        alert('Failed to review application: ' + error.message)
+      }
     }
 
     const viewApplicationDetails = (app) => {
-      console.log('View app details:', app)
+      const details = `Application Details:
+
+ID: ${app.id}
+Applicant DID: ${app.applicant_did}
+Applicant Handle: ${app.applicant_handle}
+Feed ID: ${app.feed_id}
+WebSocket URL: ${app.websocket_url}
+Description: ${app.description}
+Status: ${app.status}
+Applied: ${new Date(app.applied_at).toLocaleString()}
+Reviewed: ${app.reviewed_at ? new Date(app.reviewed_at).toLocaleString() : 'Not yet'}
+Notes: ${app.notes || 'None'}`
+      
+      alert(details)
     }
 
     const searchUsers = async () => {
@@ -738,6 +844,24 @@ export default {
       toggleProminent,
       manageAchievements,
       refreshHealth,
+      
+      // Feed management functions
+      updateFeed: async (feedId, updates) => {
+        try {
+          await apiCall(`/feeds/${feedId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates)
+          })
+          
+          // Reload feeds to show updated data
+          const feedsData = await apiCall('/feeds')
+          feeds.value = feedsData.feeds
+          
+          alert('Feed updated successfully!')
+        } catch (error) {
+          alert('Failed to update feed: ' + error.message)
+        }
+      },
       
       // Configuration management
       loadGeoConfig,
@@ -905,6 +1029,11 @@ export default {
       expandedRegions,
       expandedCities,
       inlineAdd,
+      showEditFeed,
+      editingFeed,
+      newTier,
+      saveEditFeed,
+      cancelEditFeed,
       
       copyPublicUrl: () => {
         const url = `${window.location.origin}/geo-hashtags`
@@ -1627,5 +1756,80 @@ th {
 
 .city-node {
   margin-left: 40px;
+}
+
+/* Edit Feed Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+}
+
+.edit-feed-content {
+  margin: 20px 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #2c3e50;
+}
+
+.feed-id, .owner-did {
+  font-family: monospace;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  display: block;
+  color: #666;
+}
+
+.tier-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+}
+
+.tier-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
 }
 </style>

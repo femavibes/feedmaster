@@ -67,29 +67,6 @@
             </div>
 
             <div class="form-group">
-              <label for="feed_id">Graze Feed ID *</label>
-              <input 
-                id="feed_id"
-                v-model="application.feed_id" 
-                placeholder="1234"
-                required
-              >
-              <small>Your unique feed ID from Graze Contrails (usually 4 digits)</small>
-            </div>
-
-            <div class="form-group">
-              <label for="description">Feed Description *</label>
-              <textarea 
-                id="description"
-                v-model="application.description" 
-                rows="4"
-                placeholder="Describe your feed's purpose, target audience, and content type..."
-                required
-              ></textarea>
-              <small>Help us understand what makes your feed unique</small>
-            </div>
-
-            <div class="form-group">
               <label for="applicant_name">Your Name (optional)</label>
               <input 
                 id="applicant_name"
@@ -108,6 +85,29 @@
                 placeholder="john@example.com"
               >
               <small>We'll notify you about your application status</small>
+            </div>
+
+            <div class="form-group">
+              <label for="feed_id">Graze Feed ID *</label>
+              <input 
+                id="feed_id"
+                v-model="application.feed_id" 
+                placeholder="aaaic34mdicfg"
+                required
+              >
+              <small>Your unique feed ID from Graze (found in your feed's AT URI)</small>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Feed Description *</label>
+              <textarea 
+                id="description"
+                v-model="application.description" 
+                rows="4"
+                placeholder="Describe your feed's purpose, target audience, and content type..."
+                required
+              ></textarea>
+              <small>Help us understand what makes your feed unique</small>
             </div>
 
             <div class="form-actions">
@@ -207,6 +207,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Error Modal -->
+    <div v-if="showError" class="modal-overlay" @click="closeErrorModal">
+      <div class="modal error-modal" @click.stop>
+        <h3>❌ Error</h3>
+        <div class="error-content">
+          <textarea readonly :value="errorMessage" class="error-text"></textarea>
+        </div>
+        <div class="error-actions">
+          <button @click="copyError" class="copy-btn">Copy Error</button>
+          <button @click="closeErrorModal" class="close-btn">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -220,14 +234,16 @@ export default {
     const submitted = ref(false)
     const applicationId = ref(null)
     const statusResult = ref(null)
+    const showError = ref(false)
+    const errorMessage = ref('')
     
     const application = ref({
       applicant_did: '',
       applicant_handle: '',
-      feed_id: '',
-      description: '',
       applicant_name: '',
-      applicant_email: ''
+      applicant_email: '',
+      feed_id: '',
+      description: ''
     })
     
     const statusCheck = ref({
@@ -237,7 +253,7 @@ export default {
     const submitApplication = async () => {
       loading.value = true
       try {
-        const response = await fetch('/api/v1/public/apply', {
+        const response = await fetch('/api/v1/applications', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -254,7 +270,7 @@ export default {
         applicationId.value = result.application_id
         submitted.value = true
       } catch (error) {
-        alert('Application failed: ' + error.message)
+        showErrorModal('Application failed: ' + error.message)
       } finally {
         loading.value = false
       }
@@ -262,7 +278,7 @@ export default {
 
     const checkStatus = async () => {
       try {
-        const response = await fetch(`/api/v1/public/application-status/${statusCheck.value.applicationId}`)
+        const response = await fetch(`/api/v1/applications/${statusCheck.value.applicationId}`)
         
         if (!response.ok) {
           throw new Error('Application not found')
@@ -270,7 +286,7 @@ export default {
         
         statusResult.value = await response.json()
       } catch (error) {
-        alert('Failed to check status: ' + error.message)
+        showErrorModal('Failed to check status: ' + error.message)
         statusResult.value = null
       }
     }
@@ -287,16 +303,31 @@ export default {
       application.value = {
         applicant_did: '',
         applicant_handle: '',
-        feed_id: '',
-        description: '',
         applicant_name: '',
-        applicant_email: ''
+        applicant_email: '',
+        feed_id: '',
+        description: ''
       }
     }
 
     const statusUrl = computed(() => 
       `${window.location.origin}/apply#status-${applicationId.value}`
     )
+
+    const showErrorModal = (message) => {
+      errorMessage.value = message
+      showError.value = true
+    }
+
+    const closeErrorModal = () => {
+      showError.value = false
+      errorMessage.value = ''
+    }
+
+    const copyError = () => {
+      navigator.clipboard.writeText(errorMessage.value)
+      alert('Error copied to clipboard!')
+    }
 
     return {
       loading,
@@ -306,10 +337,15 @@ export default {
       statusCheck,
       statusResult,
       statusUrl,
+      showError,
+      errorMessage,
       submitApplication,
       checkStatus,
       copyStatusUrl,
-      submitAnother
+      submitAnother,
+      showErrorModal,
+      closeErrorModal,
+      copyError
     }
   }
 }
@@ -588,6 +624,43 @@ export default {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #ddd;
+}
+
+.error-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.error-content {
+  margin: 20px 0;
+}
+
+.error-text {
+  width: 100%;
+  height: 150px;
+  padding: 15px;
+  border: 2px solid #e74c3c;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 14px;
+  background: #fdf2f2;
+  color: #721c24;
+  resize: none;
+}
+
+.error-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.close-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

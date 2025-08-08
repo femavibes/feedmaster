@@ -3,18 +3,24 @@
     <div class="feedmaker-auth-bar">
       <div class="auth-section">
         <div v-if="!isAuthenticated" class="auth-form">
-          <input 
-            v-model="userDid" 
-            placeholder="Enter your DID"
-            @keyup.enter="authenticate"
-          >
-          <input 
-            v-model="apiKey" 
-            type="password" 
-            placeholder="Enter your API key"
-            @keyup.enter="authenticate"
-          >
-          <button @click="authenticate" :disabled="loading">Login</button>
+          <div class="auth-message">
+            <p>This page is for feedmakers to manage their feeds.</p>
+            <p>If you would like to see your feed featured here, <a href="/apply">apply here</a>.</p>
+          </div>
+          <div class="auth-inputs">
+            <input 
+              v-model="userDid" 
+              placeholder="Enter your DID"
+              @keyup.enter="authenticate"
+            >
+            <input 
+              v-model="apiKey" 
+              type="password" 
+              placeholder="Enter your API key"
+              @keyup.enter="authenticate"
+            >
+            <button @click="authenticate" :disabled="loading">Login</button>
+          </div>
         </div>
         <div v-else class="auth-status">
           <span>✅ Authenticated as {{ userDid }}</span>
@@ -412,10 +418,33 @@ export default {
 
 .auth-form {
   display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.auth-message {
+  color: #ecf0f1;
+  font-size: 14px;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.auth-message a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.auth-message a:hover {
+  text-decoration: underline;
+}
+
+.auth-inputs {
+  display: flex;
   gap: 10px;
 }
 
-.auth-form input {
+.auth-inputs input {
   padding: 10px 15px;
   border: 1px solid #ddd;
   border-radius: 6px;

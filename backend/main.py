@@ -17,6 +17,7 @@ from .api.v1.endpoints import (
     public,
     search,
     config,
+    image_proxy,
 )
 
 # --- App Setup ---
@@ -77,6 +78,7 @@ app.include_router(leaderboards.router, prefix="/api/v1/leaderboards", tags=["Le
 app.include_router(profiles.router, prefix="/api/v1/profiles", tags=["Profiles"])
 app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
 app.include_router(config.router, prefix="/api/v1/config_manager", tags=["Config Manager"])
+app.include_router(image_proxy.router, prefix="/api/v1", tags=["Image Proxy"])
 
 # --- Frontend Serving ---
 # Define the path to the frontend directory.
@@ -185,10 +187,10 @@ async def serve_vue_apply_route():
     raise HTTPException(status_code=404, detail="Not found")
 
 @app.get("/geo-hashtags", response_class=FileResponse, include_in_schema=False)
-async def serve_geo_hashtags_page():
-    """Serves the standalone geo hashtags page."""
+async def serve_vue_geo_hashtags_route():
+    """Serves Vue app for geo-hashtags route."""
     if os.path.exists(FRONTEND_VUE_DIR):
-        geo_path = os.path.join(FRONTEND_VUE_DIR, "geo-hashtags.html")
-        if os.path.exists(geo_path):
-            return FileResponse(geo_path)
+        index_path = os.path.join(FRONTEND_VUE_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
     raise HTTPException(status_code=404, detail="Not found")

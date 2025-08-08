@@ -372,11 +372,14 @@ async def process_firehose_message(message: Dict[str, Any], feed_id: str):
         images_to_parse = []
         if embed_type == 'app.bsky.embed.images':
             images_to_parse = embed_data.get('images', [])
-        elif embed_type == 'app.bsky.embed.recordWithMedia' and embed_data.get('media', {}).get('$type') == 'app.bsky.embed.images':
-            images_to_parse = embed_data.get('media', {}).get('images', [])
+        elif embed_type == 'app.bsky.embed.recordWithMedia':
+            media = embed_data.get('media', {})
+            if media.get('$type') == 'app.bsky.embed.images':
+                images_to_parse = media.get('images', [])
         
         if images_to_parse:
             image_details = _parse_image_embed(images_to_parse, author_did)
+            has_image = image_details.get('has_image', False)
 
     # Prepare PostCreate schema
     post_schema = schemas.PostCreate(

@@ -23,15 +23,28 @@
       <img src="/src/assets/fema.jpg" alt="FEMA Logo" class="fema-logo" />
       <h1 class="logo">feedmaster</h1>
     </div>
-    <SearchBar @openUserModal="openUserModal" @openHashtagModal="openHashtagModal" />
+    <div class="header-right">
+      <SearchBar @openUserModal="openUserModal" @openHashtagModal="openHashtagModal" />
+      <div class="dropdown" @click="toggleDropdown" ref="dropdown">
+        <button class="dropdown-button">☰</button>
+        <div class="dropdown-menu" :class="{ show: showDropdown }">
+          <a href="/apply" class="dropdown-item">Apply for Feed</a>
+          <a href="/dashboard" class="dropdown-item">Dashboard</a>
+          <a href="/geo-hashtags" class="dropdown-item">Location Hashtags</a>
+        </div>
+      </div>
+    </div>
   </header>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useFeedStore } from '@/stores/feedStore';
 import SearchBar from './SearchBar.vue';
 
 const feedStore = useFeedStore();
+const showDropdown = ref(false);
+const dropdown = ref(null);
 
 const emit = defineEmits(['openUserModal', 'openHashtagModal'])
 
@@ -51,6 +64,24 @@ const formatNumber = (num: number): string => {
   }
   return num.toString();
 };
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
+
+const closeDropdown = (event: Event) => {
+  if (dropdown.value && !dropdown.value.contains(event.target)) {
+    showDropdown.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', closeDropdown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdown);
+});
 </script>
 
 <style scoped>
@@ -132,10 +163,10 @@ const formatNumber = (num: number): string => {
   transform: translateX(-50%);
 }
 
-.search-bar {
-  position: absolute;
-  right: 25%;
-  transform: translateX(50%);
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .fema-logo {
@@ -151,5 +182,65 @@ const formatNumber = (num: number): string => {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin-left: 1rem;
   color: #e2e8f0;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-button {
+  background: #404249;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s;
+}
+
+.dropdown-button:hover {
+  background: #5a5d66;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #2b2d31;
+  border: 1px solid #404249;
+  border-radius: 8px;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  color: #b5bac1;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #404249;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: #404249;
+  color: #fff;
 }
 </style>

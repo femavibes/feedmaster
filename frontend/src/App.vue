@@ -42,8 +42,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Admin, Feedmaker, and Apply pages get full layout -->
-  <div v-if="route.name === 'admin' || route.name === 'feedmaker' || route.name === 'apply'" class="admin-layout">
+  <!-- Admin, Feedmaker, Apply, and Geo-hashtags pages get full layout -->
+  <div v-if="route.name === 'admin' || route.name === 'feedmaker' || route.name === 'apply' || route.name === 'geo-hashtags'" class="admin-layout">
     <RouterView />
   </div>
   

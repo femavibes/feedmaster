@@ -8,7 +8,7 @@
     <div v-if="posts.length" class="posts-list">
       <div class="post-item" v-for="post in posts" :key="post.uri">
         <div class="post-author clickable" @click="openUserModal(post.author)">
-          <img :src="post.author.avatar_url" alt="avatar" class="avatar" @error="onAvatarError" />
+          <img :src="proxyImageUrl(post.author.avatar_url)" alt="avatar" class="avatar" @error="onAvatarError" />
           <div class="author-info">
             <span class="display-name">{{ post.author.display_name || post.author.handle }}</span>
             <span class="handle">@{{ post.author.handle }}</span>
@@ -49,6 +49,7 @@ import { useRoute } from 'vue-router';
 import { useFeedStore } from '@/stores/useFeedStore';
 import apiService from '@/apiService';
 import HashtagModal from '@/components/HashtagModal.vue';
+import { proxyImageUrl } from '@/utils/imageProxy';
 
 const route = useRoute();
 const posts = ref([]);
