@@ -38,7 +38,7 @@
           <section class="api-keys-section">
             <div class="section-header">
               <h2>🔑 API Key Management</h2>
-              <button @click="showCreateApiKey = true" class="btn-primary">Generate Key</button>
+              <button @click="openCreateApiKey" class="btn-primary">Generate Key</button>
             </div>
             
             <div v-if="apiKeys.length" class="api-keys-table">
@@ -67,6 +67,7 @@
                     </td>
                     <td>{{ key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'Never' }}</td>
                     <td class="actions">
+                      <button v-if="key.key_type === 'feed_owner'" @click="editApiKeyPermissions(key)" class="btn-small">Edit Permissions</button>
                       <button v-if="key.is_active && key.key_type !== 'master_admin'" @click="revokeApiKey(key)" class="btn-small btn-danger">Revoke</button>
                       <span v-else-if="key.key_type === 'master_admin'" class="protected-key">Protected</span>
                     </td>
@@ -153,7 +154,7 @@
                 <button @click="bulkToggleActive" class="btn-small">Toggle Active</button>
                 <button @click="bulkDelete" class="btn-small btn-danger">Delete Selected</button>
               </div>
-              <button @click="showCreateFeed = true" class="btn-primary">Add Feed</button>
+              <button @click="openCreateFeed" class="btn-primary">Add Feed</button>
             </div>
             
             <div v-if="feeds.length" class="feeds-table">
@@ -199,7 +200,9 @@
                     </td>
                     <td class="actions">
                       <button @click="editFeed(feed)" class="btn-small">Edit</button>
-                      <button @click="deleteFeed(feed)" class="btn-small btn-danger">Delete</button>
+                      <button v-if="feed.is_active" @click="toggleFeedActive(feed, false)" class="btn-small btn-warning">Deactivate</button>
+                      <button v-else @click="toggleFeedActive(feed, true)" class="btn-small btn-success">Activate</button>
+                      <button @click="hardDeleteFeed(feed)" class="btn-small btn-danger">Delete Forever</button>
                     </td>
                   </tr>
                 </tbody>
@@ -531,12 +534,28 @@
         <h3>Edit Feed: {{ editingFeed?.name }}</h3>
         <div class="edit-feed-content">
           <div class="form-group">
-            <label>Feed ID:</label>
+            <label>Feed ID (read-only):</label>
             <span class="feed-id">{{ editingFeed?.id }}</span>
           </div>
           <div class="form-group">
-            <label>Current Owner:</label>
-            <span class="owner-did">{{ editingFeed?.owner_did || 'None' }}</span>
+            <label for="owner-input">Owner DID:</label>
+            <input 
+              id="owner-input" 
+              v-model="newOwnerDid" 
+              class="owner-input" 
+              placeholder="did:plc:example... (leave empty for no owner)"
+            >
+            <small>The DID of the user who owns this feed</small>
+          </div>
+          <div class="form-group">
+            <label for="websocket-input">WebSocket URL:</label>
+            <input 
+              id="websocket-input" 
+              v-model="newWebsocketUrl" 
+              class="websocket-input" 
+              placeholder="wss://api.graze.social/app/contrail?feed=at://..."
+            >
+            <small>Graze Contrails WebSocket URL for this feed</small>
           </div>
           <div class="form-group">
             <label for="tier-select">Tier:</label>
@@ -551,6 +570,213 @@
         <div class="modal-actions">
           <button @click="cancelEditFeed" class="btn-small">Cancel</button>
           <button @click="saveEditFeed" class="btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Feed Modal -->
+    <div v-if="showCreateFeed" class="modal-overlay" @click="cancelCreateFeed">
+      <div class="modal" @click.stop>
+        <h3>Create New Feed</h3>
+        <div class="create-feed-content">
+          <div class="form-group">
+            <label for="new-feed-id">Feed ID *</label>
+            <input 
+              id="new-feed-id" 
+              v-model="newFeed.feed_id" 
+              class="feed-input" 
+              placeholder="e.g., 1234 or abcd1234"
+            >
+            <small>Unique identifier for the feed (WebSocket URL will be auto-constructed)</small>
+          </div>
+          <div class="form-group">
+            <label for="new-feed-name">Feed Name *</label>
+            <input 
+              id="new-feed-name" 
+              v-model="newFeed.name" 
+              class="feed-input" 
+              placeholder="e.g., My Awesome Feed"
+            >
+            <small>Display name for the feed</small>
+          </div>
+          <div class="form-group">
+            <label for="new-owner-did">Owner DID</label>
+            <input 
+              id="new-owner-did" 
+              v-model="newFeed.owner_did" 
+              class="feed-input" 
+              placeholder="did:plc:example... (optional)"
+            >
+            <small>DID of the user who owns this feed (leave empty for no owner)</small>
+          </div>
+          <div class="form-group">
+            <label for="new-tier-select">Tier</label>
+            <select id="new-tier-select" v-model="newFeed.tier" class="tier-select">
+              <option value="bronze">🥉 Bronze</option>
+              <option value="silver">🥈 Silver</option>
+              <option value="gold">🥇 Gold</option>
+              <option value="platinum">💎 Platinum</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="cancelCreateFeed" class="btn-small">Cancel</button>
+          <button @click="saveCreateFeed" class="btn-primary">Create Feed</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create API Key Modal -->
+    <div v-if="showCreateApiKey" class="modal-overlay" @click="cancelCreateApiKey">
+      <div class="modal large-modal" @click.stop>
+        <h3>Generate New API Key</h3>
+        <div class="create-api-key-content">
+          <div class="form-group">
+            <label for="api-owner-did">Owner DID *</label>
+            <input 
+              id="api-owner-did" 
+              v-model="newApiKey.owner_did" 
+              class="feed-input" 
+              placeholder="did:plc:example..."
+            >
+            <small>The DID of the user who will own this API key</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="api-expires">Expiration (days)</label>
+            <input 
+              id="api-expires" 
+              v-model="newApiKey.expires_days" 
+              class="feed-input" 
+              type="number"
+              placeholder="Leave empty for no expiration"
+            >
+            <small>Number of days until the key expires (optional)</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Feed Permissions</label>
+            <div class="permissions-grid">
+              <div v-for="permission in newApiKey.feed_permissions" :key="permission.feed_id" class="permission-item">
+                <div class="permission-header">
+                  <input 
+                    type="checkbox" 
+                    v-model="permission.selected" 
+                    :id="`feed-${permission.feed_id}`"
+                  >
+                  <label :for="`feed-${permission.feed_id}`" class="feed-label">
+                    <strong>{{ permission.feed_name }}</strong>
+                    <code>{{ permission.feed_id }}</code>
+                  </label>
+                </div>
+                <div v-if="permission.selected" class="permission-level">
+                  <select v-model="permission.permission_level" class="level-select">
+                    <option value="viewer">👁️ Viewer - Read-only access</option>
+                    <option value="moderator">🛡️ Moderator - Manage content</option>
+                    <option value="admin">⚡ Admin - Full control</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <small>Select feeds and permission levels for this API key</small>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="cancelCreateApiKey" class="btn-small">Cancel</button>
+          <button @click="saveCreateApiKey" class="btn-primary">Generate API Key</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit API Key Permissions Modal -->
+    <div v-if="showEditPermissions" class="modal-overlay" @click="cancelEditPermissions">
+      <div class="modal large-modal" @click.stop>
+        <h3>Edit Permissions: {{ editingApiKey?.owner_did }}</h3>
+        <div class="edit-permissions-content">
+          <div class="api-key-info">
+            <div class="info-item">
+              <strong>API Key ID:</strong> {{ editingApiKey?.id }}
+            </div>
+            <div class="info-item">
+              <strong>Owner:</strong> {{ editingApiKey?.owner_did }}
+            </div>
+            <div class="info-item">
+              <strong>Status:</strong> 
+              <span :class="`status-badge ${editingApiKey?.is_active ? 'active' : 'inactive'}`">
+                {{ editingApiKey?.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Current Feed Permissions</label>
+            <div v-if="editPermissions.length === 0" class="no-permissions">
+              <p>This API key has no feed permissions.</p>
+              <button @click="showAddFeedPermission = true" class="btn-small btn-primary">Add Feed Permission</button>
+            </div>
+            <div v-else class="permissions-list">
+              <div v-for="permission in editPermissions" :key="permission.feed_id" class="permission-row">
+                <div class="permission-info">
+                  <div class="feed-info">
+                    <strong>{{ permission.feed_name }}</strong>
+                    <code>{{ permission.feed_id }}</code>
+                  </div>
+                  <div class="permission-controls">
+                    <select v-model="permission.permission_level" class="level-select" @change="updatePermission(permission)">
+                      <option value="viewer">👁️ Viewer</option>
+                      <option value="moderator">🛡️ Moderator</option>
+                      <option value="admin">⚡ Admin</option>
+                    </select>
+                    <button 
+                      @click="togglePermissionActive(permission)" 
+                      :class="`btn-tiny ${permission.is_active ? 'btn-warning' : 'btn-success'}`"
+                    >
+                      {{ permission.is_active ? 'Deactivate' : 'Activate' }}
+                    </button>
+                    <button @click="deletePermission(permission)" class="btn-tiny btn-danger">Delete</button>
+                  </div>
+                </div>
+                <div v-if="!permission.is_active" class="inactive-notice">
+                  ⚠️ This permission is temporarily deactivated
+                </div>
+              </div>
+              <button @click="showAddFeedPermission = true" class="btn-small btn-primary add-permission-btn">Add Feed Permission</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="cancelEditPermissions" class="btn-small">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Feed Permission Modal -->
+    <div v-if="showAddFeedPermission" class="modal-overlay" @click="showAddFeedPermission = false">
+      <div class="modal" @click.stop>
+        <h3>Add Feed Permission</h3>
+        <div class="add-permission-content">
+          <div class="form-group">
+            <label for="add-feed-select">Select Feed</label>
+            <select id="add-feed-select" v-model="newPermission.feed_id" class="feed-select">
+              <option value="">Choose a feed...</option>
+              <option v-for="feed in availableFeeds" :key="feed.id" :value="feed.id">
+                {{ feed.name }} ({{ feed.id }})
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="add-permission-level">Permission Level</label>
+            <select id="add-permission-level" v-model="newPermission.permission_level" class="level-select">
+              <option value="viewer">👁️ Viewer - Read-only access</option>
+              <option value="moderator">🛡️ Moderator - Manage content</option>
+              <option value="admin">⚡ Admin - Full control</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="showAddFeedPermission = false" class="btn-small">Cancel</button>
+          <button @click="saveNewPermission" :disabled="!newPermission.feed_id" class="btn-primary">Add Permission</button>
         </div>
       </div>
     </div>
@@ -577,6 +803,30 @@ export default {
     const showEditFeed = ref(false)
     const editingFeed = ref(null)
     const newTier = ref('')
+    const newOwnerDid = ref('')
+    const newWebsocketUrl = ref('')
+    const showCreateFeed = ref(false)
+    const newFeed = ref({
+      feed_id: '',
+      name: '',
+      owner_did: '',
+      tier: 'bronze'
+    })
+    const showCreateApiKey = ref(false)
+    const newApiKey = ref({
+      owner_did: '',
+      expires_days: '',
+      feed_permissions: []
+    })
+    const showEditPermissions = ref(false)
+    const editingApiKey = ref(null)
+    const editPermissions = ref([])
+    const showAddFeedPermission = ref(false)
+    const availableFeeds = ref([])
+    const newPermission = ref({
+      feed_id: '',
+      permission_level: 'viewer'
+    })
     const geoHashtags = ref({})
     const newsDomains = ref([])
     const newGeoEntry = ref({ hashtag: '', city: '', region: '', country: '' })
@@ -664,27 +914,245 @@ export default {
       }
     }
 
-    // Placeholder functions for now
+    const openCreateApiKey = () => {
+      newApiKey.value = {
+        owner_did: '',
+        expires_days: '',
+        feed_permissions: feeds.value.map(feed => ({
+          feed_id: feed.id,
+          feed_name: feed.name,
+          permission_level: 'viewer',
+          selected: false
+        }))
+      }
+      showCreateApiKey.value = true
+    }
+    
+    const saveCreateApiKey = async () => {
+      if (!newApiKey.value.owner_did) {
+        alert('Owner DID is required')
+        return
+      }
+      
+      const selectedPermissions = newApiKey.value.feed_permissions.filter(p => p.selected)
+      if (selectedPermissions.length === 0) {
+        alert('Please select at least one feed')
+        return
+      }
+      
+      try {
+        const payload = {
+          owner_did: newApiKey.value.owner_did,
+          feed_permissions: selectedPermissions.map(p => ({
+            feed_id: p.feed_id,
+            permission_level: p.permission_level
+          }))
+        }
+        
+        if (newApiKey.value.expires_days && !isNaN(newApiKey.value.expires_days)) {
+          payload.expires_days = parseInt(newApiKey.value.expires_days)
+        }
+        
+        const response = await apiCall('/api-keys', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        })
+        
+        alert(`API Key generated successfully!\n\nKey: ${response.api_key}\n\nSave this key - it won't be shown again!`)
+        
+        const keysData = await apiCall('/api-keys')
+        apiKeys.value = keysData.api_keys
+        
+        showCreateApiKey.value = false
+      } catch (error) {
+        console.error('API key generation error:', error)
+        const errorMsg = error.message || error.detail || JSON.stringify(error)
+        alert('Failed to generate API key: ' + errorMsg)
+      }
+    }
+    
+    const cancelCreateApiKey = () => {
+      showCreateApiKey.value = false
+    }
+    
+    const editApiKeyPermissions = async (apiKey) => {
+      try {
+        const permissionsData = await apiCall(`/api-keys/${apiKey.id}/permissions`)
+        
+        editingApiKey.value = apiKey
+        editPermissions.value = permissionsData.permissions.map(perm => {
+          const feed = feeds.value.find(f => f.id === perm.feed_id)
+          return {
+            feed_id: perm.feed_id,
+            feed_name: feed ? feed.name : perm.feed_id,
+            permission_level: perm.permission_level,
+            is_active: perm.is_active !== false
+          }
+        })
+        
+        availableFeeds.value = feeds.value.filter(feed => 
+          !editPermissions.value.some(p => p.feed_id === feed.id)
+        )
+        
+        showEditPermissions.value = true
+      } catch (error) {
+        alert('Failed to load permissions: ' + error.message)
+      }
+    }
+    
+    const updatePermission = async (permission) => {
+      try {
+        await apiCall(`/api-keys/${editingApiKey.value.id}/permissions/${permission.feed_id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            permission_level: permission.permission_level,
+            is_active: permission.is_active
+          })
+        })
+      } catch (error) {
+        alert('Failed to update permission: ' + error.message)
+      }
+    }
+    
+    const togglePermissionActive = async (permission) => {
+      permission.is_active = !permission.is_active
+      await updatePermission(permission)
+    }
+    
+    const deletePermission = async (permission) => {
+      if (!confirm(`Remove ${permission.feed_name} access for this API key?`)) return
+      
+      try {
+        await apiCall(`/api-keys/${editingApiKey.value.id}/permissions/${permission.feed_id}`, {
+          method: 'DELETE'
+        })
+        
+        editPermissions.value = editPermissions.value.filter(p => p.feed_id !== permission.feed_id)
+        availableFeeds.value = feeds.value.filter(feed => 
+          !editPermissions.value.some(p => p.feed_id === feed.id)
+        )
+      } catch (error) {
+        alert('Failed to delete permission: ' + error.message)
+      }
+    }
+    
+    const saveNewPermission = async () => {
+      if (!newPermission.value.feed_id) return
+      
+      try {
+        await apiCall(`/api-keys/${editingApiKey.value.id}/permissions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            feed_id: newPermission.value.feed_id,
+            permission_level: newPermission.value.permission_level
+          })
+        })
+        
+        const feed = feeds.value.find(f => f.id === newPermission.value.feed_id)
+        editPermissions.value.push({
+          feed_id: newPermission.value.feed_id,
+          feed_name: feed.name,
+          permission_level: newPermission.value.permission_level,
+          is_active: true
+        })
+        
+        availableFeeds.value = availableFeeds.value.filter(f => f.id !== newPermission.value.feed_id)
+        showAddFeedPermission.value = false
+        newPermission.value = { feed_id: '', permission_level: 'viewer' }
+      } catch (error) {
+        alert('Failed to add permission: ' + error.message)
+      }
+    }
+    
+    const cancelEditPermissions = () => {
+      showEditPermissions.value = false
+      showAddFeedPermission.value = false
+      editingApiKey.value = null
+      editPermissions.value = []
+      availableFeeds.value = []
+      newPermission.value = { feed_id: '', permission_level: 'viewer' }
+    }
+    
+    const generateApiKey = async () => {
+      const ownerDid = prompt('Enter the DID for the API key owner:')
+      if (!ownerDid) return
+      
+      const expireDays = prompt('Enter expiration days (leave empty for no expiration):')
+      
+      try {
+        const payload = { owner_did: ownerDid }
+        if (expireDays && !isNaN(expireDays)) {
+          payload.expires_days = parseInt(expireDays)
+        }
+        
+        const response = await apiCall('/api-keys', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        })
+        
+        alert(`API Key generated successfully!\n\nKey: ${response.api_key}\n\nSave this key - it won't be shown again!`)
+        
+        // Reload API keys
+        const keysData = await apiCall('/api-keys')
+        apiKeys.value = keysData.api_keys
+      } catch (error) {
+        console.error('API key generation error:', error)
+        const errorMsg = error.message || error.detail || JSON.stringify(error)
+        alert('Failed to generate API key: ' + errorMsg)
+      }
+    }
+
     const revokeApiKey = async (key) => {
-      console.log('Revoke key:', key)
+      if (!confirm(`Are you sure you want to revoke API key #${key.id} for ${key.owner_did || 'Master Admin'}?`)) {
+        return
+      }
+      
+      try {
+        await apiCall(`/api-keys/${key.id}`, { method: 'DELETE' })
+        
+        // Reload API keys
+        const keysData = await apiCall('/api-keys')
+        apiKeys.value = keysData.api_keys
+        
+        alert('API key revoked successfully!')
+      } catch (error) {
+        alert('Failed to revoke API key: ' + error.message)
+      }
     }
 
     const editFeed = (feed) => {
       editingFeed.value = feed
       newTier.value = feed.tier
+      newOwnerDid.value = feed.owner_did || ''
+      newWebsocketUrl.value = feed.contrails_websocket_url || ''
       showEditFeed.value = true
     }
     
     const saveEditFeed = async () => {
-      if (newTier.value === editingFeed.value.tier) {
+      const hasChanges = newTier.value !== editingFeed.value.tier || 
+                        newOwnerDid.value !== (editingFeed.value.owner_did || '') ||
+                        newWebsocketUrl.value !== (editingFeed.value.contrails_websocket_url || '')
+      
+      if (!hasChanges) {
         showEditFeed.value = false
         return
       }
       
       try {
+        const updates = {}
+        if (newTier.value !== editingFeed.value.tier) {
+          updates.tier = newTier.value
+        }
+        if (newOwnerDid.value !== (editingFeed.value.owner_did || '')) {
+          updates.owner_did = newOwnerDid.value || null
+        }
+        if (newWebsocketUrl.value !== (editingFeed.value.contrails_websocket_url || '')) {
+          updates.contrails_websocket_url = newWebsocketUrl.value
+        }
+        
         await apiCall(`/feeds/${editingFeed.value.id}`, {
           method: 'PUT',
-          body: JSON.stringify({ tier: newTier.value })
+          body: JSON.stringify(updates)
         })
         
         // Reload feeds to show updated data
@@ -692,7 +1160,7 @@ export default {
         feeds.value = feedsData.feeds
         
         showEditFeed.value = false
-        alert('Feed tier updated successfully!')
+        alert('Feed updated successfully!')
       } catch (error) {
         alert('Failed to update feed: ' + error.message)
       }
@@ -702,21 +1170,105 @@ export default {
       showEditFeed.value = false
       editingFeed.value = null
       newTier.value = ''
+      newOwnerDid.value = ''
+      newWebsocketUrl.value = ''
+    }
+    
+    const openCreateFeed = () => {
+      newFeed.value = {
+        feed_id: '',
+        name: '',
+        owner_did: '',
+        tier: 'bronze'
+      }
+      showCreateFeed.value = true
+    }
+    
+    const saveCreateFeed = async () => {
+      if (!newFeed.value.feed_id || !newFeed.value.name) {
+        alert('Feed ID and Name are required')
+        return
+      }
+      
+      // Auto-construct WebSocket URL from feed ID and owner DID
+      const ownerDid = newFeed.value.owner_did || 'did:plc:lptjvw6ut224kwrj7ub3sqbe' // Fallback to feedmaker DID if no owner
+      const websocket_url = `wss://api.graze.social/app/contrail?feed=at://${ownerDid}/app.bsky.feed.generator/${newFeed.value.feed_id}`
+      
+      try {
+        await apiCall('/feeds', {
+          method: 'POST',
+          body: JSON.stringify({
+            feed_id: newFeed.value.feed_id,
+            name: newFeed.value.name,
+            websocket_url: websocket_url,
+            owner_did: newFeed.value.owner_did || null,
+            tier: newFeed.value.tier
+          })
+        })
+        
+        // Reload feeds to show new feed
+        const feedsData = await apiCall('/feeds')
+        feeds.value = feedsData.feeds
+        
+        showCreateFeed.value = false
+        alert('Feed created successfully!')
+      } catch (error) {
+        alert('Failed to create feed: ' + error.message)
+      }
+    }
+    
+    const cancelCreateFeed = () => {
+      showCreateFeed.value = false
+      newFeed.value = {
+        feed_id: '',
+        name: '',
+        owner_did: '',
+        tier: 'bronze'
+      }
     }
 
-    const deleteFeed = async (feed) => {
-      if (!confirm(`Are you sure you want to delete feed "${feed.name}" (${feed.id})?\n\nThis will permanently remove the feed and all associated data.`)) {
+    const toggleFeedActive = async (feed, isActive) => {
+      const action = isActive ? 'activate' : 'deactivate'
+      if (!confirm(`Are you sure you want to ${action} feed "${feed.name}" (${feed.id})?\n\n${isActive ? 'This will make the feed visible and resume aggregations.' : 'This will hide the feed from users and stop aggregations.'}`)) {
         return
       }
       
       try {
-        await apiCall(`/feeds/${feed.id}`, { method: 'DELETE' })
+        await apiCall(`/feeds/${feed.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ is_active: isActive })
+        })
+        
+        // Reload feeds to show updated status
+        const feedsData = await apiCall('/feeds')
+        feeds.value = feedsData.feeds
+        
+        alert(`Feed "${feed.name}" ${action}d successfully!`)
+      } catch (error) {
+        alert(`Failed to ${action} feed: ` + error.message)
+      }
+    }
+    
+    const hardDeleteFeed = async (feed) => {
+      if (!confirm(`⚠️ PERMANENT DELETION WARNING ⚠️\n\nAre you sure you want to PERMANENTLY DELETE feed "${feed.name}" (${feed.id})?\n\nThis will remove ALL data including:\n• All posts in this feed\n• All user achievements\n• All aggregated statistics\n• Feed configuration\n\nThis action CANNOT be undone!`)) {
+        return
+      }
+      
+      // Double confirmation for hard delete - actually require typing the feed ID
+      const typedFeedId = prompt(`Final confirmation: Type the feed ID "${feed.id}" to confirm permanent deletion:`)
+      if (typedFeedId !== feed.id) {
+        alert('Feed ID does not match. Deletion cancelled.')
+        return
+      }
+      
+      try {
+        await apiCall(`/feeds/${feed.id}?hard_delete=true`, { method: 'DELETE' })
         
         // Reload feeds to show updated list
         const feedsData = await apiCall('/feeds')
         feeds.value = feedsData.feeds
         
-        alert(`Feed "${feed.name}" deleted successfully!`)
+        alert(`Feed "${feed.name}" permanently deleted!`)
       } catch (error) {
         alert('Failed to delete feed: ' + error.message)
       }
@@ -834,9 +1386,19 @@ Notes: ${app.notes || 'None'}`
       selectedFeeds,
       authenticate,
       logout,
+      openCreateApiKey,
+      saveCreateApiKey,
+      cancelCreateApiKey,
+      editApiKeyPermissions,
+      updatePermission,
+      togglePermissionActive,
+      deletePermission,
+      saveNewPermission,
+      cancelEditPermissions,
       revokeApiKey,
       editFeed,
-      deleteFeed,
+      toggleFeedActive,
+      hardDeleteFeed,
       reviewApplication,
       viewApplicationDetails,
       searchUsers,
@@ -1056,8 +1618,23 @@ Notes: ${app.notes || 'None'}`
       showEditFeed,
       editingFeed,
       newTier,
+      newOwnerDid,
+      newWebsocketUrl,
       saveEditFeed,
       cancelEditFeed,
+      showCreateFeed,
+      newFeed,
+      openCreateFeed,
+      saveCreateFeed,
+      cancelCreateFeed,
+      showCreateApiKey,
+      newApiKey,
+      showEditPermissions,
+      editingApiKey,
+      editPermissions,
+      showAddFeedPermission,
+      availableFeeds,
+      newPermission,
       
       copyPublicUrl: () => {
         const url = `${window.location.origin}/geo-hashtags`
@@ -1473,7 +2050,7 @@ th {
 .tier-gold { background: #ffd700; color: #333; }
 .tier-platinum { background: #e5e4e2; color: #333; }
 
-.btn-primary, .btn-small, .btn-danger, .btn-success {
+.btn-primary, .btn-small, .btn-danger, .btn-success, .btn-warning {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -1485,6 +2062,7 @@ th {
 .btn-small { padding: 4px 8px; font-size: 0.8em; background: #6c757d; color: white; }
 .btn-danger { background: #dc3545; color: white; }
 .btn-success { background: #28a745; color: white; }
+.btn-warning { background: #ffc107; color: #212529; }
 
 .actions {
   display: flex;
@@ -1825,7 +2403,7 @@ th {
   color: #2c3e50;
 }
 
-.feed-id, .owner-did {
+.feed-id {
   font-family: monospace;
   background: #f8f9fa;
   padding: 8px 12px;
@@ -1833,6 +2411,28 @@ th {
   border: 1px solid #e0e0e0;
   display: block;
   color: #666;
+}
+
+.owner-input, .websocket-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: monospace;
+  background: white;
+}
+
+.owner-input:focus, .websocket-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group small {
+  color: #666;
+  font-size: 0.85em;
+  margin-top: 5px;
+  display: block;
 }
 
 .tier-select {
@@ -1855,5 +2455,200 @@ th {
   gap: 10px;
   justify-content: flex-end;
   margin-top: 20px;
+}
+
+.create-feed-content {
+  margin: 20px 0;
+}
+
+.feed-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.feed-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.large-modal {
+  max-width: 700px;
+  width: 95%;
+}
+
+.create-api-key-content {
+  margin: 20px 0;
+}
+
+.permissions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  background: #f8f9fa;
+}
+
+.permission-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.permission-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feed-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.feed-label code {
+  font-size: 0.8em;
+  color: #666;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.permission-level {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.level-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+.level-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.edit-permissions-content {
+  margin: 20px 0;
+}
+
+.api-key-info {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-item strong {
+  color: #2c3e50;
+}
+
+.permissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.permission-row {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  background: white;
+}
+
+.permission-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.feed-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feed-info code {
+  font-size: 0.8em;
+  color: #666;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.permission-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inactive-notice {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 0.9em;
+}
+
+.no-permissions {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px dashed #ddd;
+}
+
+.add-permission-btn {
+  margin-top: 10px;
+  align-self: flex-start;
+}
+
+.add-permission-content {
+  margin: 20px 0;
+}
+
+.feed-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.feed-select:focus {
+  outline: none;
+  border-color: #007bff;
 }
 </style>

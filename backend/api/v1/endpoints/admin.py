@@ -21,17 +21,23 @@ router = APIRouter()
 class CreateFeedRequest(BaseModel):
     feed_id: str
     websocket_url: str
-    owner_did: str
+    owner_did: Optional[str] = None
     tier: str = "bronze"
+    name: Optional[str] = None
 
 class UpdateFeedRequest(BaseModel):
     owner_did: Optional[str] = None
     tier: Optional[str] = None
     is_active: Optional[bool] = None
+    contrails_websocket_url: Optional[str] = None
 
 class CreateApiKeyRequest(BaseModel):
     owner_did: str
     expires_days: Optional[int] = None
+    feed_permissions: Optional[List[dict]] = None
+
+class UpdateApiKeyPermissionsRequest(BaseModel):
+    feed_permissions: List[dict]
 
 class ReviewApplicationRequest(BaseModel):
     status: str  # "approved" or "rejected"
@@ -88,6 +94,7 @@ async def list_feeds(
             "owner_did": feed.owner_did,
             "tier": feed.tier,
             "is_active": feed.is_active,
+            "contrails_websocket_url": feed.contrails_websocket_url,
             "post_count": post_count,
             "user_count": user_count,
             "achievement_count": achievement_count,
@@ -112,7 +119,7 @@ async def create_feed(
     
     feed = Feed(
         id=request.feed_id,
-        name=f"Feed {request.feed_id}",  # Will be updated from Bluesky
+        name=request.name or f"Feed {request.feed_id}",
         contrails_websocket_url=request.websocket_url,
         owner_did=request.owner_did,
         tier=request.tier,
@@ -146,6 +153,8 @@ async def update_feed(
         feed.tier = request.tier
     if request.is_active is not None:
         feed.is_active = request.is_active
+    if request.contrails_websocket_url is not None:
+        feed.contrails_websocket_url = request.contrails_websocket_url
     
     feed.updated_at = datetime.now(timezone.utc)
     await db.commit()
@@ -168,6 +177,23 @@ async def delete_feed(
         raise HTTPException(status_code=404, detail="Feed not found")
     
     if hard_delete:
+        # Hard delete: Remove all related data
+        from sqlalchemy import delete
+        
+        # Delete feed posts (join table)
+        await db.execute(delete(FeedPost).where(FeedPost.feed_id == feed_id))
+        
+        # Delete user achievements for this feed
+        await db.execute(delete(UserAchievement).where(UserAchievement.feed_id == feed_id))
+        
+        # Delete user stats for this feed
+        await db.execute(delete(UserStats).where(UserStats.feed_id == feed_id))
+        
+        # Delete aggregates for this feed
+        from backend.models import Aggregate
+        await db.execute(delete(Aggregate).where(Aggregate.feed_id == feed_id))
+        
+        # Finally delete the feed itself
         await db.delete(feed)
         message = "Feed permanently deleted"
     else:
@@ -226,6 +252,19 @@ async def create_api_key(
     
     db.add(api_key)
     await db.commit()
+    await db.refresh(api_key)
+    
+    # Add feed permissions if provided
+    if request.feed_permissions:
+        from backend.models import FeedPermission
+        for perm in request.feed_permissions:
+            feed_perm = FeedPermission(
+                api_key_id=api_key.id,
+                feed_id=perm['feed_id'],
+                permission_level=perm['permission_level']
+            )
+            db.add(feed_perm)
+        await db.commit()
     
     return {
         "message": "API key created",
@@ -251,6 +290,148 @@ async def revoke_api_key(
     await db.commit()
     
     return {"message": "API key revoked"}
+
+@router.get("/api-keys/{key_id}/permissions")
+async def get_api_key_permissions(
+    key_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_master_admin)
+):
+    """Get feed permissions for an API key"""
+    from backend.models import FeedPermission
+    
+    stmt = select(FeedPermission).where(FeedPermission.api_key_id == key_id)
+    result = await db.execute(stmt)
+    permissions = result.scalars().all()
+    
+    return {
+        "permissions": [
+            {
+                "feed_id": perm.feed_id,
+                "permission_level": perm.permission_level,
+                "is_active": getattr(perm, 'is_active', True),
+                "created_at": perm.created_at
+            }
+            for perm in permissions
+        ]
+    }
+
+@router.put("/api-keys/{key_id}/permissions")
+async def update_api_key_permissions(
+    key_id: int,
+    request: UpdateApiKeyPermissionsRequest,
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_master_admin)
+):
+    """Update feed permissions for an API key"""
+    from backend.models import FeedPermission
+    from sqlalchemy import delete
+    
+    # Verify API key exists
+    api_key_stmt = select(ApiKey).where(ApiKey.id == key_id)
+    api_key = (await db.execute(api_key_stmt)).scalar_one_or_none()
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API key not found")
+    
+    # Delete existing permissions
+    delete_stmt = delete(FeedPermission).where(FeedPermission.api_key_id == key_id)
+    await db.execute(delete_stmt)
+    
+    # Add new permissions
+    for perm in request.feed_permissions:
+        feed_perm = FeedPermission(
+            api_key_id=key_id,
+            feed_id=perm['feed_id'],
+            permission_level=perm['permission_level']
+        )
+        db.add(feed_perm)
+    
+    await db.commit()
+    
+    return {"message": "Permissions updated successfully"}
+
+@router.put("/api-keys/{key_id}/permissions/{feed_id}")
+async def update_single_permission(
+    key_id: int,
+    feed_id: str,
+    request: dict,
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_master_admin)
+):
+    """Update a single feed permission"""
+    from backend.models import FeedPermission
+    
+    stmt = select(FeedPermission).where(
+        FeedPermission.api_key_id == key_id,
+        FeedPermission.feed_id == feed_id
+    )
+    permission = (await db.execute(stmt)).scalar_one_or_none()
+    
+    if not permission:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    
+    if 'permission_level' in request:
+        permission.permission_level = request['permission_level']
+    if 'is_active' in request:
+        permission.is_active = request['is_active']
+    
+    await db.commit()
+    return {"message": "Permission updated"}
+
+@router.delete("/api-keys/{key_id}/permissions/{feed_id}")
+async def delete_single_permission(
+    key_id: int,
+    feed_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_master_admin)
+):
+    """Delete a single feed permission"""
+    from backend.models import FeedPermission
+    from sqlalchemy import delete
+    
+    stmt = delete(FeedPermission).where(
+        FeedPermission.api_key_id == key_id,
+        FeedPermission.feed_id == feed_id
+    )
+    result = await db.execute(stmt)
+    await db.commit()
+    
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    
+    return {"message": "Permission deleted"}
+
+@router.post("/api-keys/{key_id}/permissions")
+async def add_single_permission(
+    key_id: int,
+    request: dict,
+    db: AsyncSession = Depends(get_db),
+    _: ApiKey = Depends(require_master_admin)
+):
+    """Add a single feed permission"""
+    from backend.models import FeedPermission
+    
+    # Check if permission already exists
+    existing_stmt = select(FeedPermission).where(
+        FeedPermission.api_key_id == key_id,
+        FeedPermission.feed_id == request['feed_id']
+    )
+    existing = (await db.execute(existing_stmt)).scalar_one_or_none()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Permission already exists")
+    
+    permission = FeedPermission(
+        api_key_id=key_id,
+        feed_id=request['feed_id'],
+        permission_level=request['permission_level'],
+        is_active=True
+    )
+    
+    db.add(permission)
+    await db.commit()
+    
+    return {"message": "Permission added"}
 
 # Application Management
 @router.get("/applications")

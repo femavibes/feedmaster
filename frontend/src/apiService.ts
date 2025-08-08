@@ -55,13 +55,22 @@ const apiService = {
     }
   },
 
-  async fetchPosts(feedId: string) {
-    try {
-      const response = await apiClient.get(`/feeds/${feedId}/posts?limit=50`);
-      return response.data.posts;
-    } catch (error) {
-      console.error(`Failed to fetch posts for feed ${feedId}:`, error);
-      throw new Error('Failed to fetch posts.');
+  async fetchPosts(feedId: string, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const response = await apiClient.get(`/feeds/${feedId}/posts?limit=50`);
+        return response.data.posts;
+      } catch (error) {
+        console.error(`Failed to fetch posts for feed ${feedId} (attempt ${attempt + 1}):`, error);
+        
+        // If this is the last attempt, throw the error
+        if (attempt === retries) {
+          throw new Error('Failed to fetch posts.');
+        }
+        
+        // Wait before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
     }
   },
 

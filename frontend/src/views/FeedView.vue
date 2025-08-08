@@ -60,17 +60,42 @@ const selectedHashtag = ref(null);
 
 const feedStore = useFeedStore();
 
+let currentFetchController = null;
+
 const fetchPosts = async (feedId) => {
   if (!feedId) return;
+  
+  // Cancel any ongoing request
+  if (currentFetchController) {
+    currentFetchController.abort();
+  }
+  
+  // Create new abort controller for this request
+  currentFetchController = new AbortController();
+  const requestId = Date.now();
+  
   loading.value = true;
   error.value = null;
   posts.value = [];
+  
   try {
-    posts.value = await apiService.fetchPosts(feedId);
+    const fetchedPosts = await apiService.fetchPosts(feedId);
+    
+    // Only update if this is still the current request
+    if (currentFetchController && !currentFetchController.signal.aborted) {
+      posts.value = fetchedPosts;
+    }
   } catch (err) {
-    error.value = `Failed to load posts. Please try again.`;
+    // Only show error if this is still the current request
+    if (currentFetchController && !currentFetchController.signal.aborted) {
+      console.error('Posts fetch error:', err);
+      error.value = `Failed to load posts. Please try again.`;
+    }
   } finally {
-    loading.value = false;
+    // Only update loading state if this is still the current request
+    if (currentFetchController && !currentFetchController.signal.aborted) {
+      loading.value = false;
+    }
   }
 };
 
@@ -255,6 +280,17 @@ watch(() => route.params.feed_id, (newFeedId) => {
   if (newFeedId) {
     feedStore.selectedFeedId = newFeedId;
     fetchPosts(newFeedId);
+    
+    // Fallback timeout to prevent infinite loading
+    setTimeout(() => {
+      if (loading.value && !error.value) {
+        console.warn('Posts loading timeout, forcing completion');
+        loading.value = false;
+        if (posts.value.length === 0) {
+          error.value = 'Loading timed out. Please refresh the page.';
+        }
+      }
+    }, 15000); // 15 second timeout
   }
 }, { immediate: true });
 

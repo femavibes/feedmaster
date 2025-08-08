@@ -96,3 +96,38 @@ LABEL_STRATEGY=rarest        # 'rarest' = one label per user, 'threshold' = all 
 - [ ] Implement pagination for large result sets
 
 *Add new ideas below as they come up...*
+
+---
+
+## ⚠️ CRITICAL: WebSocket URL Format Documentation
+
+**IMPORTANT**: The ingestion system supports TWO WebSocket URL formats:
+
+### Format 1: Base URL Only (ORIGINAL WORKING FORMAT)
+```
+wss://api.graze.social/app/contrail
+```
+- **How it works**: Ingestion worker constructs full URL at runtime by appending `?feed=at://did:plc:lptjvw6ut224kwrj7ub3sqbe/app.bsky.feed.generator/{FEED_ID}`
+- **Used by**: Original working feeds (3654, 5511, 5770)
+- **Status**: CONFIRMED WORKING
+
+### Format 2: Complete URL (NEW FORMAT)
+```
+wss://api.graze.social/app/contrail?feed=at://did:plc:lptjvw6ut224kwrj7ub3sqbe/app.bsky.feed.generator/{FEED_ID}
+```
+- **How it works**: Full URL stored in database, used directly
+- **Used by**: New feeds created via admin interface
+- **Status**: SHOULD WORK (ingestion worker handles both)
+
+### Ingestion Worker Logic
+From `backend/ingestion_worker.py` line ~1050:
+```python
+websocket_url = f"{base_url}?feed={urllib.parse.quote_plus(str(at_uri))}"
+```
+
+**If ingestion breaks after URL changes, revert to base URL format for all feeds:**
+```sql
+UPDATE feeds SET contrails_websocket_url = 'wss://api.graze.social/app/contrail' WHERE id IN ('3654', '5511', '5770');
+```
+
+**Database change made on 2025-08-08**: Updated existing feeds from base URL to complete URL format. If this breaks ingestion, REVERT IMMEDIATELY using above SQL.

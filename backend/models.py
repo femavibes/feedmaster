@@ -391,3 +391,24 @@ class NewsDomain(Base):
     
     def __repr__(self):
         return f"<NewsDomain(domain='{self.domain}')>"
+
+class FeedPermission(Base):
+    __tablename__ = 'feed_permissions'
+    
+    id = Column(Integer, primary_key=True)
+    api_key_id = Column(Integer, ForeignKey('api_keys.id', ondelete='CASCADE'), nullable=False, index=True)
+    feed_id = Column(String(50), ForeignKey('feeds.id', ondelete='CASCADE'), nullable=False, index=True)
+    permission_level = Column(String(20), nullable=False, default='viewer')
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    api_key = relationship("ApiKey")
+    feed = relationship("Feed")
+    
+    __table_args__ = (
+        UniqueConstraint('api_key_id', 'feed_id', name='unique_api_key_feed'),
+    )
+    
+    def __repr__(self):
+        return f"<FeedPermission(api_key_id={self.api_key_id}, feed_id='{self.feed_id}', level='{self.permission_level}')>"

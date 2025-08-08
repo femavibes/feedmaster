@@ -46,8 +46,10 @@ async def get_available_feeds(db: AsyncSession = Depends(get_db)):
     first letter of the feed's name.
     """
     db_feeds = await crud.get_feeds(db)
+    # Filter to only active feeds for public API
+    active_feeds = [feed for feed in db_feeds if feed.is_active]
     # Sort feeds by order field, fallback to id if order is None
-    sorted_feeds = sorted(db_feeds, key=lambda f: (f.order or 999, f.id))
+    sorted_feeds = sorted(active_feeds, key=lambda f: (f.order or 999, f.id))
     formatted_feeds = [
         Feed(
             id=feed.id, 

@@ -41,8 +41,8 @@ async def submit_feed_application(
 ):
     """Submit a new feed application"""
     try:
-        # Construct websocket URL from feed ID
-        websocket_url = f"wss://api.graze.social/app/contrail?feed=at://did:plc:lptjvw6ut224kwrj7ub3sqbe/app.bsky.feed.generator/{application.feed_id}"
+        # Construct websocket URL from applicant's DID and feed ID
+        websocket_url = f"wss://api.graze.social/app/contrail?feed=at://{application.applicant_did}/app.bsky.feed.generator/{application.feed_id}"
         
         # Create new application
         new_application = FeedApplication(
