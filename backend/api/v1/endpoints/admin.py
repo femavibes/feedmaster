@@ -612,14 +612,17 @@ async def get_news_domains(
     domains = result.scalars().all()
     return [domain.domain for domain in domains]
 
+class AddDomainRequest(BaseModel):
+    domain: str
+
 @router.post("/config/news-domains")
 async def add_news_domain(
-    domain: str,
+    request: AddDomainRequest,
     db: AsyncSession = Depends(get_db),
     _: ApiKey = Depends(require_master_admin)
 ):
     """Add news domain"""
-    domain_obj = NewsDomain(domain=domain.lower())
+    domain_obj = NewsDomain(domain=request.domain.lower())
     await db.merge(domain_obj)
     await db.commit()
     return {"message": "News domain added"}

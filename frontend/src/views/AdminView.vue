@@ -899,18 +899,42 @@ Notes: ${app.notes || 'None'}`
       },
       
       addDomain: async () => {
-        const domain = newDomain.value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
+        let domain = newDomain.value.toLowerCase().trim()
+        
+        // Remove protocol (http:// or https://)
+        domain = domain.replace(/^https?:\/\//, '')
+        
+        // Remove www. prefix
+        domain = domain.replace(/^www\./, '')
+        
+        // Remove trailing slash and any path
+        domain = domain.split('/')[0]
+        
+        // Remove any remaining whitespace
+        domain = domain.trim()
+        
         if (!domain || newsDomains.value.includes(domain)) return
         
         try {
-          await apiCall('/config/news-domains', {
+          const response = await fetch('/api/v1/admin/config/news-domains', {
             method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey.value}`,
+              'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ domain })
           })
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: response.statusText }))
+            throw new Error(errorData.detail || 'Request failed')
+          }
           await loadDomainsConfig()
           newDomain.value = ''
         } catch (error) {
-          alert('Failed to add domain: ' + error.message)
+          console.error('Domain add error:', error)
+          const errorMsg = error.message || error.detail || JSON.stringify(error)
+          alert('Failed to add domain: ' + errorMsg)
         }
       },
       
