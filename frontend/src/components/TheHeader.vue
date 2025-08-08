@@ -24,13 +24,15 @@
       <h1 class="logo">feedmaster</h1>
     </div>
     <div class="header-right">
-      <SearchBar @openUserModal="openUserModal" @openHashtagModal="openHashtagModal" />
-      <div class="dropdown" @click="toggleDropdown" ref="dropdown">
+      <div class="search-dropdown-group">
+        <SearchBar @openUserModal="openUserModal" @openHashtagModal="openHashtagModal" />
+        <div class="dropdown" @click="toggleDropdown" ref="dropdown">
         <button class="dropdown-button">☰</button>
         <div class="dropdown-menu" :class="{ show: showDropdown }">
           <a href="/apply" class="dropdown-item">Apply for Feed</a>
           <a href="/dashboard" class="dropdown-item">Dashboard</a>
           <a href="/geo-hashtags" class="dropdown-item">Location Hashtags</a>
+        </div>
         </div>
       </div>
     </div>
@@ -167,6 +169,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.search-dropdown-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .fema-logo {

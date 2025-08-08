@@ -47,7 +47,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import apiService from '@/apiService'
+
 
 const searchQuery = ref('')
 const results = ref({ users: [], hashtags: [] })
@@ -71,7 +71,7 @@ const handleSearch = () => {
     error.value = null
     
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`)
+      const response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`)
       if (!response.ok) throw new Error('Search failed')
       
       const data = await response.json()
@@ -119,9 +119,6 @@ const hideResults = () => {
 }
 
 .search-bar {
-  position: absolute;
-  right: 25%;
-  transform: translateX(50%);
   z-index: 10000;
 }
 

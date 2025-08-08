@@ -17,7 +17,8 @@
         <div class="post-text">
           <template v-for="(part, index) in parsePostText(post.text, post)" :key="index">
             <span v-if="part.type === 'text'">{{ part.content }}</span>
-            <span v-else-if="part.type === 'mention'" class="mention-link" @click="openUserModalByHandle(part.handle)">{{ part.content }}</span>
+            <span v-else-if="part.type === 'mention' && part.exists" class="mention-link" @click="openUserModalByHandle(part.handle)">{{ part.content }}</span>
+            <span v-else-if="part.type === 'mention' && !part.exists" class="mention-inactive" title="User not in our database">{{ part.content }}</span>
             <span v-else-if="part.type === 'hashtag'" class="hashtag-link" @click="openHashtagModal(part.hashtag)">{{ part.content }}</span>
             <a v-else-if="part.type === 'link'" class="text-link" :href="part.url" target="_blank" rel="noopener noreferrer" :title="part.url">{{ part.content }}</a>
             <br v-else-if="part.type === 'newline'" />
@@ -55,6 +56,7 @@ const route = useRoute();
 const posts = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const mentionUserCache = ref(new Map());
 const showHashtagModal = ref(false);
 const selectedHashtag = ref(null);
 
@@ -83,6 +85,8 @@ const fetchPosts = async (feedId) => {
     
     // Only update if this is still the current request
     if (currentFetchController && !currentFetchController.signal.aborted) {
+      // Process mentions for all posts
+      await processMentionsForPosts(fetchedPosts);
       posts.value = fetchedPosts;
     }
   } catch (err) {
@@ -152,28 +156,46 @@ const closeHashtagModal = () => {
   selectedHashtag.value = null
 }
 
-const openUserModalByHandle = async (handle) => {
-  // First try to find user in current posts' mentions
-  for (const post of posts.value) {
-    const mentionedUser = post.mentions?.find(m => m.handle === handle)
-    if (mentionedUser) {
-      openUserModal({
-        did: mentionedUser.did,
-        handle: mentionedUser.handle,
-        display_name: mentionedUser.display_name,
-        avatar_url: mentionedUser.avatar_url || 'https://via.placeholder.com/80'
-      })
-      return
+const processMentionsForPosts = async (posts) => {
+  // Extract all unique mentions from all posts
+  const allMentions = new Set()
+  posts.forEach(post => {
+    if (post.text) {
+      const mentionMatches = post.text.match(/@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}/g)
+      if (mentionMatches) {
+        mentionMatches.forEach(mention => {
+          const handle = mention.substring(1)
+          allMentions.add(handle)
+        })
+      }
+    }
+  })
+  
+  // Check which users exist in our database
+  for (const handle of allMentions) {
+    if (!mentionUserCache.value.has(handle)) {
+      try {
+        const response = await fetch(`/api/v1/search?q=${encodeURIComponent(handle)}`)
+        if (response.ok) {
+          const data = await response.json()
+          const user = data.users?.find(u => u.handle === handle)
+          mentionUserCache.value.set(handle, user || null)
+        } else {
+          mentionUserCache.value.set(handle, null)
+        }
+      } catch (error) {
+        console.error('Error checking user:', error)
+        mentionUserCache.value.set(handle, null)
+      }
     }
   }
-  
-  // If not found in mentions, create a minimal user object and let UserModal handle the error
-  openUserModal({
-    did: `did:plc:unknown${Date.now()}`, // Create a placeholder DID
-    handle: handle,
-    display_name: handle,
-    avatar_url: 'https://via.placeholder.com/80'
-  })
+}
+
+const openUserModalByHandle = async (handle) => {
+  const user = mentionUserCache.value.get(handle)
+  if (user) {
+    openUserModal(user)
+  }
 }
 
 const parsePostText = (text, post) => {
@@ -212,9 +234,14 @@ const parsePostText = (text, post) => {
     
     const fullMatch = match[0]
     if (fullMatch.startsWith('@')) {
-      // It's a mention
+      // It's a mention - check if user exists in our database
       const handle = fullMatch.substring(1)
-      parts.push({ type: 'mention', content: fullMatch, handle })
+      const user = mentionUserCache.value.get(handle)
+      if (user) {
+        parts.push({ type: 'mention', content: fullMatch, handle, exists: true })
+      } else {
+        parts.push({ type: 'mention', content: fullMatch, handle, exists: false })
+      }
     } else if (fullMatch.startsWith('#')) {
       // It's a hashtag
       const hashtag = fullMatch.substring(1)
@@ -362,6 +389,7 @@ h1 {
 .post-text { white-space: pre-wrap; word-break: break-word; margin-bottom: 1rem; }
 .mention-link { color: #5865f2; cursor: pointer; font-weight: bold; }
 .mention-link:hover { text-decoration: underline; }
+.mention-inactive { color: #949ba4; font-weight: bold; cursor: help; }
 .hashtag-link { color: #00d4aa; cursor: pointer; font-weight: bold; }
 .hashtag-link:hover { text-decoration: underline; }
 .text-link { color: #00aff4; font-weight: bold; text-decoration: none; }

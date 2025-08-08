@@ -456,7 +456,11 @@ async def get_posts_by_hashtag_in_feed(db: AsyncSession, feed_id: str, hashtag: 
         models.FeedPost, models.Post.id == models.FeedPost.post_id
     ).where(
         models.FeedPost.feed_id == feed_id,
-        models.Post.hashtags.op('@>')([hashtag.lower()])
+        or_(
+            models.Post.hashtags.op('@>')([hashtag]),
+            models.Post.hashtags.op('@>')([hashtag.lower()]),
+            models.Post.hashtags.op('@>')([hashtag.capitalize()])
+        )
     ).options(
         selectinload(models.Post.author)
     ).order_by(
@@ -467,8 +471,6 @@ async def get_posts_by_hashtag_in_feed(db: AsyncSession, feed_id: str, hashtag: 
 
 async def get_hashtag_analytics(db: AsyncSession, feed_id: str, hashtag: str) -> Dict[str, Any]:
     """Get comprehensive analytics for a hashtag in a feed."""
-    hashtag_lower = hashtag.lower()
-    
     # Get total usage count and engagement stats
     stats_stmt = select(
         func.count(models.Post.id).label('total_posts'),
@@ -480,7 +482,11 @@ async def get_hashtag_analytics(db: AsyncSession, feed_id: str, hashtag: str) ->
         models.FeedPost, models.Post.id == models.FeedPost.post_id
     ).where(
         models.FeedPost.feed_id == feed_id,
-        models.Post.hashtags.op('@>')([hashtag_lower])
+        or_(
+            models.Post.hashtags.op('@>')([hashtag]),
+            models.Post.hashtags.op('@>')([hashtag.lower()]),
+            models.Post.hashtags.op('@>')([hashtag.capitalize()])
+        )
     )
     
     # Get top users who use this hashtag
@@ -495,7 +501,11 @@ async def get_hashtag_analytics(db: AsyncSession, feed_id: str, hashtag: str) ->
         models.FeedPost, models.Post.id == models.FeedPost.post_id
     ).where(
         models.FeedPost.feed_id == feed_id,
-        models.Post.hashtags.op('@>')([hashtag_lower])
+        or_(
+            models.Post.hashtags.op('@>')([hashtag]),
+            models.Post.hashtags.op('@>')([hashtag.lower()]),
+            models.Post.hashtags.op('@>')([hashtag.capitalize()])
+        )
     ).group_by(
         models.User.did, models.User.handle, models.User.display_name
     ).order_by(

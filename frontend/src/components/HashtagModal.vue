@@ -109,7 +109,7 @@ const formatPostText = (text: string) => {
   if (!text) return ''
   return text
     .replace(/(#[a-zA-Z0-9_]+)/g, '<strong style="color: #00d4aa; font-weight: bold;">$1</strong>')
-    .replace(/(@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63})/g, '<strong style="color: #5865f2; font-weight: bold;">$1</strong>')
+    .replace(/(@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63})/g, '<span style="color: #5865f2; font-weight: bold;">$1</span>')
 }
 
 const fetchHashtagPosts = async () => {
