@@ -234,18 +234,7 @@ class Feed(FeedBase):
 class FeedsConfig(FeedBase):
     model_config = {'from_attributes': True}
 
-class FeedPostBase(BaseModel):
-    post_id: uuid.UUID = Field(..., description="UUID of the post")
-    feed_id: str = Field(..., description="ID of the feed")
-    relevance_score: Optional[float] = Field(0.0, description="Score indicating post relevance to the feed")
-    ingested_at: Optional[datetime.datetime] = Field(None, description="Timestamp when the post was added to this feed")
-
-class FeedPostCreate(FeedPostBase):
-    pass
-
-class FeedPost(FeedPostBase):
-    id: uuid.UUID = Field(..., description="Unique ID for the feed-post relationship")
-    model_config = {'from_attributes': True}
+# FeedPost schemas removed - feed associations now stored in posts.feed_data JSON
 
 class TopLinkCard(BaseModel):
     type: Literal["link_card"] = "link_card"
@@ -550,7 +539,7 @@ class PollingConfig(BaseModel):
 User.model_rebuild()
 Post.model_rebuild()
 Feed.model_rebuild()
-FeedPost.model_rebuild()
+# FeedPost.model_rebuild() - removed
 PostListResponse.model_rebuild()
 PostPublic.model_rebuild()
 FeedsConfig.model_rebuild()

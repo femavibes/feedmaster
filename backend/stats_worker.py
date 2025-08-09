@@ -266,10 +266,13 @@ async def update_all_user_stats(db: AsyncSession, since: datetime | None) -> tup
         - The timestamp of the latest post processed in this run.
     """
     logger.info(f"Starting user stats update for posts since {since or 'the beginning'}...")
+    # Use JSON unnesting to get feed associations
+    feed_elem = func.jsonb_array_elements(models.Post.feed_data).alias('feed_elem')
+    
     stats_query = (
         select(
             models.Post.author_did,
-            models.FeedPost.feed_id,
+            func.jsonb_extract_path_text(feed_elem.c.value, 'feed_id').label('feed_id'),
             func.count(models.Post.id).label("post_count"),
             func.sum(models.Post.like_count).label("total_likes_received"),
             func.sum(models.Post.repost_count).label("total_reposts_received"),
@@ -281,13 +284,14 @@ async def update_all_user_stats(db: AsyncSession, since: datetime | None) -> tup
             func.min(models.Post.created_at).label("first_post_at"),
             func.max(models.Post.created_at).label("latest_post_at"),
         )
-        .join(models.FeedPost, models.Post.id == models.FeedPost.post_id)
+        .select_from(models.Post)
+        .join(feed_elem, models.Post.feed_data != '[]')
     )
 
     if since:
         stats_query = stats_query.where(models.Post.created_at > since)
 
-    stats_query = stats_query.group_by(models.Post.author_did, models.FeedPost.feed_id)
+    stats_query = stats_query.group_by(models.Post.author_did, func.jsonb_extract_path_text(feed_elem.c.value, 'feed_id'))
 
     result = await db.execute(stats_query)
     stats_mappings = result.mappings().all()

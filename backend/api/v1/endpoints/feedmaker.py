@@ -12,7 +12,7 @@ from backend.database import get_db
 from backend.auth import require_feed_owner
 from backend.models import (
     Feed, ApiKey, FeedApplication, ApplicationStatus,
-    User, Post, UserAchievement, FeedPost, UserStats
+    User, Post, UserAchievement, UserStats
 )
 
 router = APIRouter()
@@ -42,10 +42,8 @@ async def get_feedmaker_profile(
     feed_data = []
     for feed in feeds:
         # Post count
-        post_count_stmt = select(func.count()).select_from(
-            select(Post.id).join_from(Post, FeedPost).where(
-                FeedPost.feed_id == feed.id
-            ).subquery()
+        post_count_stmt = select(func.count()).where(
+            Post.feed_data.op('@>')([{"feed_id": feed.id}])
         )
         post_count = (await db.execute(post_count_stmt)).scalar() or 0
         
@@ -98,15 +96,15 @@ async def get_feed_analytics(
     
     since_date = datetime.now(timezone.utc) - timedelta(days=days)
     
-    # Daily post counts
+    # Daily post counts - using post creation date since we don't have per-feed ingestion time easily accessible
     daily_posts_stmt = select(
-        func.date(FeedPost.ingested_at).label('date'),
+        func.date(Post.created_at).label('date'),
         func.count().label('posts')
     ).where(
-        FeedPost.feed_id == feed_id,
-        FeedPost.ingested_at >= since_date
+        Post.feed_data.op('@>')([{"feed_id": feed_id}]),
+        Post.created_at >= since_date
     ).group_by(
-        func.date(FeedPost.ingested_at)
+        func.date(Post.created_at)
     ).order_by('date')
     
     daily_posts = await db.execute(daily_posts_stmt)

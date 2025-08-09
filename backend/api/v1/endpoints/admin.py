@@ -12,7 +12,7 @@ from backend.database import get_db
 from backend.auth import require_master_admin, generate_api_key
 from backend.models import (
     Feed, ApiKey, ApiKeyType, FeedApplication, ApplicationStatus,
-    User, Post, UserAchievement, FeedPost, UserStats
+    User, Post, UserAchievement, UserStats
 )
 
 router = APIRouter()
@@ -59,10 +59,8 @@ async def list_feeds(
     feed_data = []
     for feed in feeds:
         # Post count
-        post_count_stmt = select(func.count()).select_from(
-            select(Post.id).join_from(Post, FeedPost).where(
-                FeedPost.feed_id == feed.id
-            ).subquery()
+        post_count_stmt = select(func.count()).where(
+            Post.feed_data.op('@>')([{"feed_id": feed.id}])
         )
         post_count = (await db.execute(post_count_stmt)).scalar() or 0
         
@@ -80,11 +78,9 @@ async def list_feeds(
         
         # Recent activity (last 7 days)
         week_ago = datetime.now(timezone.utc) - timedelta(days=7)
-        recent_posts_stmt = select(func.count()).select_from(
-            select(Post.id).join_from(Post, FeedPost).where(
-                FeedPost.feed_id == feed.id,
-                FeedPost.ingested_at >= week_ago
-            ).subquery()
+        recent_posts_stmt = select(func.count()).where(
+            Post.feed_data.op('@>')([{"feed_id": feed.id}]),
+            Post.created_at >= week_ago
         )
         recent_posts = (await db.execute(recent_posts_stmt)).scalar() or 0
         
@@ -180,8 +176,15 @@ async def delete_feed(
         # Hard delete: Remove all related data
         from sqlalchemy import delete
         
-        # Delete feed posts (join table)
-        await db.execute(delete(FeedPost).where(FeedPost.feed_id == feed_id))
+        # Remove feed associations from posts (simplified - set to empty array for affected posts)
+        from sqlalchemy import update
+        await db.execute(
+            update(Post).where(
+                Post.feed_data.op('@>')([{"feed_id": feed_id}])
+            ).values(
+                feed_data='[]'
+            )
+        )
         
         # Delete user achievements for this feed
         await db.execute(delete(UserAchievement).where(UserAchievement.feed_id == feed_id))
