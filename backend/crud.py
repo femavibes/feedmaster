@@ -396,11 +396,9 @@ async def get_user_feed_stats(db: AsyncSession, user_did: str, feed_id: str) -> 
         func.sum(models.Post.quote_count).label('total_quotes_received'),
         func.min(models.Post.created_at).label('first_post_at'),
         func.max(models.Post.created_at).label('latest_post_at')
-    ).select_from(models.Post).join(
-        models.FeedPost, models.Post.id == models.FeedPost.post_id
     ).where(
         models.Post.author_did == user_did,
-        models.FeedPost.feed_id == feed_id
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}])
     )
     
     posts_result = await db.execute(posts_stmt)
@@ -1044,17 +1042,68 @@ async def delete_feed(db: AsyncSession, feed_id: str) -> Optional[models.Feed]:
 
 async def get_posts_for_feed(db: AsyncSession, feed_id: str, skip: int = 0, limit: int = 100) -> List[models.Post]:
     """
-    Retrieve actual Post objects for a given feed ID, ordered by ingestion time asynchronously.
-    Uses JSON queries on the feed_data column.
+    Retrieve actual Post objects for a given feed ID, ordered by creation time asynchronously.
+    Uses optimized query with batch author loading to avoid N+1 queries.
     """
-    stmt = (
+    # First, get the posts without author data
+    posts_stmt = (
         select(models.Post)
         .where(models.Post.feed_data.op('@>')([{"feed_id": feed_id}]))
-        .options(selectinload(models.Post.author)) # Eagerly load the author relationship
-        .order_by(models.Post.created_at.desc())  # Order by post creation time since we don't have per-feed ingestion time easily accessible
+        .order_by(models.Post.created_at.desc())
         .offset(skip).limit(limit)
     )
-    return (await db.execute(stmt)).scalars().all()
+    posts = (await db.execute(posts_stmt)).scalars().all()
+    
+    if not posts:
+        return []
+    
+    # Batch load all authors in a single query
+    author_dids = [post.author_did for post in posts]
+    authors_stmt = select(models.User).where(models.User.did.in_(author_dids))
+    authors = (await db.execute(authors_stmt)).scalars().all()
+    
+    # Create a lookup map for authors
+    authors_map = {author.did: author for author in authors}
+    
+    # Extract all unique mentions from posts and validate them
+    all_mentions = set()
+    import re
+    for post in posts:
+        if post.text:
+            # Find all @handle.domain patterns
+            mention_matches = re.findall(r'@([a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,})', post.text)
+            for handle in mention_matches:
+                all_mentions.add(handle)
+    
+    # Batch validate mentioned users - check which ones exist in our database
+    mention_validation = {}
+    if all_mentions:
+        mentioned_users_stmt = select(models.User.handle, models.User.did, models.User.display_name, models.User.avatar_url).where(
+            models.User.handle.in_(list(all_mentions))
+        )
+        mentioned_users = (await db.execute(mentioned_users_stmt)).all()
+        existing_handles = {user.handle for user in mentioned_users}
+        
+        # Create validation map: handle -> exists (True/False) + user data if exists
+        for handle in all_mentions:
+            if handle in existing_handles:
+                user = next(u for u in mentioned_users if u.handle == handle)
+                mention_validation[handle] = {
+                    'exists': True,
+                    'did': user.did,
+                    'handle': user.handle,
+                    'display_name': user.display_name,
+                    'avatar_url': user.avatar_url
+                }
+            else:
+                mention_validation[handle] = {'exists': False}
+    
+    # Assign authors and mention validation to posts
+    for post in posts:
+        post.author = authors_map.get(post.author_did)
+        post.mention_validation = mention_validation
+    
+    return posts
 
 # --- Aggregate CRUD Operations ---
 

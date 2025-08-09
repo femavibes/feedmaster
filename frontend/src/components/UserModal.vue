@@ -51,7 +51,12 @@
                     <span class="count">{{ formatDate(feedStats.first_post_at) }}</span>
                   </div>
                 </div>
-                <p v-else>No stats available for this user in this feed.</p>
+                <div v-else class="no-stats-message">
+                  <p>No stats available for this user in this feed.</p>
+                  <p v-if="achievements.length > 0" class="feed-hint">
+                    This user has achievements in other feeds. Check their achievements below to see where they're active.
+                  </p>
+                </div>
               </div>
               
               <div class="modal-section">
@@ -303,21 +308,47 @@ const loadUserProfile = async () => {
   error.value = null
   
   try {
-    const [profileRes, statsRes, achievementsRes, inProgressRes, postsRes] = await Promise.all([
-      apiService.get(`/profiles/${props.user.did}/details`),
+    // Load profile details first (required)
+    const profileRes = await apiService.get(`/profiles/${props.user.did}/details`)
+    userProfile.value = profileRes.data
+    
+    // Load other data in parallel, but handle failures gracefully
+    const [statsRes, achievementsRes, inProgressRes, postsRes] = await Promise.allSettled([
       apiService.get(`/profiles/${props.user.did}/stats/${props.feedId}`),
       apiService.get(`/profiles/${props.user.did}/achievements`),
       apiService.get(`/profiles/${props.user.did}/achievements/in-progress`),
       apiService.get(`/feeds/${props.feedId}/posts/by_author/${props.user.did}?limit=5`)
     ])
     
-    userProfile.value = profileRes.data
-    feedStats.value = statsRes.data
-    achievements.value = achievementsRes.data.sort((a: UserAchievement, b: UserAchievement) => 
-      (a.achievement.rarity_percentage || 100) - (b.achievement.rarity_percentage || 100)
-    )
-    inProgressAchievements.value = inProgressRes.data
-    recentPosts.value = postsRes.data.posts
+    // Handle stats (may not exist for this feed)
+    if (statsRes.status === 'fulfilled') {
+      feedStats.value = statsRes.value.data
+    } else {
+      feedStats.value = null // Will show "No stats available"
+    }
+    
+    // Handle achievements
+    if (achievementsRes.status === 'fulfilled') {
+      achievements.value = achievementsRes.value.data.sort((a: UserAchievement, b: UserAchievement) => 
+        (a.achievement.rarity_percentage || 100) - (b.achievement.rarity_percentage || 100)
+      )
+    } else {
+      achievements.value = []
+    }
+    
+    // Handle in-progress achievements
+    if (inProgressRes.status === 'fulfilled') {
+      inProgressAchievements.value = inProgressRes.value.data
+    } else {
+      inProgressAchievements.value = []
+    }
+    
+    // Handle recent posts
+    if (postsRes.status === 'fulfilled') {
+      recentPosts.value = postsRes.value.data.posts
+    } else {
+      recentPosts.value = []
+    }
     
   } catch (err: any) {
     console.error('Error loading user profile:', err)
@@ -535,6 +566,17 @@ watch(() => [props.isVisible, props.user, props.feedId], () => {
   font-weight: 500;
   font-size: 0.75rem;
   border: 1px solid #404249;
+}
+
+.no-stats-message {
+  color: #949ba4;
+  font-style: italic;
+}
+
+.feed-hint {
+  font-size: 0.85rem;
+  color: #72767d;
+  margin-top: 0.5rem;
 }
 
 .scrollable-list {

@@ -182,6 +182,7 @@ class PostUpdate(BaseModel):
 class Post(PostBase):
     id: uuid.UUID # Post ID from the database
     author: Optional[UserPublic] = None
+    mention_validation: Optional[Dict[str, Dict[str, Any]]] = Field(None, description="Map of handle to user data for mentioned users")
     model_config = {'from_attributes': True}
 
 class PostListResponse(BaseModel):

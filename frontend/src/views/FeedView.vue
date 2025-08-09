@@ -116,7 +116,7 @@ const fetchPosts = async (feedId, reset = true) => {
     
     // Only update if this is still the current request
     if (currentFetchController && !currentFetchController.signal.aborted) {
-      // Process mentions for new posts
+      // Process mentions for new posts using backend validation data
       await processMentionsForPosts(fetchedPosts);
       
       if (reset) {
@@ -212,44 +212,33 @@ const closeHashtagModal = () => {
 }
 
 const processMentionsForPosts = async (posts) => {
-  // Extract all unique mentions from all posts
-  const allMentions = new Set()
-  posts.forEach(post => {
-    if (post.text) {
-      const mentionMatches = post.text.match(/@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}/g)
-      if (mentionMatches) {
-        mentionMatches.forEach(mention => {
-          const handle = mention.substring(1)
-          allMentions.add(handle)
-        })
-      }
-    }
-  })
-  
-  // Check which users exist in our database
-  for (const handle of allMentions) {
-    if (!mentionUserCache.value.has(handle)) {
-      try {
-        const response = await fetch(`/api/v1/search?q=${encodeURIComponent(handle)}`)
-        if (response.ok) {
-          const data = await response.json()
-          const user = data.users?.find(u => u.handle === handle)
-          mentionUserCache.value.set(handle, user || null)
-        } else {
-          mentionUserCache.value.set(handle, null)
-        }
-      } catch (error) {
-        console.error('Error checking user:', error)
+  // Mention validation is now handled by the backend and included in the API response
+  // Extract the validation data from the first post (all posts share the same validation data)
+  if (posts.length > 0 && posts[0].mention_validation) {
+    const validationData = posts[0].mention_validation
+    // Update the cache with the validation data
+    Object.entries(validationData).forEach(([handle, data]) => {
+      if (data.exists) {
+        // Only cache users that exist in our database
+        mentionUserCache.value.set(handle, data)
+      } else {
+        // Cache that this user doesn't exist
         mentionUserCache.value.set(handle, null)
       }
-    }
+    })
   }
 }
 
 const openUserModalByHandle = async (handle) => {
   const user = mentionUserCache.value.get(handle)
-  if (user) {
-    openUserModal(user)
+  if (user && user !== null) {
+    // user is the full user object from mention validation
+    openUserModal({
+      did: user.did,
+      handle: user.handle,
+      display_name: user.display_name,
+      avatar_url: user.avatar_url
+    })
   }
 }
 
