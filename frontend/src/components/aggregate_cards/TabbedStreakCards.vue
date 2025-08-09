@@ -56,8 +56,8 @@ watch([() => props.activeStreaks, () => props.longestStreaks], () => {
 
 <style scoped>
 .tabbed-streak-cards {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   display: flex;
@@ -68,7 +68,7 @@ watch([() => props.activeStreaks, () => props.longestStreaks], () => {
 .tab-header {
   display: flex;
   gap: 4px;
-  background-color: #404249;
+  background-color: var(--bg-tertiary);
   border-radius: 6px;
   padding: 4px;
   margin-bottom: 1rem;
@@ -78,7 +78,7 @@ watch([() => props.activeStreaks, () => props.longestStreaks], () => {
   flex: 1;
   background-color: transparent;
   border: none;
-  color: #b5bac1;
+  color: var(--text-secondary);
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
@@ -88,8 +88,8 @@ watch([() => props.activeStreaks, () => props.longestStreaks], () => {
 }
 
 .tab-header button.active {
-  background-color: #2b2d31;
-  color: #fff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .tab-content {

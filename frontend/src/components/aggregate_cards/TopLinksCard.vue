@@ -89,8 +89,8 @@ const truncateUrl = (url: string): string => {
 
 <style scoped>
 .stat-card {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   grid-column: span 2;
@@ -106,7 +106,7 @@ const truncateUrl = (url: string): string => {
 .tab-selector {
   display: flex;
   gap: 4px;
-  background-color: #404249;
+  background-color: var(--bg-tertiary);
   border-radius: 6px;
   padding: 4px;
 }
@@ -114,7 +114,7 @@ const truncateUrl = (url: string): string => {
 .tab-selector button {
   background-color: transparent;
   border: none;
-  color: #b5bac1;
+  color: var(--text-secondary);
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
@@ -125,12 +125,12 @@ const truncateUrl = (url: string): string => {
 }
 
 .tab-selector button.active {
-  background-color: #2b2d31;
-  color: #fff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .tab-selector button:hover:not(.active) {
-  background-color: #3c3e44;
+  background-color: var(--hover-bg);
 }
 
 .scrollable-content {
@@ -156,8 +156,8 @@ const truncateUrl = (url: string): string => {
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;
-  background-color: #404249;
-  border: 1px solid #5a5d66;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 8px;
   text-decoration: none;
@@ -166,11 +166,11 @@ const truncateUrl = (url: string): string => {
 }
 
 .link-pill:hover {
-  background-color: #3c3e44;
+  background-color: var(--hover-bg);
 }
 
 .link-name {
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -179,19 +179,19 @@ const truncateUrl = (url: string): string => {
 }
 
 .link-count {
-  background-color: #2b2d31;
-  color: #b5bac1;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 4px 6px;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid #404249;
+  border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
 .no-data-message {
   text-align: center;
   padding: 2rem;
-  color: #949ba4;
+  color: var(--text-muted);
 }
 </style>

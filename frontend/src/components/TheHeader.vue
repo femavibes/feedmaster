@@ -89,8 +89,8 @@ onUnmounted(() => {
 <style scoped>
 .app-header {
   grid-area: header;
-  background-color: #313338;
-  color: #fff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -130,7 +130,7 @@ onUnmounted(() => {
 .feed-name {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -149,7 +149,7 @@ onUnmounted(() => {
 }
 
 .feed-description {
-  color: #b5bac1;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   line-height: 1.2;
   max-width: 60%;
@@ -189,7 +189,7 @@ onUnmounted(() => {
   font-weight: 600;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin-left: 1rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .dropdown {
@@ -197,9 +197,9 @@ onUnmounted(() => {
 }
 
 .dropdown-button {
-  background: #404249;
+  background: var(--bg-tertiary);
   border: none;
-  color: #fff;
+  color: var(--text-primary);
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -208,15 +208,15 @@ onUnmounted(() => {
 }
 
 .dropdown-button:hover {
-  background: #5a5d66;
+  background: var(--hover-bg);
 }
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
   right: 0;
-  background: #2b2d31;
-  border: 1px solid #404249;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -237,10 +237,10 @@ onUnmounted(() => {
 .dropdown-item {
   display: block;
   padding: 12px 16px;
-  color: #b5bac1;
+  color: var(--text-secondary);
   text-decoration: none;
   transition: background-color 0.2s;
-  border-bottom: 1px solid #404249;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dropdown-item:last-child {
@@ -248,7 +248,9 @@ onUnmounted(() => {
 }
 
 .dropdown-item:hover {
-  background: #404249;
-  color: #fff;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
+
+
 </style>

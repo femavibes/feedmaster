@@ -43,8 +43,8 @@ const onAvatarError = (event: Event) => {
 
 <style scoped>
 .stat-card {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   display: flex;
@@ -54,7 +54,7 @@ const onAvatarError = (event: Event) => {
 
 h3 {
   font-size: 1.1rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 1rem 0;
   font-weight: 600;
 }
@@ -75,12 +75,12 @@ h3 {
   gap: 12px;
 }
 
-.rank { font-size: 0.9rem; font-weight: 600; color: #949ba4; text-align: center; }
-.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: #3c3e44; }
+.rank { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-align: center; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--hover-bg); }
 .user-info { display: flex; flex-direction: column; overflow: hidden; }
-.display-name { font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.handle { color: #949ba4; font-size: 0.9rem; }
-.streak-count { font-size: 0.9rem; font-weight: 500; color: #b5bac1; white-space: nowrap; }
+.display-name { font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.handle { color: var(--text-muted); font-size: 0.9rem; }
+.streak-count { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
 
 .scrollable-content {
   flex: 1;

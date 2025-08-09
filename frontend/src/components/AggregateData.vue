@@ -138,7 +138,7 @@ watch([() => feedStore.selectedFeedId, selectedTimeframe], ([newFeedId, newTimef
 <style scoped>
 .aggregate-data-container {
   grid-area: sidebar;
-  background-color: #313338;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
   height: 100%;
@@ -151,13 +151,13 @@ watch([() => feedStore.selectedFeedId, selectedTimeframe], ([newFeedId, newTimef
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #404249;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
 
 h2 {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 1.2rem;
   margin-top: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -166,7 +166,7 @@ h2 {
 .timeframe-selector {
   display: flex;
   gap: 4px;
-  background-color: #2b2d31;
+  background-color: var(--bg-primary);
   border-radius: 6px;
   padding: 4px;
 }
@@ -174,7 +174,7 @@ h2 {
 .timeframe-selector button {
   background-color: transparent;
   border: none;
-  color: #b5bac1;
+  color: var(--text-secondary);
   padding: 4px 12px;
   border-radius: 4px;
   cursor: pointer;
@@ -183,8 +183,8 @@ h2 {
 }
 
 .timeframe-selector button.active {
-  background-color: #404249;
-  color: #fff;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .stats-grid {
@@ -213,7 +213,8 @@ h2 {
 .stats-grid > *::-webkit-scrollbar {
   display: none;
 }
-.state-message { text-align: center; padding: 2rem; color: #949ba4; }
-.error { color: #e57373;
-}
+.state-message { text-align: center; padding: 2rem; color: var(--text-muted); }
+.error { color: #e57373; }
+
+
 </style>

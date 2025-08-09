@@ -128,10 +128,10 @@ const hideResults = () => {
 .search-input {
   width: 100%;
   padding: 8px 12px;
-  background-color: #404249;
-  border: 1px solid #5a5d66;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: #dcddde;
+  color: var(--text-primary);
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.2s ease;
@@ -142,7 +142,7 @@ const hideResults = () => {
 }
 
 .search-input::placeholder {
-  color: #8a8e94;
+  color: var(--text-muted);
 }
 
 .search-results {
@@ -150,8 +150,8 @@ const hideResults = () => {
   top: 100%;
   left: 0;
   right: 0;
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   margin-top: 4px;
   max-height: 300px;
@@ -168,7 +168,7 @@ const hideResults = () => {
 .search-loading, .search-error, .search-no-results {
   padding: 12px;
   text-align: center;
-  color: #8a8e94;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -186,7 +186,7 @@ const hideResults = () => {
 }
 
 .search-result-item:hover {
-  background-color: #404249;
+  background-color: var(--bg-tertiary);
 }
 
 .result-avatar {
@@ -203,12 +203,12 @@ const hideResults = () => {
 
 .result-name {
   font-weight: 600;
-  color: #dcddde;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .result-handle {
-  color: #8a8e94;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -220,7 +220,7 @@ const hideResults = () => {
   width: 32px;
   height: 32px;
   background-color: #00d4aa;
-  color: #2b2d31;
+  color: var(--bg-secondary);
   border-radius: 50%;
   display: flex;
   align-items: center;

@@ -38,6 +38,12 @@ const closeHashtagModal = () => {
 
 onMounted(() => {
   apiService.fetchFeeds();
+  
+  // Initialize theme from localStorage
+  const settings = JSON.parse(localStorage.getItem('feedmaster-settings') || '{}')
+  if (settings.lightMode) {
+    document.documentElement.classList.add('light-mode')
+  }
 })
 </script>
 

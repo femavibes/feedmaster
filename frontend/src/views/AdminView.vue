@@ -548,14 +548,14 @@
             <small>The DID of the user who owns this feed</small>
           </div>
           <div class="form-group">
-            <label for="websocket-input">WebSocket URL:</label>
+            <label for="websocket-input">WebSocket Base URL:</label>
             <input 
               id="websocket-input" 
               v-model="newWebsocketUrl" 
               class="websocket-input" 
-              placeholder="wss://api.graze.social/app/contrail?feed=at://..."
+              placeholder="wss://api.graze.social/app/contrail"
             >
-            <small>Graze Contrails WebSocket URL for this feed</small>
+            <small>Base WebSocket URL (ingestion worker will append feed parameters automatically)</small>
           </div>
           <div class="form-group">
             <label for="tier-select">Tier:</label>
@@ -1190,9 +1190,8 @@ export default {
         return
       }
       
-      // Auto-construct WebSocket URL from feed ID and owner DID
-      const ownerDid = newFeed.value.owner_did || 'did:plc:lptjvw6ut224kwrj7ub3sqbe' // Fallback to feedmaker DID if no owner
-      const websocket_url = `wss://api.graze.social/app/contrail?feed=at://${ownerDid}/app.bsky.feed.generator/${newFeed.value.feed_id}`
+      // Use base WebSocket URL format (ingestion worker will construct full URL)
+      const websocket_url = 'wss://api.graze.social/app/contrail'
       
       try {
         await apiCall('/feeds', {

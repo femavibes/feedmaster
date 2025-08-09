@@ -6,10 +6,6 @@
         <button class="close-button" @click="closeModal">×</button>
       </div>
       <div class="modal-body">
-        <div class="notice">
-          <p>⚠️ Settings are not yet functional - coming soon!</p>
-        </div>
-        
         <div class="setting-group">
           <label class="setting-label">
             <input type="checkbox" v-model="lightMode" @change="toggleTheme" />
@@ -20,33 +16,9 @@
         
         <div class="setting-group">
           <label class="setting-label">
-            <input type="checkbox" v-model="autoRefresh" @change="saveSettings" />
-            <span class="checkmark"></span>
-            Auto-refresh data every 30 seconds
-          </label>
-        </div>
-        
-        <div class="setting-group">
-          <label class="setting-label">
-            <input type="checkbox" v-model="compactView" @change="saveSettings" />
-            <span class="checkmark"></span>
-            Compact view for posts
-          </label>
-        </div>
-        
-        <div class="setting-group">
-          <label class="setting-label">
             <input type="checkbox" v-model="showTimestamps" @change="saveSettings" />
             <span class="checkmark"></span>
             Show relative timestamps ("2 hours ago")
-          </label>
-        </div>
-        
-        <div class="setting-group">
-          <label class="setting-label">
-            <input type="checkbox" v-model="hideNsfw" @change="saveSettings" />
-            <span class="checkmark"></span>
-            Hide NSFW content
           </label>
         </div>
       </div>
@@ -64,10 +36,7 @@ defineProps({
 const emit = defineEmits(['close'])
 
 const lightMode = ref(false)
-const autoRefresh = ref(false)
-const compactView = ref(false)
 const showTimestamps = ref(true)
-const hideNsfw = ref(false)
 
 const closeModal = () => {
   emit('close')
@@ -76,26 +45,33 @@ const closeModal = () => {
 const loadSettings = () => {
   const settings = JSON.parse(localStorage.getItem('feedmaster-settings') || '{}')
   lightMode.value = settings.lightMode || false
-  autoRefresh.value = settings.autoRefresh || false
-  compactView.value = settings.compactView || false
   showTimestamps.value = settings.showTimestamps !== false
-  hideNsfw.value = settings.hideNsfw || false
+  
+  // Apply theme on load
+  applyTheme()
 }
 
 const saveSettings = () => {
   const settings = {
     lightMode: lightMode.value,
-    autoRefresh: autoRefresh.value,
-    compactView: compactView.value,
-    showTimestamps: showTimestamps.value,
-    hideNsfw: hideNsfw.value
+    showTimestamps: showTimestamps.value
   }
   localStorage.setItem('feedmaster-settings', JSON.stringify(settings))
+  // Dispatch custom event for immediate updates
+  window.dispatchEvent(new CustomEvent('settings-changed', { detail: settings }))
+}
+
+const applyTheme = () => {
+  if (lightMode.value) {
+    document.documentElement.classList.add('light-mode')
+  } else {
+    document.documentElement.classList.remove('light-mode')
+  }
 }
 
 const toggleTheme = () => {
   saveSettings()
-  // Theme switching logic would go here
+  applyTheme()
 }
 
 onMounted(() => {

@@ -12,6 +12,7 @@ from backend import crud, schemas
 from backend.schemas import AggregateData
 from backend.database import get_db
 from backend.enums import Timeframe
+from backend.cache import Cache, feeds_list_key, feed_posts_key, aggregates_key
 
 router = APIRouter()
 
@@ -47,6 +48,12 @@ async def get_available_feeds(db: AsyncSession = Depends(get_db)):
     It reads from the database and derives an 'icon' for the frontend from the
     first letter of the feed's name.
     """
+    # Try cache first
+    cache_key = feeds_list_key()
+    cached_result = Cache.get(cache_key)
+    if cached_result:
+        return cached_result
+    
     db_feeds = await crud.get_feeds(db)
     # Filter to only active feeds for public API
     active_feeds = [feed for feed in db_feeds if feed.is_active]
@@ -66,6 +73,9 @@ async def get_available_feeds(db: AsyncSession = Depends(get_db)):
     
     response_data = {"feeds": formatted_feeds}
     
+    # Cache for 5 minutes
+    Cache.set(cache_key, response_data, 300)
+    
     return response_data
 
 
@@ -81,8 +91,21 @@ async def get_recent_posts_for_feed(
     skip: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
+    # Only cache first page with default limit
+    if skip == 0 and limit == 50:
+        cache_key = feed_posts_key(feed_id, 0)
+        cached_result = Cache.get(cache_key)
+        if cached_result:
+            return cached_result
+    
     posts = await crud.get_posts_for_feed(db, feed_id=feed_id, limit=limit, skip=skip)
-    return {"posts": posts}
+    result = {"posts": posts}
+    
+    # Cache first page for 2 minutes
+    if skip == 0 and limit == 50:
+        Cache.set(cache_key, result, 120)
+    
+    return result
 
 
 @router.get(
@@ -164,6 +187,12 @@ async def get_all_feed_aggregates(
     timeframe: str = Query("1d", description="Timeframe for aggregates (1h, 6h, 1d, 7d, 30d, allTime)"),
     db: AsyncSession = Depends(get_db),
 ):
+    # Try cache first
+    cache_key = aggregates_key(feed_id, timeframe)
+    cached_result = Cache.get(cache_key)
+    if cached_result:
+        return cached_result
+    
     # List of all aggregates to fetch
     aggregate_names = [
         "top_posts",
@@ -224,4 +253,7 @@ async def get_all_feed_aggregates(
                 # Fallback for any other aggregates, just pass the data_json as is
                 response_data[agg_name] = aggregate.data_json
 
+    # Cache for 10 minutes
+    Cache.set(cache_key, response_data, 600)
+    
     return response_data

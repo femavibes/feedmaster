@@ -33,16 +33,16 @@ const openHashtagModal = (hashtag: string) => {
 
 <style scoped>
 .top-hashtags-card {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #dcddde;
+  color: var(--text-primary);
   font-family: 'Inter', sans-serif;
 }
 
 .card-header {
   padding: 1rem;
-  border-bottom: 1px solid #404249;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .card-title {
@@ -66,9 +66,9 @@ const openHashtagModal = (hashtag: string) => {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  border-bottom: 1px solid #313338;
-  background-color: #404249;
-  border: 1px solid #5a5d66;
+  border-bottom: 1px solid var(--bg-secondary);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 8px;
 }
@@ -79,8 +79,8 @@ const openHashtagModal = (hashtag: string) => {
 }
 
 .hashtag-item.clickable:hover {
-  background-color: #4a4d54;
-  border-color: #6a6d76;
+  background-color: var(--hover-bg);
+  border-color: var(--border-color);
   transform: translateY(-1px);
 }
 
@@ -90,21 +90,21 @@ const openHashtagModal = (hashtag: string) => {
 
 .hashtag-name {
   font-weight: 500;
-  color: #dcddde;
+  color: var(--text-primary);
 }
 
 .hashtag-count {
   font-weight: 500;
-  background-color: #2b2d31;
-  color: #b5bac1;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 4px 6px;
   border-radius: 4px;
   font-size: 0.75rem;
-  border: 1px solid #404249;
+  border: 1px solid var(--border-color);
 }
 
 .no-data {
   text-align: center;
-  color: #8a8e94;
+  color: var(--text-muted);
 }
 </style>

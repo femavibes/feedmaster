@@ -66,3 +66,15 @@ def hashtag_search_key(query: str) -> str:
 
 def user_profile_key(user_did: str) -> str:
     return f"user_profile:{user_did}"
+
+def feeds_list_key() -> str:
+    return "feeds:list"
+
+def feed_posts_key(feed_id: str, page: int = 0) -> str:
+    return f"feed_posts:{feed_id}:page:{page}"
+
+def aggregates_key(feed_id: str, timeframe: str) -> str:
+    return f"aggregates:{feed_id}:{timeframe}"
+
+def feed_metadata_key(feed_id: str) -> str:
+    return f"feed_metadata:{feed_id}"

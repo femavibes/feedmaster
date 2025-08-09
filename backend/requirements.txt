@@ -33,5 +33,5 @@ httpx==0.27.0   # For making asynchronous HTTP requests to external services
 # Image generation
 Pillow==10.4.0
 
-# Image generation
-Pillow==10.4.0
+# Redis caching
+redis==5.0.7

@@ -29,7 +29,7 @@
           <span>↻ {{ post.repost_count }}</span>
           <span>↳ {{ post.reply_count }}</span>
           <span class="bluesky-icon">🦋</span>
-          <span class="post-time">{{ new Date(post.created_at).toLocaleString() }}</span>
+          <span class="post-time">{{ useRelativeTime ? formatRelativeTime(post.created_at) : new Date(post.created_at).toLocaleString() }}</span>
         </a>
       </div>
       
@@ -58,12 +58,13 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFeedStore } from '@/stores/useFeedStore';
 import apiService from '@/apiService';
 import HashtagModal from '@/components/HashtagModal.vue';
 import { proxyImageUrl } from '@/utils/imageProxy';
+import { formatRelativeTime } from '@/utils/timeFormat';
 
 const route = useRoute();
 const posts = ref([]);
@@ -77,6 +78,7 @@ const POSTS_PER_PAGE = 50;
 const MAX_POSTS = 150;
 const showHashtagModal = ref(false);
 const selectedHashtag = ref(null);
+const useRelativeTime = ref(true);
 
 const feedStore = useFeedStore();
 
@@ -355,6 +357,31 @@ const splitByNewlines = (text) => {
   return parts
 }
 
+const loadSettings = () => {
+  const settings = JSON.parse(localStorage.getItem('feedmaster-settings') || '{}')
+  useRelativeTime.value = settings.showTimestamps !== false
+}
+
+// Watch for settings changes
+const watchSettings = () => {
+  // Listen for custom settings-changed event for immediate updates
+  window.addEventListener('settings-changed', (e) => {
+    useRelativeTime.value = e.detail.showTimestamps !== false
+  })
+  
+  // Also listen for localStorage changes (for other tabs)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'feedmaster-settings') {
+      loadSettings()
+    }
+  })
+}
+
+onMounted(() => {
+  loadSettings()
+  watchSettings()
+})
+
 // Watch route parameter and update store
 watch(() => route.params.feed_id, (newFeedId) => {
   if (newFeedId) {
@@ -362,7 +389,7 @@ watch(() => route.params.feed_id, (newFeedId) => {
     fetchPosts(newFeedId, true);
     
     // Fallback timeout to prevent infinite loading
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (loading.value && !error.value) {
         console.warn('Posts loading timeout, forcing completion');
         loading.value = false;
@@ -371,6 +398,14 @@ watch(() => route.params.feed_id, (newFeedId) => {
         }
       }
     }, 15000); // 15 second timeout
+    
+    // Clear timeout if posts load successfully
+    const checkLoaded = setInterval(() => {
+      if (!loading.value || posts.value.length > 0) {
+        clearTimeout(timeoutId);
+        clearInterval(checkLoaded);
+      }
+    }, 100);
   }
 }, { immediate: true });
 
@@ -380,7 +415,7 @@ watch(() => route.params.feed_id, (newFeedId) => {
 <style scoped>
 .view-container {
   /* This is the "box" styling that used to be in App.vue's .main-content */
-  background-color: #313338;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   padding: 1.5rem 2rem;
   height: 100%;
@@ -391,7 +426,7 @@ watch(() => route.params.feed_id, (newFeedId) => {
 
 h1 {
   font-size: 1.2rem;
-  color: #fff;
+  color: var(--text-primary);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -419,39 +454,42 @@ h1 {
 }
 
 .post-item {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 
 .header {
-  border-bottom: 1px solid #404249;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .post-author { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
 .post-author.clickable { cursor: pointer; transition: all 0.2s ease; border-radius: 6px; padding: 8px; margin: -8px -8px 0.75rem -8px; }
-.post-author.clickable:hover { background-color: #404249; transform: translateY(-1px); }
+.post-author.clickable:hover { background-color: var(--bg-tertiary); transform: translateY(-1px); }
 .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 .author-info { display: flex; flex-direction: column; }
-.display-name { font-weight: bold; }
-.handle { color: #949ba4; font-size: 0.9rem; }
-.post-text { white-space: pre-wrap; word-break: break-word; margin-bottom: 1rem; }
+.display-name { font-weight: bold; color: var(--text-primary); }
+.handle { color: var(--text-muted); font-size: 0.9rem; }
+.post-text { white-space: pre-wrap; word-break: break-word; margin-bottom: 1rem; color: var(--text-primary); }
 .mention-link { color: #5865f2; cursor: pointer; font-weight: bold; }
 .mention-link:hover { text-decoration: underline; }
-.mention-inactive { color: #949ba4; font-weight: bold; cursor: help; }
+.mention-inactive { color: var(--text-muted); font-weight: bold; cursor: help; }
 .hashtag-link { color: #00d4aa; cursor: pointer; font-weight: bold; }
 .hashtag-link:hover { text-decoration: underline; }
 .text-link { color: #00aff4; font-weight: bold; text-decoration: none; }
 .text-link:hover { text-decoration: underline; }
-.post-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: #949ba4; border-top: 1px solid #404249; padding-top: 0.75rem; margin-top: 1rem; align-items: center; }
+.post-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: 1rem; align-items: center; }
+.post-meta span { color: var(--text-muted); }
 .clickable-meta { text-decoration: none; color: inherit; transition: all 0.2s ease; border-radius: 4px; padding: 0.25rem; margin: -0.25rem; }
-.clickable-meta:hover { background-color: #404249; transform: translateY(-1px); }
+.clickable-meta:hover { background-color: var(--bg-tertiary); transform: translateY(-1px); }
 .bluesky-icon { flex-grow: 1; text-align: center; font-size: 0.9rem; }
 .post-time { margin-left: auto; }
-.loading-more, .end-of-posts { text-align: center; padding: 1rem; color: #949ba4; font-size: 0.9rem; }
-.end-of-posts { border-top: 1px solid #404249; margin-top: 1rem; }
+.loading-more, .end-of-posts { text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.9rem; }
+.end-of-posts { border-top: 1px solid var(--border-color); margin-top: 1rem; }
+
+
 </style>

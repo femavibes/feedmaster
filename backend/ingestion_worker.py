@@ -184,7 +184,7 @@ async def load_configurations():
         
         if db_feeds:
             # Convert model objects to Pydantic schemas for consistency
-            feeds_config = [schemas.FeedsConfig.from_orm(f) for f in db_feeds]
+            feeds_config = [schemas.FeedsConfig.model_validate(f) for f in db_feeds]
             logger.info(f"Loaded {len(feeds_config)} feed configurations from database.")
             return
     except Exception as e:
@@ -667,9 +667,15 @@ async def run_worker():
         logging.info("No feeds configured. Ingestion Worker will not listen to any feeds.")
     else:
         for feed_conf in feeds_config:
-            base_url = feed_conf.contrails_websocket_url
-            at_uri = feed_conf.bluesky_at_uri
-            websocket_url = f"{base_url}?feed={urllib.parse.quote_plus(str(at_uri))}"
+            websocket_url = str(feed_conf.contrails_websocket_url)
+            
+            # Check if URL already contains feed parameter (new format)
+            if '?feed=' not in websocket_url:
+                # Old format: base URL only, construct full URL
+                at_uri = feed_conf.bluesky_at_uri
+                websocket_url = f"{websocket_url}?feed={urllib.parse.quote_plus(str(at_uri))}"
+            # If URL already has ?feed=, use it as-is (new format)
+            
             listener_tasks.append(asyncio.create_task(listen_to_contrails_feed(feed_conf.id, websocket_url)))
 
     # --- Start the periodic DID refresh scheduler ---

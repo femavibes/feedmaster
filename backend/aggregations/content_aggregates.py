@@ -116,7 +116,7 @@ async def _calculate_top_media_posts(
             "quoted_post_text": p.quoted_post_text,
             "quoted_post_author_handle": p.quoted_post_author_handle,
             "author": p.author.display_name if p.author and p.author.display_name else p.author.handle if p.author else "Unknown",
-            "avatar": p.author.avatar_url if p.author else None,
+            "avatar": p.author.avatar_url if p.author and p.author.avatar_url else "",
             "post_url": f"https://bsky.app/profile/{p.author.handle}/post/{p.uri.split('/')[-1]}" if p.author else None
         }
         top_media_data["top"].append(post_data)
@@ -185,7 +185,7 @@ async def calculate_top_posts(
                 "quoted_post_author_handle": p.quoted_post_author_handle,
                 # Add the missing fields for TopPostCard
                 "author": p.author.display_name if p.author and p.author.display_name else p.author.handle if p.author else "Unknown",
-                "avatar": p.author.avatar_url if p.author else None,
+                "avatar": p.author.avatar_url if p.author and p.author.avatar_url else "",
                 "post_url": f"https://bsky.app/profile/{p.author.handle}/post/{p.uri.split('/')[-1]}" if p.author else None
             } for p, engagement_score in top_posts_results
         ]

@@ -72,8 +72,8 @@ const formatTimestamp = (timestamp: string) => {
 
 <style scoped>
 .stat-card {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   display: flex;
@@ -83,7 +83,7 @@ const formatTimestamp = (timestamp: string) => {
 
 h3 {
   font-size: 1.1rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 1rem 0;
   font-weight: 600;
 }
@@ -104,7 +104,7 @@ h3 {
   align-items: center;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid #313338;
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .poster-item.clickable {
@@ -116,7 +116,7 @@ h3 {
 }
 
 .poster-item.clickable:hover {
-  background-color: #404249;
+  background-color: var(--bg-tertiary);
   transform: translateY(-1px);
 }
 
@@ -129,7 +129,7 @@ h3 {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: #3c3e44;
+  background-color: var(--hover-bg);
 }
 
 .poster-info {
@@ -140,19 +140,19 @@ h3 {
 
 .display-name {
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .handle {
-  color: #949ba4;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 .timestamp {
-  color: #72767d;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-style: italic;
 }
@@ -160,6 +160,6 @@ h3 {
 .no-data-message {
   text-align: center;
   padding: 2rem;
-  color: #949ba4;
+  color: var(--text-muted);
 }
 </style>

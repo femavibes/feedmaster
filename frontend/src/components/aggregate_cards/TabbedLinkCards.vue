@@ -130,8 +130,8 @@ const onThumbnailError = (event: Event) => {
 
 <style scoped>
 .stat-card {
-  background-color: #2b2d31;
-  border: 1px solid #404249;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   display: flex;
@@ -145,7 +145,7 @@ const onThumbnailError = (event: Event) => {
 .tab-selector {
   display: flex;
   gap: 4px;
-  background-color: #404249;
+  background-color: var(--bg-tertiary);
   border-radius: 6px;
   padding: 4px;
 }
@@ -153,7 +153,7 @@ const onThumbnailError = (event: Event) => {
 .tab-selector button {
   background-color: transparent;
   border: none;
-  color: #b5bac1;
+  color: var(--text-secondary);
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
@@ -164,12 +164,12 @@ const onThumbnailError = (event: Event) => {
 }
 
 .tab-selector button.active {
-  background-color: #2b2d31;
-  color: #fff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .tab-selector button:hover:not(.active) {
-  background-color: #3c3e44;
+  background-color: var(--hover-bg);
 }
 
 .scrollable-content {
@@ -192,8 +192,8 @@ const onThumbnailError = (event: Event) => {
 .link-card-item {
   display: flex;
   flex-direction: column;
-  background-color: #404249;
-  border: 1px solid #5a5d66;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
@@ -201,7 +201,7 @@ const onThumbnailError = (event: Event) => {
 }
 
 .link-card-item:hover {
-  background-color: #3c3e44;
+  background-color: var(--hover-bg);
 }
 
 .link-card-thumbnail {
@@ -241,7 +241,7 @@ const onThumbnailError = (event: Event) => {
 
 .link-card-title {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.9rem;
   line-height: 1.3;
   display: -webkit-box;
@@ -251,7 +251,7 @@ const onThumbnailError = (event: Event) => {
 }
 
 .link-card-description {
-  color: #b5bac1;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   line-height: 1.4;
   margin: 0 0 8px 0;
@@ -266,7 +266,7 @@ const onThumbnailError = (event: Event) => {
 }
 
 .link-card-url {
-  color: #949ba4;
+  color: var(--text-muted);
   font-size: 0.75rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -277,20 +277,20 @@ const onThumbnailError = (event: Event) => {
   position: absolute;
   bottom: 4px;
   right: 4px;
-  background-color: #2b2d31;
-  color: #b5bac1;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 4px 6px;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid #404249;
+  border: 1px solid var(--border-color);
   white-space: nowrap;
 }
 
 .no-data-message {
   text-align: center;
   padding: 2rem;
-  color: #949ba4;
+  color: var(--text-muted);
 }
 
 .placeholder-thumbnail {
@@ -300,7 +300,7 @@ const onThumbnailError = (event: Event) => {
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  color: #949ba4;
-  background-color: #3c3e44;
+  color: var(--text-muted);
+  background-color: var(--hover-bg);
 }
 </style>

@@ -492,7 +492,7 @@ async def review_application(
         feed = Feed(
             id=application.feed_id,
             name=f"Feed {application.feed_id}",
-            contrails_websocket_url=application.websocket_url,
+            contrails_websocket_url='wss://api.graze.social/app/contrail',
             owner_did=application.applicant_did,
             tier=request.tier,
             is_active=True

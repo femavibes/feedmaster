@@ -50,7 +50,7 @@ const closeSettings = () => {
 <style scoped>
 .left-nav-bar {
   grid-area: nav;
-  background-color: #313338;
+  background-color: var(--bg-secondary);
   padding: 16px 8px;
   border-radius: 8px;
   display: flex;
@@ -70,7 +70,7 @@ const closeSettings = () => {
   height: 52px;
   border-radius: 50%;
   background-color: transparent;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: bold;
   border: none;
@@ -103,7 +103,7 @@ const closeSettings = () => {
 }
 
 .loading-spinner {
-  border: 4px solid #404249;
+  border: 4px solid var(--border-color);
   border-top: 4px solid #5865f2;
   border-radius: 50%;
   width: 24px;
@@ -121,7 +121,7 @@ const closeSettings = () => {
   height: 48px;
   border-radius: 50%;
   background-color: #da373c;
-  color: #fff;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,19 +147,21 @@ const closeSettings = () => {
 
 .settings-button {
   margin-top: auto;
-  background-color: #404249;
-  border: 2px solid #5a5d66;
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
 }
 
 .settings-button:hover {
-  background-color: #4a4d54;
-  border-color: #6a6d76;
+  background-color: var(--hover-bg);
+  border-color: var(--border-color);
 }
 
 .settings-icon {
   font-size: 1.5rem;
-  color: #dcddde;
+  color: var(--text-secondary);
   z-index: 1;
   position: relative;
 }
+
+
 </style>
