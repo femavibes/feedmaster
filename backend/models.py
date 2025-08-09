@@ -133,8 +133,11 @@ class Post(Base):
     next_poll_at = Column(DateTime(timezone=True), nullable=True, index=True)
     # Flag to indicate if the post is still active in the battle royale / eligible for polling.
     is_active_for_polling = Column(Boolean, default=True, index=True)
-    # Relationship to FeedPost model (the join table for many-to-many feeds)
-    feed_inclusions = relationship("FeedPost", back_populates="post", lazy="raise_on_sql")
+    # NEW: JSON field to store feed associations directly
+    feed_data = Column(JSONB, nullable=False, default=lambda: [])
+    
+    # NEW: Language detection from AT Protocol
+    langs = Column(JSONB, nullable=True)
 
     __table_args__ = (
         # Add GIN indexes to the JSONB columns that are frequently queried.
@@ -146,6 +149,8 @@ class Post(Base):
         Index('ix_posts_images_gin', images, postgresql_using='gin'),
         # Index for efficiently querying posts that are due for polling.
         Index('ix_posts_polling_queue', 'is_active_for_polling', 'next_poll_at'),
+        # Index for efficiently querying posts by feed using JSON operations
+        Index('ix_posts_feed_data_gin', feed_data, postgresql_using='gin'),
     )
     def __repr__(self):
         return f"<Post(id='{self.id}', uri='{self.uri}', author_did='{self.author_did}')>"
@@ -189,8 +194,7 @@ class Feed(Base):
     created_at = Column(DateTime(timezone=True), default=func.now())
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
-    # Add relationship back to UserAchievement
-    feed_posts = relationship("FeedPost", back_populates="feed", lazy="raise_on_sql")
+    # Relationships
     aggregates = relationship("Aggregate", back_populates="feed_config", lazy="raise_on_sql") # Link to the Aggregate model
     user_achievements = relationship("UserAchievement", back_populates="feed", lazy="raise_on_sql")
     
@@ -198,31 +202,7 @@ class Feed(Base):
         return f"<Feed(id='{self.id}', name='{self.name}')>"
 
 
-# --- FeedPost Model (Join Table) ---
-# Corresponds to the FeedPost model in datamaster-prisma-schema
-class FeedPost(Base):
-    __tablename__ = "feed_posts" # Maps to the 'feed_posts' table
-
-    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    post_id = Column(PG_UUID(as_uuid=True), ForeignKey("posts.id"), nullable=False, index=True)
-    feed_id = Column(String(255), ForeignKey("feeds.id"), nullable=False, index=True)
-    ingested_at = Column(DateTime(timezone=True), default=func.now())
-
-    # NEW: Relevance score for this post within this specific feed
-    relevance_score = Column(Integer, default=0)
-
-    # Relationships
-    post = relationship("Post", back_populates="feed_inclusions")
-    feed = relationship("Feed", back_populates="feed_posts")
-
-    __table_args__ = (
-        UniqueConstraint('post_id', 'feed_id', name='_post_feed_uc'), # You had this commented out
-        Index('idx_feed_posts_feed_ingested', feed_id, ingested_at),
-        Index('idx_feed_posts_post_ingested', post_id, ingested_at),
-    )
-
-    def __repr__(self):
-        return f"<FeedPost(id='{self.id}', post_id='{self.post_id}', feed_id='{self.feed_id}')>"
+# FeedPost model removed - feed associations now stored in posts.feed_data JSON column
 
 # --- Aggregate Model (Renamed from FeedAggregateResult, consistent with your file) ---
 class Aggregate(Base):

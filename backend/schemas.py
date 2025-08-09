@@ -170,7 +170,7 @@ class PostBase(BaseModel):
     next_poll_at: Optional[datetime.datetime] = Field(None, description="Timestamp for the next scheduled poll")
 
 class PostCreate(PostBase):
-    pass
+    feed_data: Optional[List[Dict[str, Any]]] = Field(None, description="JSON array of feed associations")
 
 class PostUpdate(BaseModel):
     # ... all other fields ...

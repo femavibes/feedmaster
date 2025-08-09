@@ -39,9 +39,8 @@ feeds_config: List[schemas.FeedBase] = []
 # Batching configuration
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", 100)) # Number of records per batch
 BATCH_INTERVAL_SECONDS = int(os.getenv("BATCH_INTERVAL_SECONDS", 5)) # Time in seconds to wait before flushing a batch
-# Queues for batching
+# Queue for batching posts (no longer need feed_post queue)
 post_batch_queue: asyncio.Queue[Tuple[schemas.PostCreate, str]] = asyncio.Queue()
-feed_post_batch_queue: asyncio.Queue[schemas.FeedPostCreate] = asyncio.Queue()
 
 # --- NEW HELPER FUNCTION ---
 def resolve_bluesky_cdn_url(author_did: str, blob_data: Dict[str, Any]) -> Optional[str]:
@@ -450,7 +449,7 @@ async def process_firehose_message(message: Dict[str, Any], feed_id: str):
 # --- Batch Processing Workers ---
 
 async def _flush_post_batch(batch: List[Tuple[schemas.PostCreate, str]]):
-    """Helper function to de-duplicate, upsert, and link a batch of posts."""
+    """Helper function to de-duplicate, upsert posts with feed_data JSON."""
     if not batch:
         return
 
@@ -462,10 +461,24 @@ async def _flush_post_batch(batch: List[Tuple[schemas.PostCreate, str]]):
         else:
             unique_posts_with_feeds[post_schema.cid][1].append(feed_id)
 
-    posts_to_upsert = [post_schema for post_schema, _ in unique_posts_with_feeds.values()]
+    # 2. Create PostCreate objects with feed_data populated
+    posts_to_upsert = []
+    ingested_at = datetime.now(timezone.utc)
+    
+    for post_schema, feed_ids in unique_posts_with_feeds.values():
+        # Create feed_data JSON array
+        feed_data = [
+            {"feed_id": feed_id, "ingested_at": ingested_at.isoformat()}
+            for feed_id in feed_ids
+        ]
+        
+        # Create new post schema with feed_data
+        post_with_feeds = post_schema.model_copy()
+        post_with_feeds.feed_data = feed_data
+        posts_to_upsert.append(post_with_feeds)
 
     async with get_async_db_session() as db:
-        # 2. Ensure all authors for the unique posts exist
+        # 3. Ensure all authors for the unique posts exist
         author_dids_in_batch = {p.author_did for p in posts_to_upsert}
         if author_dids_in_batch:
             # Check for existing, stale users who just posted and need a refresh.
@@ -478,24 +491,9 @@ async def _flush_post_batch(batch: List[Tuple[schemas.PostCreate, str]]):
             # it uses ON CONFLICT DO NOTHING and won't overwrite existing profiles.
             await crud.create_placeholder_users_batch(db, list(author_dids_in_batch))
 
-        # 3. Upsert the de-duplicated posts
+        # 4. Upsert the posts with feed_data included
         inserted_posts = await crud.upsert_posts_batch(db, posts_to_upsert)
-        logger.info(f"Flushed batch of {len(posts_to_upsert)} unique posts to DB (from {len(batch)} queue items).")
-        
-        # 4. Link posts to all their respective feeds
-        inserted_posts_map = {p.cid: p for p in inserted_posts}
-        for cid, (post_schema, feed_ids) in unique_posts_with_feeds.items():
-            p = inserted_posts_map.get(cid)
-            if p:
-                for feed_id in feed_ids:
-                    feed_post_batch_queue.put_nowait(schemas.FeedPostCreate(
-                        post_id=p.id,
-                        feed_id=feed_id,
-                        relevance_score=1.0, # Default score
-                        ingested_at=datetime.now(timezone.utc)
-                    ))
-            else:
-                logger.warning(f"Could not find post with CID {cid} in upserted batch, can't link to feeds {feed_ids}.")
+        logger.info(f"Flushed batch of {len(posts_to_upsert)} unique posts to DB (from {len(batch)} queue items) with feed associations.")
 
 
 async def post_batch_worker():
@@ -518,26 +516,7 @@ async def post_batch_worker():
             logger.error(f"Error in post batch worker: {e}", exc_info=True)
             current_batch = []
 
-async def feed_post_batch_worker():
-    """Periodically flushes the feed_post batch queue to the database."""
-    current_batch: List[schemas.FeedPostCreate] = []
-    while True:
-        try:
-            feed_post = await asyncio.wait_for(feed_post_batch_queue.get(), timeout=BATCH_INTERVAL_SECONDS)
-            current_batch.append(feed_post)
-
-            if len(current_batch) >= BATCH_SIZE:
-                async with get_async_db_session() as db:
-                    await crud.create_feed_posts_batch(db, current_batch)
-                current_batch = []
-        except asyncio.TimeoutError:
-            if current_batch:
-                async with get_async_db_session() as db:
-                    await crud.create_feed_posts_batch(db, current_batch)
-                current_batch = []
-        except Exception as e:
-            logger.error(f"Error in feed_post batch worker: {e}", exc_info=True)
-            current_batch = []
+# No longer needed - feed associations are handled in post upsert
 
 # --- WebSocket Listener ---
 
@@ -658,7 +637,7 @@ async def run_worker():
     # --- Start batch processing workers ---
     batch_worker_tasks = [
         asyncio.create_task(post_batch_worker()),
-        asyncio.create_task(feed_post_batch_worker()),
+        # No longer need feed_post_batch_worker
     ]
 
     # --- Start WebSocket listeners for each feed ---

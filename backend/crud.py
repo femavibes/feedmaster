@@ -469,10 +469,8 @@ async def get_user_achievements(db: AsyncSession, user_did: str) -> Sequence[mod
 
 async def get_posts_by_author_for_feed(db: AsyncSession, feed_id: str, author_did: str, limit: int = 5) -> Sequence[models.Post]:
     """Retrieve the most recent posts by a specific author within a specific feed."""
-    stmt = select(models.Post).join(
-        models.FeedPost, models.Post.id == models.FeedPost.post_id
-    ).where(
-        models.FeedPost.feed_id == feed_id,
+    stmt = select(models.Post).where(
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
         models.Post.author_did == author_did
     ).order_by(
         desc(models.Post.created_at)
@@ -482,10 +480,8 @@ async def get_posts_by_author_for_feed(db: AsyncSession, feed_id: str, author_di
 
 async def get_posts_by_author_in_feed(db: AsyncSession, feed_id: str, author_did: str, limit: int = 10, skip: int = 0) -> Sequence[models.Post]:
     """Retrieve posts by a specific author within a specific feed with pagination."""
-    stmt = select(models.Post).join(
-        models.FeedPost, models.Post.id == models.FeedPost.post_id
-    ).where(
-        models.FeedPost.feed_id == feed_id,
+    stmt = select(models.Post).where(
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
         models.Post.author_did == author_did
     ).options(
         selectinload(models.Post.author)
@@ -497,10 +493,8 @@ async def get_posts_by_author_in_feed(db: AsyncSession, feed_id: str, author_did
 
 async def get_posts_by_hashtag_in_feed(db: AsyncSession, feed_id: str, hashtag: str, limit: int = 20, skip: int = 0) -> Sequence[models.Post]:
     """Retrieve posts containing a specific hashtag within a specific feed with pagination."""
-    stmt = select(models.Post).join(
-        models.FeedPost, models.Post.id == models.FeedPost.post_id
-    ).where(
-        models.FeedPost.feed_id == feed_id,
+    stmt = select(models.Post).where(
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
         or_(
             models.Post.hashtags.op('@>')([hashtag]),
             models.Post.hashtags.op('@>')([hashtag.lower()]),
@@ -523,10 +517,8 @@ async def get_hashtag_analytics(db: AsyncSession, feed_id: str, hashtag: str) ->
         func.avg(models.Post.repost_count).label('avg_reposts'),
         func.sum(models.Post.like_count).label('total_likes'),
         func.sum(models.Post.repost_count).label('total_reposts')
-    ).join(
-        models.FeedPost, models.Post.id == models.FeedPost.post_id
     ).where(
-        models.FeedPost.feed_id == feed_id,
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
         or_(
             models.Post.hashtags.op('@>')([hashtag]),
             models.Post.hashtags.op('@>')([hashtag.lower()]),
@@ -542,10 +534,8 @@ async def get_hashtag_analytics(db: AsyncSession, feed_id: str, hashtag: str) ->
         func.count(models.Post.id).label('usage_count')
     ).join(
         models.Post, models.User.did == models.Post.author_did
-    ).join(
-        models.FeedPost, models.Post.id == models.FeedPost.post_id
     ).where(
-        models.FeedPost.feed_id == feed_id,
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
         or_(
             models.Post.hashtags.op('@>')([hashtag]),
             models.Post.hashtags.op('@>')([hashtag.lower()]),
@@ -846,7 +836,9 @@ async def upsert_posts_batch(db: AsyncSession, posts: List[schemas.PostCreate]) 
             "quoted_post_repost_count": post.quoted_post_repost_count if post.quoted_post_repost_count is not None else 0, # Corrected typo
             "quoted_post_reply_count": post.quoted_post_reply_count if post.quoted_post_reply_count is not None else 0,
             "quoted_post_created_at": post.quoted_post_created_at,
-            "facets": processed_facets # Added facets
+            "facets": processed_facets, # Added facets
+            "feed_data": post.feed_data if post.feed_data is not None else [],
+            "langs": post.langs if hasattr(post, 'langs') else None
         })
 
     # ON CONFLICT DO UPDATE on 'uri' (assuming uri is unique and the primary way to identify a post)
@@ -892,7 +884,9 @@ async def upsert_posts_batch(db: AsyncSession, posts: List[schemas.PostCreate]) 
             "quoted_post_repost_count": insert_stmt.excluded.quoted_post_repost_count,
             "quoted_post_reply_count": insert_stmt.excluded.quoted_post_reply_count,
             "quoted_post_created_at": insert_stmt.excluded.quoted_post_created_at,
-            "facets": insert_stmt.excluded.facets # Added facets
+            "facets": insert_stmt.excluded.facets, # Added facets
+            "feed_data": insert_stmt.excluded.feed_data,
+            "langs": insert_stmt.excluded.langs
         }
     )
 
@@ -1046,95 +1040,18 @@ async def delete_feed(db: AsyncSession, feed_id: str) -> Optional[models.Feed]:
         await db.commit() # Await commit
     return db_feed
 
-# --- FeedPost CRUD Operations ---
-# Note: feed_id is now a string type
-
-async def get_feed_post(db: AsyncSession, feed_post_id: uuid.UUID) -> Optional[models.FeedPost]:
-    """Retrieve a feed post entry by its UUID asynchronously."""
-    result = await db.execute(select(models.FeedPost).where(models.FeedPost.id == feed_post_id))
-    return result.scalar_one_or_none()
-
-# Batch feed post creation
-async def create_feed_posts_batch(db: AsyncSession, feed_posts: List[schemas.FeedPostCreate]) -> List[models.FeedPost]:
-    """
-    Batch creates new entries linking posts to feeds.
-    Uses ON CONFLICT DO NOTHING to handle duplicates efficiently.
-    """
-    if not feed_posts:
-        return []
-
-    insert_data = []
-    for fp in feed_posts:
-        insert_data.append({
-            "post_id": fp.post_id,
-            "feed_id": fp.feed_id,
-            "relevance_score": fp.relevance_score if fp.relevance_score is not None else 0,
-            "ingested_at": fp.ingested_at if fp.ingested_at else datetime.now(timezone.utc)
-        })
-
-    # ON CONFLICT DO NOTHING (assuming a unique constraint on (post_id, feed_id))
-    insert_stmt = postgresql.insert(models.FeedPost.__table__).values(insert_data)
-    on_conflict_stmt = insert_stmt.on_conflict_do_nothing(
-        index_elements=[models.FeedPost.post_id, models.FeedPost.feed_id] # Conflict on this composite key
-    )
-
-    try:
-        await db.execute(on_conflict_stmt)
-        await db.commit()
-        # It's difficult to get the *newly inserted* objects directly with ON CONFLICT DO NOTHING
-        # unless you use RETURNING, which is more complex with batch operations.
-        # For simplicity, we'll just return an empty list or fetch by IDs if necessary,
-        # but the primary goal is efficient insertion.
-        # If you need the objects returned, you'd have to query for them by (post_id, feed_id)
-        # after the batch insert, filtering by the input list.
-        # For now, this function is about efficient insertion.
-        logger.info(f"Successfully attempted to batch insert {len(feed_posts)} feed posts.")
-        return [] # Or implement fetching logic if crucial to get the ORM objects back.
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Failed to batch create feed posts: {e}", exc_info=True)
-        return []
-
-# Refactored create_feed_post to use batch function
-async def create_feed_post(db: AsyncSession, feed_post: schemas.FeedPostCreate) -> Optional[models.FeedPost]:
-    """
-    Create a new entry linking a post to a feed.
-    This now calls the batch creation function for a single feed post.
-    """
-    await create_feed_posts_batch(db, [feed_post])
-    # Since batch create with ON CONFLICT DO NOTHING doesn't easily return the object,
-    # we'll fetch it if it exists.
-    # Note: This might still result in fetching an existing one even if it was just inserted
-    # in the batch. If precise new object return is critical, adjust upsert logic.
-    result = await db.execute(
-        select(models.FeedPost).where(
-            (models.FeedPost.post_id == feed_post.post_id) & (models.FeedPost.feed_id == feed_post.feed_id)
-        )
-    )
-    return result.scalar_one_or_none()
-
-
-async def get_feed_posts_for_feed(db: AsyncSession, feed_id: str, skip: int = 0, limit: int = 100) -> List[models.FeedPost]:
-    """Retrieve all feed posts for a given feed ID asynchronously."""
-    stmt = (
-        select(models.FeedPost)
-        .where(models.FeedPost.feed_id == feed_id)
-        .order_by(models.FeedPost.ingested_at.desc())
-        .offset(skip).limit(limit)
-    )
-    return (await db.execute(stmt)).scalars().all()
+# FeedPost CRUD operations removed - feed associations now handled via JSON in posts table
 
 async def get_posts_for_feed(db: AsyncSession, feed_id: str, skip: int = 0, limit: int = 100) -> List[models.Post]:
     """
     Retrieve actual Post objects for a given feed ID, ordered by ingestion time asynchronously.
-    Uses a join to efficiently get posts associated with a feed.
+    Uses JSON queries on the feed_data column.
     """
     stmt = (
         select(models.Post)
-        .join(models.FeedPost.__table__, models.Post.id == models.FeedPost.post_id)
-        .where(models.FeedPost.feed_id == feed_id)
+        .where(models.Post.feed_data.op('@>')([{"feed_id": feed_id}]))
         .options(selectinload(models.Post.author)) # Eagerly load the author relationship
-        .order_by(models.FeedPost.ingested_at.desc())
+        .order_by(models.Post.created_at.desc())  # Order by post creation time since we don't have per-feed ingestion time easily accessible
         .offset(skip).limit(limit)
     )
     return (await db.execute(stmt)).scalars().all()
@@ -1275,15 +1192,12 @@ async def get_top_posts_for_feed(
     """
     time_boundary = get_time_boundary(timeframe)
     
-    query = select(models.Post) \
-        .join(models.FeedPost.__table__, models.Post.id == models.FeedPost.post_id) \
-        .where(
-            (models.FeedPost.feed_id == feed_id) &
-            (models.FeedPost.feed_id == feed_id) &
-            (models.Post.is_active_for_polling == True)
-        )
+    query = select(models.Post).where(
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
+        models.Post.is_active_for_polling == True
+    )
     if timeframe != "allTime":
-        query = query.where(models.FeedPost.ingested_at >= time_boundary)
+        query = query.where(models.Post.created_at >= time_boundary)  # Use post creation time instead of ingestion time
     
     query = query.order_by(desc(models.Post.engagement_score)).limit(limit)
     query = query.options(selectinload(models.Post.author)) # Eagerly load author to prevent async errors
@@ -1313,15 +1227,12 @@ async def get_top_hashtags_for_feed(
     query = select(
         hashtag_cte.c.value.label('hashtag_name'),
         func.count().label('hashtag_count')
-    ).select_from(models.Post) \
-        .join(models.FeedPost, models.Post.id == models.FeedPost.post_id) \
-        .join(hashtag_cte, True) \
-        .where(
-            (models.FeedPost.feed_id == feed_id) &
-            (models.Post.is_active_for_polling == True)
-        )
+    ).select_from(models.Post).join(hashtag_cte, True).where(
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
+        models.Post.is_active_for_polling == True
+    )
     if timeframe != "allTime":
-        query = query.where(models.FeedPost.ingested_at >= time_boundary)
+        query = query.where(models.Post.created_at >= time_boundary)  # Use post creation time
     
     query = query.group_by('hashtag_name').order_by(desc('hashtag_count')).limit(limit)
 
@@ -1346,15 +1257,12 @@ async def get_top_users_for_feed(
         models.User.handle,
         models.User.display_name,
         func.sum(models.Post.engagement_score).label('total_engagement_score')
-    ) \
-    .join(models.Post.__table__, models.User.did == models.Post.author_did) \
-    .join(models.FeedPost.__table__, models.Post.id == models.FeedPost.post_id) \
-    .where(
-        (models.FeedPost.feed_id == feed_id) &
-        (models.Post.is_active_for_polling == True)
+    ).join(models.Post.__table__, models.User.did == models.Post.author_did).where(
+        models.Post.feed_data.op('@>')([{"feed_id": feed_id}]),
+        models.Post.is_active_for_polling == True
     )
     if timeframe != "allTime":
-        query = query.where(models.FeedPost.ingested_at >= time_boundary)
+        query = query.where(models.Post.created_at >= time_boundary)  # Use post creation time
     
     query = query.group_by(models.User.did, models.User.handle, models.User.display_name) \
     .order_by(desc('total_engagement_score')) \
